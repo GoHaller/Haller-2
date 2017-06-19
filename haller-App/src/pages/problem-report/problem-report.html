@@ -1,0 +1,22 @@
+<ion-header>
+
+  <ion-navbar color="primary">
+    <ion-title>Report a Problem</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+  <form [formGroup]="problemForm" (ngSubmit)="submitProblemForm(problemForm.value)">
+    <ion-list>
+      <ion-item>
+        <ion-input class="input-text-align-right" formControlName="title" placeholder="Title of Issue"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-textarea rows="15" formControlName="description" placeholder="Issue Description"></ion-textarea>
+      </ion-item>
+    </ion-list>
+    <button ion-button full style="padding: 30px;" type="submit" [disabled]="!problemForm.valid">Submit</button>
+  </form>
+</ion-content>

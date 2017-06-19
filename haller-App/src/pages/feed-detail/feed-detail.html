@@ -1,0 +1,122 @@
+<!--
+  Generated template for the FeedDetail page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar color="primary" hideBackButton>
+    <ion-buttons left>
+      <button ion-button (click)="goBack()">Back</button>
+    </ion-buttons>
+    <ion-title>Comments</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+  <ion-card>
+
+    <ion-item>
+      <ion-avatar item-left>
+        <img [src]="(feed.createdBy && feed.createdBy.currentProfile) ? feed.createdBy.currentProfile.secure_url : 'assets/img/default-user.png'">
+      </ion-avatar>
+      <h2>{{(feed.createdBy ? feed.createdBy.firstName : 'No One' ) + ' ' + (feed.createdBy ? feed.createdBy.lastName : 'No One')}}</h2>
+      <ion-note>{{feed.createdAt | date: getCommentDateFormatr(feed.createdAt)}}</ion-note>
+      <button ion-button icon-only item-right clear small color="newlight" (click)="presentFeedActionSheet(feed,$event)"><ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon></button>
+    </ion-item>
+
+    <img *ngIf="feed.cover && feed.cover.length > 0" (click)="viewFullImage(feed.cover[feed.cover.length - 1])" [src]="feed.cover[feed.cover.length - 1].secure_url">
+
+    <ion-card-content *ngIf="feed.details && !feed.isEvent">
+      <p>{{feed.details}}</p>
+    </ion-card-content>
+
+    <ion-card-content center text-center *ngIf="feed.isEvent">
+      <h2><b>{{feed.title}}</b></h2>
+      <h3>{{feed.time | date: 'shortTime'}}&nbsp;{{feed.date | date: 'MMMM d, yyyy '}}</h3>
+      <p>{{feed.location}}</p>
+      <p style="margin-top:10px">{{feed.details}}</p>
+      <p style="margin-top:10px"><b>{{feed.going.length}} people are going</b></p>
+      <button style="max-width: 140px;width: 18vh;" *ngIf="!feed._userGoing" (click)="joinEvent(feed)" ion-button>Join</button>
+      <button style="max-width: 140px;width: 18vh;" *ngIf="feed._userGoing" (click)="leaveEvent(feed)" ion-button outline>Joined</button>
+      <!-- (click)="confirmEventLeaveAction(feed)"-->
+    </ion-card-content>
+
+    <ion-row class="action-count">
+      <ion-col *ngIf="(feed.liked && feed.liked.length > 0) || (feed.comments && feed.comments.length > 0)">
+        <span style="float:left" *ngIf="feed.liked.length > 0">{{feed.liked.length +' Likes'}}</span>
+        <span style="float:right" *ngIf="feed.comments.length > 0">{{feed.comments.length + ' Comments'}}</span>
+      </ion-col>
+    </ion-row>
+    <ion-row class="feed-actions" *ngIf="feed">
+      <ion-col center text-center>
+        <button ion-button icon-left clear small color="{{feed._userLiked ? 'primary':'newlight'}}" (click)="likeFeed(feed)">
+          <ion-icon name="{{feed._userLiked ? 'ios-thumbs-up' : 'ios-thumbs-up-outline'}}"></ion-icon>&nbsp;Likes</button>
+      </ion-col>
+      <ion-col center text-center>
+        <button ion-button icon-left clear small color="{{feed._userStarred ? 'primary':'newlight'}}" (click)="starFeed(feed)">
+          <ion-icon ios="{{feed._userStarred ? 'ios-heart' : 'ios-heart-outline'}}" md="{{feed._userStarred ? 'md-heart' : 'md-heart-outline'}}"></ion-icon>&nbsp;Save</button>
+      </ion-col>
+    </ion-row>
+
+    <ion-list class="comment-list">
+      <ion-item *ngFor="let comment of feed.comments">
+        <ion-avatar item-left>
+          <img [src]="(comment.createdBy && comment.createdBy.currentProfile) ? comment.createdBy.currentProfile.secure_url : 'assets/img/default-user.png'">
+        </ion-avatar>
+        <button ion-button icon-only item-right clear small color="newlight" (click)="presentCommentOption(comment)"><ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon></button>
+        <h2>{{(comment.createdBy ? comment.createdBy.firstName : 'No One' ) + ' ' + (comment.createdBy ? comment.createdBy.lastName
+          : 'No One')}}
+        </h2>
+        <ion-note>{{comment.createdAt | date: getCommentDateFormatr(comment.createdAt)}}</ion-note>
+        <p>{{comment.body}}</p>
+        <!--<button ion-button icon-only item-right clear small color="newlight"><ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon></button>-->
+        <img (click)="viewFullImage(comment.image)" class="comment-image" *ngIf="comment.image" [src]="comment.image.secure_url"
+        />
+        <img class="comment-image" *ngIf="comment.giphy" [src]="comment.giphy.gif.url" />
+        <ion-row>
+          <ion-col>
+            <button ion-button color="dark" disabled clear small style="float: left">{{comment.liked.length || 0}}&nbsp;Likes</button>
+            <button style="float: right" (click)="likeComment(comment)" ion-button icon-left color="{{isCommentLiked(comment) ? 'primary':'newlight'}}"
+              clear small><ion-icon name="ios-thumbs-up-outline"></ion-icon>&nbsp;Like</button>
+          </ion-col>
+        </ion-row>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+</ion-content>
+
+<ion-footer>
+  <ion-row *ngIf="feedProvider.cloudinaryProvider.imageLocalPath || feedProvider.cloudinaryProvider.gif.id">
+    <ion-col col-12 class="image-to-upload">
+      <button ion-button icon-only color="dark" clear class="remove-image-btn" (click)="removeImage()"><ion-icon name="close"></ion-icon></button>
+      <img [src]="feedProvider.cloudinaryProvider.imageLocalPath || feedProvider.cloudinaryProvider.gif.gif.url">
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col col-1 class="comment-attachment" (click)="showGiphyGif()">
+      <ion-icon name="images"></ion-icon>
+    </ion-col>
+    <ion-col col-1 class="comment-attachment" (click)="takePicture()">
+      <ion-icon name="camera"></ion-icon>
+    </ion-col>
+    <ion-col col-8>
+      <ion-textarea [(ngModel)]="commentContent" (input)="newCommentChange($event)" rows="1" class="new-comment" type="text" placeholder="Comment..."></ion-textarea>
+    </ion-col>
+    <ion-col col-2><button color="dark" small clear ion-button (click)="postComment()">Post</button></ion-col>
+  </ion-row>
+  <!--<ion-row class="comment-attachment">
+    <ion-col col-4>
+      <ion-icon name="link"></ion-icon>
+    </ion-col>
+    <ion-col col-4>
+      <ion-icon (click)="takePictureFromPhotoLibrary()" name="images"></ion-icon>
+    </ion-col>
+    <ion-col col-4>
+      <ion-icon (click)="takePictureFromCamera()" name="camera"></ion-icon>
+    </ion-col>
+  </ion-row>-->
+</ion-footer>

@@ -1,0 +1,51 @@
+page-feed-new {
+    .footer{
+        border-top: 2px solid color($colors, light);
+    }
+    .scroll-content{
+        // padding: 0px 16px 16px;
+    }
+    .grid{
+        padding: 0px;
+        .post-detail{
+            font-size:16px;
+            line-height:22px
+        }
+        .post-image{
+            img{
+                max-height: 400px;
+                max-width: 100%;
+                display: block;
+                height: auto;
+                width: auto;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .remove-image-btn{
+                position: absolute;
+                padding: 0px;
+                max-width: 25px;
+                max-height: 15px;
+                margin-top: 10px;
+                background: transparent;
+                box-shadow: none;
+            }
+        }
+        .row{
+            .col{
+                padding: 0px;
+                .item{
+                    padding-left: 16px;
+                    .item-inner{
+                        padding-left: 0px;
+                    }
+                }
+            }
+        }
+        .item-block{
+            .item-inner{
+                border-bottom: none;
+            }
+        }
+    }
+}

@@ -1,0 +1,20 @@
+page-notifications {
+    .list > .item-block:first-child{
+        border-top: none;        
+    }
+    .list > .item-block:last-child{
+        border-bottom: none;
+    }
+    .item ion-avatar[item-left], .item ion-thumbnail[item-left]{
+        margin: 8px 0px 8px 8px;
+    }
+    ion-label{
+        white-space: normal;
+    }
+    .item{
+        background-color: transparent;
+    }
+    .item.unread{
+        background-color: #fff;
+    }
+}

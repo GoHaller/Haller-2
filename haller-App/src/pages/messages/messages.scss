@@ -1,0 +1,69 @@
+page-messages {
+    .bot-header{
+         min-height: 2rem;
+        text-transform: capitalize;
+        background-color: color($colors,colorwhite);
+        .label{
+            margin: 5px 8px 5px 0;
+        }
+    }
+    ion-scroll{
+        height: 15%;
+        white-space: nowrap; 
+        .scroll-item {
+            width:150px;
+            display: inline-block;
+            margin: 10px;
+            .item{
+                background-color: color($colors,background);
+                border-bottom: none;
+            }
+        }
+    }
+    // .msg-ion-content{
+    //     top:31%;
+    //     .fixed-content{
+    //         margin-top: 0px !important;
+    //     }
+    //     .scroll-content{
+    //         margin-top: 0px !important;
+    //         border-top: none;
+    //         ion-refresher{
+    //             top: 0px !important;
+    //         }
+    //     }
+        .msg-list{
+            .list-header{
+                min-height: 2rem;
+                text-transform: capitalize;
+                background-color: color($colors,colorwhite);
+                .label{
+                    margin: 5px 8px 5px 0;
+                }
+            }
+            .item-block{
+                .ion-ios-remove-circle-outline{
+                    margin: 8px 0px 8px 8px;
+                }
+                ion-avatar{
+                    margin-left: 10px !important;
+                    margin-right: 0px;
+                }
+                .item-inner [item-right] {
+                    margin: 11px 8px 8px 8px;
+                    font-size: 1.5rem;
+                    position: absolute;
+                    top: 0px;
+                    right: 0px;
+                }
+                &.read-convo{
+                    background-color: color($colors,background);
+                }
+            }
+
+            .item-block:last-child, .item-wrapper:last-child .item-block{
+                border-bottom: none;
+            }
+        }
+    // }
+}

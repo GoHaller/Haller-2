@@ -1,0 +1,104 @@
+// http://ionicframework.com/docs/v2/theming/
+
+// App Global Sass
+// --------------------------------------------------
+// Put style rules here that you want to apply globally. These
+// styles are for the entire app and not just one component.
+// Additionally, this file can be also used as an entry point
+// to import other Sass files to be included in the output CSS.
+//
+// Shared Sass variables, which can be used to adjust Ionic's
+// default Sass variables, belong in "theme/variables.scss".
+//
+// To declare rules for a specific mode, create a child rule
+// for the .md, .ios, or .wp mode classes. The mode class is
+// automatically applied to the <body> element in the app.
+.scroll-content{
+    overflow-y: auto !important;
+    // padding: 16px !important;
+}
+// .toolbar {
+//     min-height: 44px;
+// }
+.back-button-icon{
+    padding: 0px;
+}
+.toolbar-title-md{
+    text-align: center;
+}
+.back-button-icon-ios{
+    min-width: 0px;
+}
+// .md,
+// .wp, .ios {
+//     .back-button {
+//         color: #222 !important;//what ever the color you like
+//     }
+// }
+.item{
+    border-bottom: 0.55px solid #eaeaea;
+    ion-avatar {
+        min-width: 44px;
+        min-height: 44px;
+        ion-img, img{
+            width: 45px;
+            height: 45px;
+        }
+    }
+    .item-inner{
+        border-bottom: none !important;
+    }
+}
+.content {
+    background-color: color($colors,background);
+}
+.content-ios:not([no-bounce]) > .scroll-content::before{
+    bottom: 0px;
+}
+
+.input-md .text-input-clear-icon{
+    background-color: transparent;
+}
+
+.app-background{
+    background-image: url('../assets/img/background.png');
+    background-size: cover;
+}
+.color-white{
+    color: #ffffff;
+}
+
+.auth-btn{
+    color: color($colors, authbtn);
+    background-color: color($colors, authbtnback);
+}
+
+.help-btn{
+    position: absolute;
+    bottom: 10vh;
+    // width: 92%;
+    width:100%;
+}
+
+ .border-radius-5{
+     border-radius: 5px;
+     overflow: hidden;
+ }
+
+ .item{
+    padding-left: 0px;
+    }
+    .item-inner{
+        padding-left: 16px;
+    }
+.text-center{
+    text-align: center;
+}
+
+// ion-avatar[item-left], ion-thumbnail[item-left]{
+//     margin: 8px 0px 8px 0px !important ;
+// }
+
+ion-item.ng-dirty.ng-invalid{
+    border-bottom: 1px solid color($colors, danger) !important;
+}

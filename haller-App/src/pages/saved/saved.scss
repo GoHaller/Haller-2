@@ -1,0 +1,18 @@
+page-saved {
+    .content {
+        background-color: color($colors,light);
+        .save-list {
+            .item-block{
+                ion-avatar{
+                    margin-left: 10px !important;
+                }
+            }
+            .item-block:last-child, .item-wrapper:last-child .item-block{
+                border-bottom: none;
+            }
+            .item-block:first-child, .item-wrapper:first-child .item-block {
+                border-top: none;
+            }
+        }
+    }
+}

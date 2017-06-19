@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Notifications</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-list *ngIf="!userMessage">
+    <ion-item *ngFor="let noti of notifications" [ngClass]="{'unread': !noti.read }" (click)="gototFeedDetail(noti)">
+      <ion-avatar item-left>
+        <img *ngIf="noti.lastObj.createdBy" [src]="noti.lastObj.createdBy.currentProfile ? noti.lastObj.createdBy.currentProfile.secure_url : 'assets/img/default-user.png'">
+        <img *ngIf="noti.lastObj.actedBy" [src]="noti.lastObj.actedBy.currentProfile ? noti.lastObj.actedBy.currentProfile.secure_url : 'assets/img/default-user.png'">
+      </ion-avatar>
+      {{noti.title}}
+      <p>{{noti.createdAt | date: getDateFormate(noti.createdAt)}}</p>
+    </ion-item>
+  </ion-list>
+  <ion-list *ngIf="userMessage">
+    <ion-item>{{userMessage}}</ion-item>
+  </ion-list>
+</ion-content>

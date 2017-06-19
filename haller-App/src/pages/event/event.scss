@@ -1,0 +1,39 @@
+page-event {
+    .toolbar-ios .segment-button{
+        max-width: 65px;
+    }
+    .segment-md .segment-button{
+        flex: none;
+        width: 65px;
+    }
+    .item ion-avatar[item-left], .item ion-thumbnail[item-left]{
+        margin-right: 0px;
+    }
+    .content {
+        ion-card{
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 0px;
+            width: 100%;
+            padding: 0px 0px 0px 0px;
+            .event-actions{
+                border-top: 1px solid #f4f4f4;
+            }
+            .card-content{
+                padding-left: 0px;
+                padding-right: 0px;
+                .ev-detail{
+                    padding: 0px 16px 0px 16px;
+                }
+            }
+            .item{
+                border-bottom:none;
+                padding: 0px 0px 0px 16px;
+            }
+            box-shadow: none;
+            ion-row{
+                margin: 0px 16px 0px 16px;
+            }
+        }
+    }
+}

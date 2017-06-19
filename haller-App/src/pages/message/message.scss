@@ -1,0 +1,113 @@
+page-message {
+    ion-title{
+        [icon-right] ion-icon{
+            font-size: 1.1em;
+        }
+    }
+    .user-image{
+        width: 4vh;
+    }
+    .new-msg{
+        border: 1px solid rgba(0,0,0,0.2);
+        border-radius: 6px;
+        textarea,input {
+            margin: 8px;
+        }
+    }
+    .footer{
+        background-color: #fff;
+        .msg-attachment{
+            ion-col{
+                text-align: center;
+            }            
+        }
+    }
+
+    ion-row.conversation{ 
+        
+        ion-col{ 
+            .user-image{
+                border-radius: 100px;
+                width: 45px;
+                height: 45px;
+            }
+            .msg-container{
+                // max-width: 75%;
+                width: auto;
+                line-height: 1.4;
+                // display: block;
+                padding: 5px;
+                // border-radius: 5px;
+                // border: 1px solid rgba(0,0,0,0.2);
+
+                .img-container{
+                    width: 100%;
+                    margin-bottom: 2px;
+                    img{
+                        max-height: 200px;
+                        max-width: 100%;
+                        display: block;
+                        margin-left: auto;
+                        margin-right: auto;
+                    }
+                }
+            }
+        }
+        &.me{
+            .msg-container{
+                float: right;  
+                .msg-time{
+                    float: left;
+                }
+            }          
+        }
+        &.them{
+            .msg-container{
+                float: left;            
+                .msg-time{
+                    float: right;
+                }
+            }
+        }
+    }
+
+    .selected-participants{
+        button{padding: 0 1.8rem;}
+    }
+    .seaarch-parti-list{
+        padding: 0px 16px 0px 16px;
+        .item-block:first-child {
+            border-top: none;
+        }
+
+        .item-block:last-child, .item-wrapper:last-child .item-block{
+            border-bottom: none;
+        }
+    }
+
+    .new-msg-card{
+        position: fixed;
+        /* width: 100%; */
+        z-index: 1;
+        margin-top: 0px;
+    }
+
+    .image-to-upload{
+        img{
+            max-height: 200px;
+            max-width: 100%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .remove-image-btn{
+            position: absolute;
+            padding: 0px;
+            max-width: 25px;
+            max-height: 15px;
+            margin-top: 10px;
+            background: transparent;
+            box-shadow: none;
+        }
+    }
+}

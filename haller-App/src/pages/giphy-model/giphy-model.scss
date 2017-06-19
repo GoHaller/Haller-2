@@ -1,0 +1,23 @@
+page-giphy-model {
+    .toolbar-background{
+        background-color: #000;
+        border: none;
+    }
+    .toolbar-title{
+        color: white;
+    }
+    .toolbar .searchbar .searchbar-input {
+        background-color: rgba(255,255,255,0.8);
+    }
+    .content{
+        background-color: rgba(0,0,0,0.5);
+    }
+    .infinite-loading-spinner .spinner-bubbles circle, 
+    .infinite-loading-spinner .spinner-circles circle, 
+    .infinite-loading-spinner .spinner-dots circle{
+        fill: #ffffff;
+    }
+    .infinite-loading-text{
+        color: #ffffff;
+    }
+}

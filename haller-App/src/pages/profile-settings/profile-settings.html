@@ -1,0 +1,45 @@
+<!--
+  Generated template for the ProfileSettings page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar color="primary">
+    <ion-title>Profile Settings</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+  <ion-item-group>
+    <button ion-item (click)="goToAddress('Profile')">
+      <ion-avatar item-left>
+        <img [src]="userInfo.currentProfile ? userInfo.currentProfile.secure_url : '../../assets/img/default-user.png'">
+      </ion-avatar>
+      {{userInfo.firstName+' '+userInfo.lastName}}
+    </button>
+    <!--<button ion-item (click)="goToAddress('Peers')">Peers</button>-->
+  </ion-item-group>
+  <ion-item-group>
+    <ion-item-divider color="light">&nbsp;</ion-item-divider>
+    <button ion-item (click)="goToAddress('Saved')">Saved</button>
+    <button ion-item (click)="goToAddress('ActivityLog')">Activity Log</button>
+  </ion-item-group>
+  <ion-item-group>
+    <ion-item-divider color="light">&nbsp;</ion-item-divider>
+    <!--<button ion-item [disabled]="userInfo.isRARequested" (click)="presentRequestRAActionSheet()">Request RA Account</button>-->
+    <button ion-item (click)="goToAddress('BlockedUsers')">Block Users</button>
+    <button ion-item>Disable Facebook</button>
+    <button ion-item (click)="goToAddress('ChangePassword')">Change Password</button>
+    <button ion-item>Change Notifications</button>
+    <button ion-item (click)="goToAddress('ProblemReport')">Report a Problem</button>
+    <button ion-item>Privacy Policy</button>
+  </ion-item-group>
+  <ion-item-group>
+    <ion-item-divider color="light">&nbsp;</ion-item-divider>
+    <button ion-item class="item-logout" (click)="logoutClicked()">Log Out</button>
+  </ion-item-group>
+</ion-content>

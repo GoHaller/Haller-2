@@ -1,0 +1,50 @@
+<!--
+  Generated template for the Profile page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar color="primary">
+    <!--<ion-buttons start>
+      <button ion-button color="dark" (click)="goBack()">Back</button>
+    </ion-buttons>-->
+    <ion-title>{{userInfo.firstName + ' ' + userInfo.lastName}}</ion-title>
+    <ion-buttons end *ngIf="userId == userInfo._id">
+      <button ion-button (click)="gotoProfileEdit()">Edit</button>
+    </ion-buttons>
+    <ion-buttons end *ngIf="userId != userInfo._id && showMsgBtn == true">
+      <button ion-button (click)="gotoMessage()">Message</button>
+    </ion-buttons>
+  </ion-navbar>
+
+</ion-header>
+
+<ion-content padding>
+  <ion-card *ngIf="!!userInfo._id">
+    <ion-card-content>
+      <div class="profile-image">
+        <img class="profile-image" (click)="viewFullImage(userInfo.currentProfile)" [src]="userInfo.currentProfile ? userInfo.currentProfile.secure_url : '../../assets/img/default-user.png'"
+        />
+        <ion-row align-items-center class="mini-detail">
+          <ion-col class="r-b-1"><b>{{userInfo.major || 'Major'}}</b></ion-col>
+          <ion-col class="r-b-1"><b>{{userInfo.hometown || 'Hometown'}}</b></ion-col>
+          <ion-col><b>{{userInfo.graduationYear || 'Class'}}</b></ion-col>
+        </ion-row>
+      </div>
+      <ion-card-title>About</ion-card-title>
+      <p>{{userInfo.bio || 'About'}}</p>
+      <ion-card-title>Organizations</ion-card-title>
+      <p>
+        <button *ngFor="let org of userInfo.organizations" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{org.name}}</span></button>
+      </p>
+      <ion-card-title>Interests</ion-card-title>
+      <p>
+        <button *ngFor="let interest of userInfo.interests" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{interest.name}}</span></button>
+      </p>
+      <ion-card-title>Pronouns</ion-card-title>
+      <p>{{userInfo.genderPronouns.join(', ') || 'him/her his/her He/She'}}</p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

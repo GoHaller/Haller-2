@@ -1,0 +1,48 @@
+<!--<ion-content padding class="app-background">
+  <div class="login-div">
+    <div class="logo-image">
+      <img src="/assets/img/logo.png" width="40%" height="40%">
+    </div>
+    <p class="logo-subtext">The opportunities are endless</p>
+    <form [formGroup]="authForm" (ngSubmit)="loginClicked(authForm.value)">
+      <ion-list [ngClass]="'border-radius-5'">
+        <ion-item>
+          <ion-input type="text" placeholder="KU Email" formControlName="email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input type="password" placeholder="Password" formControlName="password"></ion-input>
+        </ion-item>
+      </ion-list>
+      <button ion-button block color="light">Login</button>
+    </form>
+    <button ion-button block (click)="gotoLandingPage()" clear color="light" style="margin-top:30px">Already have an account? Sign Up</button>
+    <button [ngClass]="'help-btn'" ion-button block clear color="light">Help</button>
+  </div>
+</ion-content>-->
+
+<ion-content class="app-background">
+  <div>
+    <ion-slides>
+      <ion-slide>
+        <h3 class="color-white" style="margin-top: 15vh">Haller</h3>
+        <h5 class="color-white">&nbsp;</h5>
+        <form [formGroup]="authForm" (ngSubmit)="loginClicked(authForm.value)">
+          <ion-list>
+            <ion-item>
+              <ion-input type="text" placeholder="KU Email" formControlName="email"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input type="password" placeholder="Password" formControlName="password"></ion-input>
+            </ion-item>
+          </ion-list>
+          <button class="auth-btn" [disabled]="!authForm.valid" ion-button color="light">Login</button>
+        </form>
+        <button ion-button block (click)="gotoRegPage()" clear color="light" style="margin-top:5px">Don’t have an account? Sign Up</button>
+        <!--<button ion-button block (click)="getFbLoginStatus()" clear color="light" style="margin-top:20px">FB Status</button>-->
+        <!--<button ion-button block (click)="showGiphyGif()" clear color="light" style="margin-top:20px">GIPHY</button>-->
+        <!--<button ion-button block (click)="notifyNow()" clear color="light" style="margin-top:20px">Notify</button>-->
+      </ion-slide>
+    </ion-slides>
+  </div>
+  <button ion-button block clear color="light" style="margin-top:20vh">Help</button>
+</ion-content>

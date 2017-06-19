@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-buttons left>
+      <button ion-button *ngIf="edit" (click)="edit = false">Cancel</button>
+      <button ion-button *ngIf="!edit" (click)="edit = true">Edit</button>
+    </ion-buttons>
+    <ion-title>Messages</ion-title>
+    <ion-buttons right>
+      <button ion-button (click)="composeNewMessage()">Compose</button>
+    </ion-buttons>
+  </ion-navbar>
+  <ion-searchbar (ionInput)="serachConvo($event)"></ion-searchbar>
+</ion-header>
+
+<!--<ion-content>
+  <ion-list-header class="bot-header">Bots</ion-list-header>
+  <ion-scroll scrollX>
+    <div class="scroll-item" *ngFor="let n of numbers">
+      <ion-item>
+        <ion-avatar item-left>
+          <img src="assets/img/user-group.png">
+        </ion-avatar>
+        <h2>Bot-{{n}}</h2>
+      </ion-item>
+    </div>
+  </ion-scroll>
+  <ion-list-header class="bot-header">Conversations</ion-list-header>
+</ion-content> class="msg-ion-content"-->
+<ion-content>
+  <ion-refresher (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles" refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-list class="msg-list">
+    <ion-list-header>Conversations</ion-list-header>
+    <ion-item *ngFor="let msg of messageList | convosearch:['firstName','lastName',searchText]" [ngClass]="checkMsgIfReadByOther(msg.messages[msg.messages.length - 1]) ? '':'read-convo'">
+      <ion-icon *ngIf="edit" (click)="presentEditActionSheet(msg)" item-left color="danger" name="ios-remove-circle-outline"></ion-icon>
+      <ion-avatar item-left *ngIf="msg.participants.length == 1" (click)="showConversation(msg)">
+        <img *ngIf="msg.participants[0] && msg.participants[0]._id !== userInfo._id" [src]="msg.participants[0].currentProfile ? msg.participants[0].currentProfile.secure_url : 'assets/img/default-user.png'">
+        <img *ngIf="msg.participants[0] && msg.participants[0]._id == userInfo._id" src="assets/img/default-user.png">
+      </ion-avatar>
+      <ion-avatar item-left *ngIf="msg.participants.length == 2" (click)="showConversation(msg)">
+        <img *ngIf="msg.participants[0] && msg.participants[0]._id !== userInfo._id" [src]="msg.participants[0].currentProfile ? msg.participants[0].currentProfile.secure_url : 'assets/img/default-user.png'">
+        <img *ngIf="msg.participants[1] && msg.participants[1]._id !== userInfo._id" [src]="msg.participants[1].currentProfile ? msg.participants[1].currentProfile.secure_url : 'assets/img/default-user.png'">
+        <img *ngIf="msg.participants[0] && msg.participants[1] && msg.participants[0]._id !== userInfo._id && msg.participants[1]._id !== userInfo._id"
+          src="assets/img/default-user.png">
+      </ion-avatar>
+      <ion-avatar item-left *ngIf="msg.participants.length > 2" (click)="showConversation(msg)">
+        <img src="assets/img/user-group.png">
+      </ion-avatar>
+      <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length == 2 && msg.participants[0] && msg.participants[0]._id !== userInfo._id">{{msg.participants[0].firstName + ' ' + msg.participants[0].lastName}}</h2>
+      <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length == 2 && msg.participants[1] && msg.participants[1]._id !== userInfo._id">{{msg.participants[1].firstName + ' ' + msg.participants[1].lastName}}</h2>
+      <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length > 2">{{getGroupChatName(msg)+ ' (' + msg.participants.length + ')'}}</h2>
+      <p (click)="showConversation(msg)">
+        <!--<span *ngIf="msg.participants.length > 2">-->
+        {{msg.messages[msg.messages.length - 1].createdBy._id == userInfo._id ? 'You' : msg.messages[msg.messages.length - 1].createdBy.firstName}}:&nbsp;
+        <!--</span> -->
+        {{msg.messages[msg.messages.length - 1].body}}</p>
+      <ion-note item-right (click)="showConversation(msg)">
+        {{ msg.messages[msg.messages.length - 1].createdAt| date: getMessageDateFormate(msg.messages[msg.messages.length - 1].createdAt)}}
+      </ion-note>
+    </ion-item>
+  </ion-list>
+</ion-content>
