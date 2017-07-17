@@ -5,7 +5,7 @@ import User from '../models/user.model';
 import emailVerification from '../cronJobs/emailVerification';
 
 const config = require('../../config/env');
-const bcryptjs = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 
 /**
  * /api/auth/:userId/logout
@@ -25,8 +25,8 @@ function logout(req, res, next) { //eslint-disable-line
         userCpy.status.activeToken = null;
         userCpy.status.currentStatus = 'offline';
         userCpy.lastOnline = new Date();
-        userCpy.device.updatedAt = new Date();
-        userCpy.device.token = '';
+        // userCpy.device.updatedAt = new Date();
+        userCpy.notifications.deviceToken = '';
         userCpy.save().then(() => res.sendStatus(httpStatus.OK)).catch(e => next(e));
       }
     });
@@ -37,7 +37,7 @@ function logout(req, res, next) { //eslint-disable-line
 }
 
 function encryptPassword(req, res, next) {
-  res.send(bcryptjs.hashSync(req.params.password, 10));
+  res.send(bcrypt.hashSync(req.params.password, 10));
 }
 /**
  * Returns jwt token if valid username and password is provided
@@ -51,7 +51,7 @@ function login(req, res, next) {
     return User.getByEmail(req.body.email)
       .then((user) => { //eslint-disable-line
         if (user) {
-          bcryptjs.compare(req.body.password, user.password, (err, same) => { //eslint-disable-line
+          bcrypt.compare(req.body.password, user.password, (err, same) => { //eslint-disable-line
             if (same) {
               const token = jwt.sign({
                 email: user.email
@@ -73,6 +73,31 @@ function login(req, res, next) {
           });
         } else {
           const error = new APIError('No User Found with that email!', httpStatus.NOT_FOUND);
+          return next(error);
+        }
+      }).catch((e) => {
+        console.log(e); //eslint-disable-line
+        next(e);
+      });
+  } else if (!!req.body.facebookId) {
+    return User.getByFBId(req.body.facebookId)
+      .then((user) => { //eslint-disable-line
+        if (user) {
+          const token = jwt.sign({
+            email: user.email
+          }, config.jwtSecret);
+          const userCpy = user;   // update the user status object to
+          userCpy.status.online = true; // reflect their current online status.
+          userCpy.status.currentStatus = 'online';
+          userCpy.status.activeToken = token;
+          userCpy.save().then(updatedUser =>
+            res.json({
+              token,
+              user: updatedUser,
+            })
+          );
+        } else {
+          const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
           return next(error);
         }
       }).catch((e) => {
@@ -102,10 +127,10 @@ function changePassword(req, res, next) {
   if (req.params.userId && req.body.password && req.body.newPassword) {
     User.get(req.params.userId).then((user) => {
       if (user) {
-        bcryptjs.compare(req.body.password, user.password, (err, same) => { //eslint-disable-line
+        bcrypt.compare(req.body.password, user.password, (err, same) => { //eslint-disable-line
           if (same) {
             const userCpy = user;
-            userCpy.password = bcryptjs.hashSync(req.body.newPassword, 10);
+            userCpy.password = bcrypt.hashSync(req.body.newPassword, 10);
             userCpy.save().then(updatedUser => {
               updatedUser.otp = {};
               res.json(updatedUser)

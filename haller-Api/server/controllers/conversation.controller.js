@@ -2,6 +2,7 @@ import _ from 'lodash';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import Conversation from '../models/conversation.model';
+import FCMSender from '../helpers/FCMSender';
 import User from '../models/user.model';
 import APIError from '../helpers/APIError';
 
@@ -114,10 +115,8 @@ function list(req, res, next) {
     .then(usersWhoBlockedMe => {
       User.findOne({ '_id': req.params.userId }, { 'blocked.user': 1 }).exec()
         .then(bu => {
-          if (bu.blocked) {
-            for (var i = 0; i < bu.blocked.length; i++) {
-              usersWhoBlockedMe.push({ _id: bu.blocked[i].user });
-            }
+          for (var i = 0; i < bu.blocked.length; i++) {
+            usersWhoBlockedMe.push({ _id: bu.blocked[i].user });
           }
           Conversation.list({ userId: req.params.userId, recipient, skip: 0, limit: 50, blocked: usersWhoBlockedMe })
             .then((convos) => {
@@ -201,24 +200,26 @@ function update(req, res, next) { //eslint-disable-line
       if (req.body.groupName) {
         savedConvo.groupName = req.body.groupName;
       }
+      if (req.body.notificationFor) {
+        if (!savedConvo.notificationOffFor) savedConvo.notificationOffFor = [];
+        var userExist = savedConvo.notificationOffFor.filter(item => {
+          return item.user.toString() == req.body.notificationFor;
+        })
+        if (userExist.length == 0 && !req.body.off)
+          savedConvo.notificationOffFor.push({ 'user': req.body.notificationFor, from: new Date() })
+        else if (req.body.off) {
+          var index = savedConvo.notificationOffFor.indexOf(userExist);
+          savedConvo.notificationOffFor.splice(index, 1);
+        }
+      }
       savedConvo.save().then((sConvo) => {
-
         if (req.params.userId) {
           //for new app
-          Conversation.get(req.params.conversationId, req.params.userId || null).then((convo) => {
-            // if (req.body.message) {
-            //   var notiObj = { _id: mongoose.Types.ObjectId(), conversation: convo._id, type: activityType, createdBy: req.body.message.createdBy };
-            //   var recipients = _.filter(convo.participants, function (item) {
-            //     return item.toString() != notiObj.createdBy
-            //   })[0];
-            //   if (recipients) {
-            //     notiObj.recipients = [];
-            //     for (var r = 0; r < recipients.length; r++) {
-            //       notiObj.recipients.push({ 'user': recipients[r]._id });
-            //     }
-            //   }
-            // }
-            return res.json(convo);
+          Conversation.get(req.params.conversationId, req.params.userId || null).then((convo2) => {
+            if (req.body.message) {
+              FCMSender.sendMsgNotification(req.body.message, convo2);
+            }
+            return res.json(convo2);
           }).catch(e => {
             console.info('Conversation.get error', e);
             const error = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);
@@ -279,7 +280,9 @@ function updateMessage(req, res, next) { //eslint-disable-line
           message.image = req.body.message.image;
           savedConvo.updatedAt = new Date();
         }
-        if (req.body.message.read) {
+        if (req.body.message.read && req.body.userId) {
+          if (!message.readBy) message.readBy = [];
+          message.readBy.push({ user: req.body.userId, at: new Date() })
           message.read = true;
         }
 

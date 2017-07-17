@@ -7,5 +7,5 @@ export default {
     key: 'key-123e941659eb0511afc01ddf7b60df3a',
     domain: 'mg.gohaller.com'
   },
-  inviteCode: 'REZLIFET1'
+  inviteCode: 'hallerku!'
 };

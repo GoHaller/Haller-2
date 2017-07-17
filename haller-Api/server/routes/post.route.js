@@ -268,6 +268,8 @@ router.route('/users/:userId')
     }
   }), load, validate(paramValidation.listByUser), postCtrl.listByUser);
 
+router.route('/university/notification')
+  .post(postCtrl.createUniversityNotification);
 // /** Load user when API with userId route parameter is hit */
 // router.param('userId', load);
 

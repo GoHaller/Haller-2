@@ -29,11 +29,23 @@ router.route('/:notificationId')
     getToken
   }), validate(paramValidation.removeNotification), notificationCtrl.remove);
 
+router.route('/:notificationId/users/:userId/read')
+  .get([expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), validate(paramValidation.readNotifications), notificationCtrl.readNotification])
+
 router.route('/users/:userId')
   /** GET /api/notifications/users/:userId - Get list of notifications by participant Id*/
   .get(expressJwt({
     secret: config.jwtSecret,
     getToken
-  }), validate(paramValidation.listNotifications), notificationCtrl.list);
+  }), validate(paramValidation.listNotifications), notificationCtrl.getNotification);
+
+router.route('/users/:userId/unread')
+  .post(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), validate(paramValidation.unreadNotifications), notificationCtrl.getUnreadNotificationCount);
 
 export default router;

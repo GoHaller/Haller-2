@@ -24,7 +24,8 @@ const sendVerificationEmail = user =>
       from: 'Haller Verification <noreply@gohaller.com>',
       to: user.email,
       subject: 'Verify your Haller email address',
-      html: `<h2 style="text-align:center">Your OTP is ` + user.otp.token + `, Click <a href="${link}" rel="nofollow noreferrer" target="_blank">on this link</a> to verify your email address and begin using Haller.</h2><br />`
+      //html: `<h2 style="text-align:center">Your OTP is ` + user.otp.token + `, Click <a href="${link}" rel="nofollow noreferrer" target="_blank">on this link</a> to verify your email address and begin using Haller.</h2><br />`
+      html: `<h2 style="text-align:center">Click <a href="${link}" rel="nofollow noreferrer" target="_blank">on this link</a> to verify your email address and begin using Haller.</h2><br />`
     };
     mailgun.messages().send(data, (error, body) => {
       if (error) {
@@ -70,7 +71,7 @@ const sendProblemReportEmail = (user, problemData) =>
     const link = `${config.rootUrl}users/${user._id}/verify-email`;
     const data = {
       from: 'Haller Problem <noreply@gohaller.com>',
-      to: 'support@gohaller.com',
+      to: 'kamal.mandalia@plutustec.com',
       subject: 'By ' + user.firstName + ' ' + user.lastName,
       html: `<h3> Residence: ` + user.residence + `<h3/>` +
       `<h3>Issue Title: ` + problemData.title + `</h3>` +

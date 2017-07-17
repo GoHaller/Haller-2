@@ -8,6 +8,7 @@ import Activities from '../models/activities.model';
 import Notification from '../models/notification.model';
 import Library from '../models/library.model';
 import APIError from '../helpers/APIError';
+import FCMSender from '../helpers/FCMSender';
 import { postsMap } from '../helpers/PopulateMaps';
 import { sendFlaggedEmailWithMailgun } from '../cronJobs/sendFlaggedPostEmail';
 
@@ -962,7 +963,6 @@ function createActivityLog(actObj, callback) {
 }
 
 function createNotification(actObj) {
-  // console.info('actObj', actObj);
   Post.get(actObj.post).then(post => {
     if (actObj.createdBy != post.createdBy._id) {
       Notification.getByPostAndType(actObj.activityType, actObj.post)
@@ -974,14 +974,30 @@ function createNotification(actObj) {
             if (recipient) {
               recipient.read = false;
               notification.updatedAt = new Date();
-              notification.save().then(savedNoti => { }).catch(e => { console.info('savedNoti error', e); });
+              notification.save().then(savedNoti => {
+                Notification.get(savedNoti._id)
+                  .then(noti => {
+                    FCMSender.sendNotification(noti);
+                    // console.info('1 savedNoti', savedNoti);
+                  }).catch(e => {
+                    console.info('1 savedNoti error', e);
+                  });
+              }).catch(e => {
+                console.info('savedNoti error', e);
+              });
             }
           } else {
             var notiObje = { _id: mongoose.Types.ObjectId(), post: actObj.post, type: actObj.activityType, recipients: [{ user: post.createdBy._id }], createdBy: actObj.createdBy };
             // if (actObj.comment) notiObje['objectId'] = actObj.comment;
             var notification = new Notification(notiObje);
             notification.save().then(savedNoti => {
-              Notification.get(savedNoti._id).then(noti => { }).catch(e => { console.info('2 savedNoti error', e); });
+              Notification.get(savedNoti._id)
+                .then(noti => {
+                  FCMSender.sendNotification(noti);
+                  // console.info('2 savedNoti', savedNoti);
+                }).catch(e => {
+                  console.info('2 savedNoti error', e);
+                });
             });
           }
         }).catch(e => {
@@ -994,6 +1010,31 @@ function createNotification(actObj) {
     console.info('Post.get error', e);
   })
 }
+
+function createUniversityNotification(req, res, next) {
+  var notiObje = { _id: mongoose.Types.ObjectId(), type: 20 };
+  notiObje.body = { title: req.body.title || 'Haller University says', message: req.body.message || 'Hello friends, this is lorem ippsem.' };
+  var notification = new Notification(notiObje);
+  notification.save().then(savedNoti => {
+    Notification.get(savedNoti._id)
+      .then(noti => {
+        sendUniversityNotification(noti);
+        res.json(noti);
+        // console.info('university savedNoti', savedNoti);
+      }).catch(e => {
+        console.info('university savedNoti error', e);
+        next(e);
+      });
+  });
+}
+
+function sendUniversityNotification(notification) {
+  User.list({ limit: 10, skip: 0 })
+    .then(users => {
+      FCMSender.sendUniversityNotification(users, notification);
+    });
+}
+
 
 export default {
   get,
@@ -1025,5 +1066,6 @@ export default {
   addStandAloneLibraryItem,
   listLibraryItems,
   removeStandAloneLibraryItem,
-  listUserFavorites
+  listUserFavorites,
+  createUniversityNotification
 };

@@ -22,7 +22,7 @@
   <ion-list class="save-list">
     <ion-item *ngFor="let saved of savedList" (click)="gototFeedDetail(saved)">
       <ion-avatar item-left>
-        <img [src]="saved.createdBy && saved.createdBy.currentProfile ? saved.createdBy.currentProfile.secure_url : '../../assets/img/default-user.png'">
+        <img [src]="saved.createdBy.currentProfile.secure_url || '../../assets/img/default-user.png'">
       </ion-avatar>
       <h2>{{saved.isEvent ? 'Event' : 'Feed'}}</h2>
       <p>{{saved.details}}</p>

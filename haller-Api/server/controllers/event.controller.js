@@ -4,6 +4,7 @@ import httpStatus from 'http-status';
 import Post from '../models/post.model';
 import Activities from '../models/activities.model';
 import Notification from '../models/notification.model';
+import FCMSender from '../helpers/FCMSender';
 import Library from '../models/library.model';
 import APIError from '../helpers/APIError';
 import { postsMap } from '../helpers/PopulateMaps';
@@ -287,12 +288,34 @@ function createNotification(actObj) {
             if (recipient) {
               recipient.read = false;
               notification.updatedAt = new Date();
-              notification.save().then(savedNoti => { }).catch(e => { console.info('savedNoti error', e); });
+              notification.save().then(savedNoti => {
+                // console.info('savedNoti', savedNoti);
+                Notification.get(savedNoti._id)
+                  .then(noti => {
+                    FCMSender.sendNotification(noti);
+                    // console.info('1 savedNoti', savedNoti);
+                  }).catch(e => {
+                    console.info('1 savedNoti error', e);
+                  });
+              }).catch(e => {
+                console.info('savedNoti error', e);
+              });
             }
           } else {
             var notiObje = { _id: mongoose.Types.ObjectId(), post: actObj.post, type: actObj.activityType, recipients: [{ user: post.createdBy._id }], createdBy: actObj.createdBy };
             var notification = new Notification(notiObje);
-            notification.save().then(savedNoti => { }).catch(e => { console.info('1 savedNoti error', e); });
+            notification.save().then(savedNoti => {
+              // console.info('1 savedNoti', savedNoti);
+              Notification.get(savedNoti._id)
+                .then(noti => {
+                  FCMSender.sendNotification(noti);
+                  // console.info('1 savedNoti', savedNoti);
+                }).catch(e => {
+                  console.info('1 savedNoti error', e);
+                });
+            }).catch(e => {
+              console.info('1 savedNoti error', e);
+            });
           }
         }).catch(e => {
           console.info('getByPostAndType error', e);

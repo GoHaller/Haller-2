@@ -5,7 +5,7 @@ import chai, { expect } from 'chai';
 import app from '../../index';
 import User from '../models/user.model';
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 chai.config.includeStack = true;
 let user = new User({

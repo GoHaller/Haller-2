@@ -18,6 +18,7 @@
     "@angular/http": "4.0.0",
     "@angular/platform-browser": "4.0.0",
     "@angular/platform-browser-dynamic": "4.0.0",
+    "@ionic-native/push": "3.4.4",
     "@ionic-native/camera": "^3.6.1",
     "@ionic-native/core": "^3.6.1",
     "@ionic-native/facebook": "^3.10.3",
@@ -46,7 +47,9 @@
     "cordova-plugin-whitelist",
     "ionic-plugin-keyboard",
     "cordova-plugin-inappbrowser",
-    "cordova-plugin-facebook4"
+    "cordova-plugin-facebook4",
+    "de.appplant.cordova.plugin.local-notification",
+    "phonegap-plugin-push"
   ],
   "cordovaPlatforms": [],
   "description": "haller: An Ionic project"

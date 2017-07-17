@@ -17,6 +17,10 @@ const NotificationSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'Post'
   },
+  body: {
+    title: { type: String, default: '' },
+    message: { type: String, default: '' }
+  },
   objectId: {
     type: String,
   },
@@ -32,7 +36,6 @@ const NotificationSchema = new mongoose.Schema({
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
-      required: true
     },
     read: { type: Boolean, default: false },
     readAt: Date,
@@ -48,7 +51,6 @@ const NotificationSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
-    required: true
   },
 });
 /*
@@ -123,12 +125,14 @@ NotificationSchema.statics = {
    * @param {number} limit - Limit number of notifications to be returned.
    * @returns {Promise<Conversation[]>}
    */
-  list({ userId, skip = 0, limit = 50 } = {}) {
+  list({ userId, skip = 0, limit = 50, university = false } = {}) {
     if (userId.toString().match(/^[0-9a-fA-F]{24}$/).length > 0) {
       try {
-        return this.find({ 'recipients.user': userId })
+        var q = { 'recipients.user': userId };
+        if (university == 'true') q = { type: 20 };
+        return this.find(q)
           .populate(populateMap())
-          .sort({ createdAt: -1 })
+          .sort({ updatedAt: -1 })
           .skip(skip)
           .limit(limit)
           .exec();

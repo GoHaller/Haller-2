@@ -34,6 +34,10 @@ const MessageSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.ObjectId, ref: 'User' },
     at: { type: Date, default: new Date() }
   }],
+  readBy: [{
+    user: { type: mongoose.Schema.ObjectId, ref: 'User' },
+    at: { type: Date, default: new Date() }
+  }],
   read: {
     type: Boolean,
     default: false,
@@ -84,6 +88,10 @@ const ConversationSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
     index: true
+  }],
+  notificationOffFor: [{
+    user: { type: mongoose.Schema.ObjectId, ref: 'User' },
+    from: { type: Date, default: new Date() }
   }],
   deletedFor: [{
     user: { type: mongoose.Schema.ObjectId, ref: 'User' },

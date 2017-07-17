@@ -10,6 +10,8 @@ import config from '../../config/env';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
+router.route('/sendnoti/:msg')
+  .get(userCtrl.sendNotification)
 router.route('/')
   /** GET /api/users - Get list of users */
   .get(expressJwt({ secret: config.jwtSecret, getToken }), userCtrl.list)
@@ -52,6 +54,7 @@ router.route('/:userId/list')
     secret: config.jwtSecret,
     getToken
   }), userCtrl.listForUser)
+
 
 router.route('/:userId')
   /** GET /api/users/:userId - Get user */

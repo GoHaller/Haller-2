@@ -40,24 +40,25 @@ const participant = Joi.string().hex();
 export default {
   // POST /api/users
   createUser: {
-    body: {
+    body: Joi.object().keys({
       email: Joi.string().required(),
-      password: Joi.string().required()
-    }
+      password: Joi.string(),
+      facebook: Joi.object()
+    }).or('password', 'facebook')
   },
 
   // UPDATE /api/users/:userId
   updateUser: {
     body: {
-      major: Joi.string(),
+      major: Joi.string().allow(''),
       mobileNumber: Joi.number(),
       residence: Joi.string(),
-      graduationYear: Joi.string(),
+      graduationYear: Joi.string().allow(''),
       genderPronouns: Joi.array().items(Joi.string()),
       firstName: Joi.string(),
       lastName: Joi.string(),
-      hometown: Joi.string(),
-      bio: Joi.string(),
+      hometown: Joi.string().allow(''),
+      bio: Joi.string().allow(''),
       currentProfile: imageItem,
       currentCover: imageItem,
       organizations: Joi.array().items(participant),
@@ -378,6 +379,17 @@ export default {
       userId: Joi.string().hex().required()
     }
   },
+  readNotifications: {
+    params: {
+      notificationId: Joi.string().hex().required(),
+      userId: Joi.string().hex().required()
+    }
+  },
+  unreadNotifications: {
+    params: {
+      userId: Joi.string().hex().required()
+    }
+  },
   removeNotification: {
     params: {
       notificationId: Joi.string().hex().required()
@@ -419,10 +431,15 @@ export default {
   },
   // POST /api/auth/login
   login: {
-    body: {
-      email: Joi.string().required(),
-      password: Joi.string().required()
-    }
+    body: Joi.alternatives().try(
+      Joi.object().keys({
+        email: Joi.string().required(),
+        password: Joi.string().required()
+      }),
+      Joi.object().keys({
+        facebookId: Joi.string().required()
+      })
+    )
   },
   logout: {
     params: {

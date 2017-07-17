@@ -24,7 +24,8 @@ const types = {
     16: 'Unflaged a comment',
     17: 'Joined an event',
     18: 'Left an event',
-    19: 'Message Sent'
+    19: 'Message Sent',
+    20: 'University'
 }
 
 const populateMap = () =>

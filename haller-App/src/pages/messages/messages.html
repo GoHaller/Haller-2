@@ -35,15 +35,9 @@
     <ion-list-header>Conversations</ion-list-header>
     <ion-item *ngFor="let msg of messageList | convosearch:['firstName','lastName',searchText]" [ngClass]="checkMsgIfReadByOther(msg.messages[msg.messages.length - 1]) ? '':'read-convo'">
       <ion-icon *ngIf="edit" (click)="presentEditActionSheet(msg)" item-left color="danger" name="ios-remove-circle-outline"></ion-icon>
-      <ion-avatar item-left *ngIf="msg.participants.length == 1" (click)="showConversation(msg)">
-        <img *ngIf="msg.participants[0] && msg.participants[0]._id !== userInfo._id" [src]="msg.participants[0].currentProfile ? msg.participants[0].currentProfile.secure_url : 'assets/img/default-user.png'">
-        <img *ngIf="msg.participants[0] && msg.participants[0]._id == userInfo._id" src="assets/img/default-user.png">
-      </ion-avatar>
       <ion-avatar item-left *ngIf="msg.participants.length == 2" (click)="showConversation(msg)">
         <img *ngIf="msg.participants[0] && msg.participants[0]._id !== userInfo._id" [src]="msg.participants[0].currentProfile ? msg.participants[0].currentProfile.secure_url : 'assets/img/default-user.png'">
         <img *ngIf="msg.participants[1] && msg.participants[1]._id !== userInfo._id" [src]="msg.participants[1].currentProfile ? msg.participants[1].currentProfile.secure_url : 'assets/img/default-user.png'">
-        <img *ngIf="msg.participants[0] && msg.participants[1] && msg.participants[0]._id !== userInfo._id && msg.participants[1]._id !== userInfo._id"
-          src="assets/img/default-user.png">
       </ion-avatar>
       <ion-avatar item-left *ngIf="msg.participants.length > 2" (click)="showConversation(msg)">
         <img src="assets/img/user-group.png">

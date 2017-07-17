@@ -1,0 +1,187 @@
+<div class="main-content">
+  <div class="container-fluid">
+
+    <div class="row post-list">
+      <!--Post Section Start-->
+      <div class="col-lg-8 col-md-6 col-sm-8">
+        <div class="row">
+          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
+            <select class="selectpicker" data-style="select-with-transition" title="Choose residence" data-size="3">
+              <option disabled>Choose residence</option>
+              <option value="Oliver">Oliver </option>
+              <option value="Scholarship Halls">Scholarship Halls</option>
+          </select>
+          </div>
+          <div class="col-lg-4 col-md-4"></div>
+          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
+            <button class="btn btn-info btn-simple" (click)="openModal('new-feed-form')">Create Post</button>
+          </div>
+        </div>
+        <div class="row" *ngFor="let post of posts; let i = index">
+          <div class="col-lg-10 col-sm-12">
+            <div class="card">
+              <div class="card-header card-header-icon" data-background-color="blue">
+                <i *ngIf="!post.createdBy || !post.createdBy.currentProfile" class="material-icons">person</i>
+                <img width="100px" *ngIf="post.createdBy && post.createdBy.currentProfile" [src]="post.createdBy.currentProfile.secure_url"
+                />
+              </div>
+              <div class="card-content">
+                <h5 class="card-title">{{(post.createdBy?post.createdBy.firstName:'no-name')+' '+(post.createdBy?post.createdBy.lastName:'no-name')}}
+                  <p class="category">{{post.createdAt | date:'short'}}</p>
+                </h5>
+              </div>
+              <div class="card-footer">
+                {{post.details}}
+                <p *ngIf="post.cover.length > 0">
+                  <img [src]="post.cover[post.cover.length - 1].secure_url" />
+                </p>
+              </div>
+              <div class="card-footer action">
+                <div class="stats">
+                  <button class="btn btn-info btn-simple">{{post.liked.length}}&nbsp;Like</button>
+                  <button class="btn btn-info btn-simple" (click)="selectPost(i)">{{post.comments.length}}&nbsp;Comment</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Post Section End-->
+      <!--Comment Section Start-->
+      <div class="col-lg-4 col-md-6 col-sm-4 comment-section">
+        <div class="row">
+          <div class="card" style="margin-bottom: 0px;">
+            <div class="card-header card-header-icon" data-background-color="blue">
+              <i *ngIf="!posts[postIndex].createdBy || !posts[postIndex].createdBy.currentProfile" class="material-icons">person</i>
+              <img width="100px" *ngIf="posts[postIndex].createdBy && posts[postIndex].createdBy.currentProfile" [src]="posts[postIndex].createdBy.currentProfile.secure_url"
+              />
+            </div>
+            <div class="card-content">
+              <h5 class="card-title">{{(posts[postIndex].createdBy?posts[postIndex].createdBy.firstName:'no-name')+' '+(posts[postIndex].createdBy?posts[postIndex].createdBy.lastName:'no-name')}}
+                <p class="category">{{posts[postIndex].createdAt | date:'short'}}</p>
+              </h5>
+            </div>
+            <div class="card-footer post-detail">
+              {{posts[postIndex].details}}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12" style="margin: 11px 0px;">
+            <legend class="margin-top-10">Comments - <small><button class="btn btn-info btn-simple comment-btn" (click)="openModal('new-feed-comment-form')">Add Comment</button></small></legend>
+          </div>
+        </div>
+        <div class="row comment-list" *ngFor="let cmnt of posts[postIndex].comments">
+          <div class="card">
+            <div class="card-header card-header-icon" data-background-color="blue">
+              <i *ngIf="!cmnt.createdBy || !cmnt.createdBy.currentProfile" class="material-icons">person</i>
+              <img *ngIf="cmnt.createdBy && cmnt.createdBy.currentProfile" [src]="cmnt.createdBy.currentProfile.secure_url" />
+            </div>
+            <div class="card-content">
+              <h5 class="card-title">{{(cmnt.createdBy?cmnt.createdBy.firstName:'no-name')+' '+(cmnt.createdBy?cmnt.createdBy.lastName:'no-name')}}
+                <p class="category">{{cmnt.createdAt | date:'short'}}</p>
+              </h5>
+            </div>
+            <div class="card-footer">
+              {{cmnt.body}}
+              <p class="comment-image" *ngIf="cmnt.giphy && cmnt.giphy.gif">
+                <img [src]="cmnt.giphy.gif.url" />
+              </p>
+              <p class="comment-image" *ngIf="cmnt.image && cmnt.image.secure_url">
+                <img [src]="cmnt.image.secure_url" />
+              </p>
+            </div>
+            <div class="card-footer action">
+              <div class="stats">
+                <button class="btn btn-info btn-simple">{{cmnt.liked.length}}&nbsp;Like</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Comment Section End-->
+    </div>
+  </div>
+</div>
+<modal id="new-feed-form">
+  <div class="modal">
+    <div class="modal-body col-md-4 col-md-offset-4">
+      <div class="card">
+        <form #frmPost="ngForm" novalidate (ngSubmit)="save(frmPost.value, frmPost.valid,'new-feed-form')">
+          <div class="card-header card-header-icon" data-background-color="blue">
+            <i class="material-icons">featured_play_list</i>
+          </div>
+          <div class="card-content">
+            <h4 class="card-title">Feed</h4>
+            <div class="form-group label-floating">
+              <textarea type="text" class="form-control" name="details" placeholder="Detail..." [(ngModel)]="post.details" #details="ngModel"></textarea>
+            </div>
+            <div class="text-center">
+              <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                <div class="fileinput-new thumbnail">
+                  <img src="../../assets/img/image_placeholder.jpg" alt="...">
+                </div>
+                <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                <div>
+                  <span class="btn btn-rose btn-simple btn-file">
+                  <span class="fileinput-new">Add Image</span>
+                  <span class="fileinput-exists">Change</span>
+                  <input type="file" [(ngModel)]="post.image" #image="ngModel" (change)="setImage(image.files || null)" name="image" />
+                  </span>
+                  <a href="#pablo" class="btn btn-danger btn-simple fileinput-exists" data-dismiss="fileinput">Remove</a>
+                </div>
+              </div>
+            </div>
+            <div class="text-center">
+              <button type="button" (click)="save(frmPost.value, frmPost.valid,'new-feed-form')" class="btn btn-info btn-fill btn-wd" [disabled]="!(frmPost.value.details || post.image)">Create</button>
+              <button class="btn btn-default" (click)="closeModal('new-feed-form');">Close</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="modal-background"></div>
+</modal>
+<modal id="new-feed-comment-form">
+  <div class="modal">
+    <div class="modal-body col-md-4 col-md-offset-4">
+      <div class="card">
+        <form #frmComment="ngForm" novalidate (ngSubmit)="save(frmComment.value, frmComment.valid,'new-feed-comment-form')">
+          <div class="card-header card-header-icon" data-background-color="blue">
+            <i class="material-icons">chat</i>
+          </div>
+          <div class="card-content">
+            <h4 class="card-title">Comment</h4>
+            <div class="form-group label-floating">
+              <textarea type="text" class="form-control" placeholder="Comment...." name="body" [(ngModel)]="comment.body" #body="ngModel"></textarea>
+            </div>
+            <div class="text-center">
+              <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                <div class="fileinput-new thumbnail">
+                  <img src="../../assets/img/image_placeholder.jpg" alt="...">
+                </div>
+                <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                <div>
+                  <span class="btn btn-rose btn-simple btn-file">
+                  <span class="fileinput-new">Add Image</span>
+                  <span class="fileinput-exists">Change</span>
+                  <input type="file" [(ngModel)]="comment.image" #cmtimage="ngModel" (change)="setImage(cmtimage.files || null)" name="cmtimage"
+                  />
+                  </span>
+                  <a href="#pablo" class="btn btn-danger btn-simple fileinput-exists" data-dismiss="fileinput">Remove</a>
+                </div>
+              </div>
+            </div>
+            <div class="text-center">
+              <button type="button" (click)="save(frmComment.value, frmComment.valid,'new-feed-comment-form')" class="btn btn-info btn-fill btn-wd"
+                [disabled]="!(frmComment.value.details || comment.image)">Create</button>
+              <button class="btn btn-default" (click)="closeModal('new-feed-comment-form');">Close</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="modal-background"></div>
+</modal>

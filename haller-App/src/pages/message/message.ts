@@ -285,7 +285,7 @@ export class Message {
   }
 
   checkIfUserHasLeft() {
-    if (this.conversation && this.conversation['leftUser']) {
+    if (this.conversation['leftUser']) {
       let user = this.conversation['leftUser'].filter(user => {
         return user.user == this.userInfo['_id'];
       })

@@ -64,7 +64,7 @@
     <ion-item class="org-list no-bootom-border">
       <button *ngFor="let org of userInfo.organizations" color="primary" (click)="removeOrgFromUserList(org)" icon-right ion-button
         small outline><span class="tag-text">{{org.name}}</span><ion-icon color="dark" name="close"></ion-icon></button>
-      <!--<button color="primary" icon-right ion-button small>Add<ion-icon name="add"></ion-icon></button>-->
+      <button color="primary" icon-right ion-button small>Add<ion-icon name="add"></ion-icon></button>
     </ion-item>
     <ion-item>
       <ion-input (input)="searchOrg($event)" placeholder="Search organization"></ion-input>
@@ -82,7 +82,7 @@
     <ion-item class="org-list no-bootom-border">
       <button *ngFor="let interest of userInfo.interests" color="primary" (click)="removeInterestFromUserList(interest)" icon-right
         ion-button small outline><span class="tag-text">{{interest.name}}</span><ion-icon color="dark" name="close"></ion-icon></button>
-      <!--<button color="primary" icon-right ion-button small>Add<ion-icon name="add"></ion-icon></button>-->
+      <button color="primary" icon-right ion-button small>Add<ion-icon name="add"></ion-icon></button>
     </ion-item>
     <ion-item>
       <ion-input (input)="searchInterest($event)" [(ngModel)]="userInterest" placeholder="Add here"></ion-input>

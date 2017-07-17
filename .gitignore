@@ -86,3 +86,6 @@ haller-Api/.npm
 # Optional REPL history
 haller-Api/*.node_repl_history
 haller-Api/.node_repl_history
+
+
+haller-Web/node_modules/

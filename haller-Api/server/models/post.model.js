@@ -184,7 +184,8 @@ const PostSchema = new mongoose.Schema({
   },
   deteled: {
     type: Boolean,
-    default: false
+    default: false,
+    required: true
   }
 });
 
@@ -233,8 +234,8 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of posts to be returned.
    * @returns {Promise<User[]>}
    */
-  list({ skip = 0, limit = 50 } = {}) {
-    return this.find()
+  list({ skip = 0, limit = 50, deteled = false } = {}) {
+    return this.find({ deteled: deteled })
       .populate(populateMap())
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -251,8 +252,8 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of posts to be returned.
    * @returns {Promise<User[]>}
    */
-  listByFeed({ feed = 'all', residenceHall, skip = 0, limit = 50, isEvent = null, blockedMe = [] } = {}) {
-    const q = {};
+  listByFeed({ feed = 'all', residenceHall, skip = 0, limit = 50, isEvent = null, blockedMe = [], deteled = false } = {}) {
+    const q = { $or: [{ deteled: { $exists: false } }, { deteled: deteled }] };
     if (feed === 'discovery') { q.discoveryFeed = true; }
     else if (feed === 'residents' && residenceHall) {
       q.residentsFeed = true;
@@ -278,8 +279,8 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<User[]>}
    */
-  listByResidence({ residence, skip = 0, limit = 50, blockedMe = [] } = {}) {
-    return this.find({ authorResidence: residence, createdBy: { $nin: blockedMe } })
+  listByResidence({ residence, skip = 0, limit = 50, blockedMe = [], deteled = false } = {}) {
+    return this.find({ authorResidence: residence, createdBy: { $nin: blockedMe }, $or: [{ deteled: { $exists: false } }, { deteled: deteled }] })
       .populate(populateMap())
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -293,8 +294,8 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<User[]>}
    */
-  listByUser({ userId, skip = 0, limit = 50 } = {}) {
-    return this.find({ createdBy: userId })
+  listByUser({ userId, skip = 0, limit = 50, deteled = false } = {}) {
+    return this.find({ createdBy: userId, $or: [{ deteled: { $exists: false } }, { deteled: deteled }] })
       .populate(populateMap())
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -323,8 +324,8 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<User[]>}
    */
-  listUserEvents({ userId, skip = 0, limit = 50 } = {}) {
-    return this.find({ $or: [{ createdBy: userId }, { 'going.actedBy': userId }] })
+  listUserEvents({ userId, skip = 0, limit = 50, deteled = false } = {}) {
+    return this.find({ $and: [{ $or: [{ createdBy: userId }, { 'going.actedBy': userId }] }, { $or: [{ deteled: { $exists: false } }, { deteled: deteled }] }] })
       .populate(populateMap())
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -346,15 +347,15 @@ PostSchema.statics = {
   },
 
   getUserCreatedPosts(userId) {
-    return this.find({ 'createdBy': userId }).populate(populateMap()).sort({ createdAt: -1 }).exec();
+    return this.find({ 'createdBy': userId, $or: [{ deteled: { $exists: false } }, { deteled: false }] }).populate(populateMap()).sort({ createdAt: -1 }).exec();
   },
 
   getUserLikedPosts(userId) {
-    return this.find({ 'liked.actedBy': userId }).populate(populateMap()).sort({ 'liked.createdAt': -1 }).exec();
+    return this.find({ 'liked.actedBy': userId, $or: [{ deteled: { $exists: false } }, { deteled: false }] }).populate(populateMap()).sort({ 'liked.createdAt': -1 }).exec();
   },
 
   getUserCommentedPosts(userId) {
-    return this.find({ 'comments.createdBy': userId }).populate(populateMap()).sort({ 'comments.createdAt': -1 }).exec();
+    return this.find({ 'comments.createdBy': userId, $or: [{ deteled: { $exists: false } }, { deteled: false }] }).populate(populateMap()).sort({ 'comments.createdAt': -1 }).exec();
   }
 };
 /**

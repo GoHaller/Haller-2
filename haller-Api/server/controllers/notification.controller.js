@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
+import User from '../models/user.model';
 import Notification from '../models/notification.model';
+import Conversation from '../models/conversation.model';
 import APIError from '../helpers/APIError';
 
 /**
@@ -116,4 +118,130 @@ function remove(req, res, next) {
         });
     });
 }
-export default { get, list, create, update, remove };
+
+function readNotification(req, res, next) {
+  Notification.get(req.params.notificationId)
+    .then(notification => {
+      notification.recipients.forEach(item => {
+        if (item.user._id == req.params.userId) {
+          item.read = true;
+        }
+      });
+      notification.save().then(savedNotification => {
+        var notiesObj = {};
+        if ([10, 4, 17].indexOf(savedNotification.type) > -1) {
+          notiesObj._id = savedNotification._id;
+          notiesObj.type = savedNotification.type;
+          notiesObj.post = { details: savedNotification.post.details, _id: savedNotification.post._id };
+          if (savedNotification.type == 10) {
+            var data = getNamesFromArray(savedNotification.post.comments);
+            notiesObj.title = data + ' ' + 'commented on your ' + (savedNotification.post.isEvent ? 'event' : 'post');
+            notiesObj.lastObj = savedNotification.post.comments[savedNotification.post.comments.length - 1];
+          } else if (savedNotification.type == 17) {
+            var data = getNamesFromArray(savedNotification.post.going);
+            notiesObj.title = data + ' ' + 'joined your event.';
+            notiesObj.lastObj = savedNotification.post.going[item.post.going.length - 1];
+          } else if (savedNotification.type == 4) {
+            var data = getNamesFromArray(savedNotification.post.liked);
+            notiesObj.title = data + ' ' + 'liked your event.';
+            notiesObj.lastObj = savedNotification.post.liked[savedNotification.post.liked.length - 1];
+          }
+          var recipient = _.filter(savedNotification.recipients, function (savedNotification) {
+            return savedNotification.user._id == req.params.userId
+          })
+          notiesObj.read = recipient[0].read;
+          notiesObj.createdAt = savedNotification.createdAt;
+        }
+        res.json(notiesObj);
+      })
+    })
+}
+
+function getUnreadNotificationCount(req, res, next) {
+  var query = [{ 'recipients.user': req.params.userId }]
+  if (req.body.notificationId) query.push({ _id: { $gt: mongoose.Types.ObjectId(req.body.notificationId) } });
+  Notification.find({ $and: query }).skip(0).limit(50).exec().then(notifs => {
+    var qOr = [{ 'messages.readBy.user': { $ne: req.params.userId } }, { 'messages.createdBy': { $ne: req.params.userId } }];
+    var qAnd = [{ 'leftUser.user': { $ne: req.params.userId } }];
+    qAnd.push({ 'deletedFor.user': { $ne: req.params.userId } });
+    // qAnd.push({ $or: qOr, 'participants': req.params.userId });
+    qAnd.push({ 'participants': req.params.userId });
+    qAnd.push({ 'messages.readBy.user': { $ne: req.params.userId } });
+    qAnd.push({ 'messages.createdBy': { $ne: req.params.userId } });
+    Conversation.find({ $and: qAnd })
+      .exec().then(convo => {
+        res.json({ 'convo': convo.length, 'notiCount': notifs.length });
+      })
+      .catch((e) => {
+        console.log(e); //eslint-disable-line
+        next(e);
+      });
+  });
+}
+
+function getNotification(req, res, next) {
+  const { limit = 50, skip = 0, university = false } = req.query;
+  Notification.list({ userId: req.params.userId, skip, limit, university })
+    .then(noties => {
+      var finalNoties = [];
+      noties.forEach(item => {
+        if ([10, 4, 17].indexOf(item.type) > -1) {
+          var notiesObj = {};
+          notiesObj._id = item._id;
+          notiesObj.type = item.type;
+          notiesObj.post = { details: item.post.details, _id: item.post._id };
+          notiesObj.message = item.post.details;
+          var data = '';
+          if (item.type == 10) {
+            data = getNamesFromArray(item.post.comments);
+            notiesObj.title = data + ' ' + 'commented on your ' + (item.post.isEvent ? 'event' : 'post');
+            notiesObj.lastObj = item.post.comments[item.post.comments.length - 1];
+          } else if (item.type == 17) {
+            data = getNamesFromArray(item.post.going);
+            notiesObj.title = data + ' ' + 'joined your event.';
+            notiesObj.lastObj = item.post.going[item.post.going.length - 1];
+          } else if (item.type == 4) {
+            data = getNamesFromArray(item.post.liked);
+            notiesObj.title = data + ' ' + 'liked your ' + (item.post.isEvent ? 'event' : 'post');
+            notiesObj.lastObj = item.post.liked[item.post.liked.length - 1];
+          }
+          var recipient = _.filter(item.recipients, function (item) {
+            return item.user._id == req.params.userId
+          })
+          notiesObj.read = recipient[0].read;
+          notiesObj.createdAt = item.createdAt;
+          if (data.length)
+            finalNoties.push(notiesObj);
+        } else if (item.type == 20) {
+          var notiesObj = {};
+          notiesObj._id = item._id;
+          notiesObj.type = item.type;
+          notiesObj.title = item.body.title;
+          notiesObj.message = item.body.message;
+          notiesObj.createdAt = item.createdAt;
+          notiesObj.university = { logo: 'assets/img/user-group.png' };
+          finalNoties.push(notiesObj);
+        }
+      })
+      res.json(finalNoties);
+    })
+    .catch((e) => {
+      console.log(e); //eslint-disable-line
+      next(e);
+    });
+}
+
+function getNamesFromArray(nameList) {
+  var names = [];
+  var allNames = [];
+  for (var n = (nameList.length - 1); n >= 0; n--) {
+    var fullName = nameList[n].createdBy ? (nameList[n].createdBy.firstName + ' ' + nameList[n].createdBy.lastName) : (nameList[n].actedBy.firstName + ' ' + nameList[n].actedBy.lastName);
+    if (allNames.indexOf(fullName) == -1) {
+      allNames.push(fullName);
+      if (names.length < 3) names.push(fullName);
+    }
+  }
+  return names.join(', ') + (allNames.length > 3 ? (allNames.length - 3) : '');
+}
+
+export default { get, list, create, update, remove, getNotification, readNotification, getUnreadNotificationCount };

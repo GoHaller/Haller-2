@@ -5,6 +5,13 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import emailVerification from '../cronJobs/emailVerification';
 
+function deleteEmpty(v) {
+  if (v == null || !v) {
+    return undefined;
+  }
+  return v;
+}
+
 function toLower(v) {
   return v.toLowerCase();
 }
@@ -75,7 +82,6 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
   },
   mobileNumber: {
     type: Number,
@@ -92,10 +98,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
   },
   hometown: {
-    type: String,
+    type: String, set: deleteEmpty
   },
   major: {
-    type: String,
+    type: String, set: deleteEmpty
   },
   graduationYear: {
     type: String,
@@ -137,6 +143,7 @@ const UserSchema = new mongoose.Schema({
     deviceToken: {
       type: String
     },
+    os: { type: String },
     method: {
       type: String,
       enum: ['email', 'push']
@@ -159,16 +166,8 @@ const UserSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.ObjectId, ref: 'User' },
     at: { type: Date, default: new Date() }
   }],
-  interests: [{
-    name: { type: String, required: true },
-    createdAt: { type: Date, default: new Date() }
-  }],
-  device: {
-    token: { type: String },
-    os: { type: String },
-    createdAt: { type: Date, default: new Date() },
-    updatedAt: { type: Date, default: new Date() }
-  }
+  interests: [{ name: { type: String, required: true }, createdAt: { type: Date, default: new Date() } }],
+  facebook: { type: mongoose.Schema.Types.Mixed }
 }, {
     toObject: {
       virtuals: true
@@ -260,6 +259,20 @@ UserSchema.statics = {
       });
   },
 
+  getByFBId(id) {
+    return this.findOne({ 'facebook.id': id })
+      .populate(populateMap())
+      .exec()
+      .then((user) => {
+        if (user) {
+          user.otp = {};
+          return user;
+        }
+        const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+        return Promise.reject(err);
+      });
+  },
+
   /**
    * List users in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of users to be skipped.
@@ -297,6 +310,7 @@ UserSchema.statics = {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
+      .populate(populateMap())
       .exec();
   },
   /*

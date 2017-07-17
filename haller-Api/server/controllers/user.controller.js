@@ -9,9 +9,10 @@ import Interest from '../models/interest.model';
 import Library from '../models/library.model';
 import Organization from '../models/organizations.model';
 import APIError from '../helpers/APIError';
+import FCMSender from '../helpers/FCMSender';
 import emailVerification from '../cronJobs/emailVerification';
 
-const bcryptjs = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 const config = require('../../config/env');
 
 /**
@@ -57,50 +58,70 @@ function getByEmail(req, res, next) {
  */
 function create(req, res, next) {
   getByEmail(req, res, (e) => {
-    const user = new User({
-      _id: mongoose.Types.ObjectId(), //eslint-disable-line
-      email: req.body.email,
-      password: bcryptjs.hashSync(req.body.password, 10),
-      status: {
-        online: true,
-        lastOnline: new Date(),
-        currentStatus: 'online',
-      },
-      otp: {
-        token: Math.floor(Math.random() * 900000) + 100000,
-        active: true
-      }
-    });
-    user.save()
-      .then((savedUser) => {
-        const token = jwt.sign({
-          email: savedUser.email
-        }, config.jwtSecret);
-        const userCpy = savedUser;   // update the user status object to
-        userCpy.status.activeToken = token;
-        userCpy.save().then((upU) => {
-          // upU.otp = {};
-          // res.json({ //eslint-disable-line
-          //   token,
-          //   user: upU,
-          // })
-          if (userCpy.isRARequested == true && !userCpy.RAData.verificationSent) {
-            emailVerification.sendIsRAVerificationEmail(upU);
+    if (req.body.facebook) {
+      User.getByFBId(req.body.facebook.id)
+        .then((user) => {
+          if (user) {
+            // res.json(user);
+            const error = new APIError('Facebook account is already in use.', httpStatus.UNAUTHORIZED);
+            next(error);
+          } else {
+            createUser(req, res, next);
           }
-          emailVerification.sendVerificationEmail(upU)
-            .then(({ success, notified }) => {
-              notified.otp = {};
-              success ? res.json({ //eslint-disable-line
-                token,
-                user: notified,
-              }) : res.error('not successful notifying user by email')
-            });
+        }).catch((e) => {
+          createUser(req, res, next);
         });
-      })
-      .catch((exc) => {
-        next(exc);
-      });
+    } else {
+      createUser(req, res, next);
+    }
   });
+}
+
+function createUser(req, res, next) {
+  const user = new User({
+    _id: mongoose.Types.ObjectId(), //eslint-disable-line
+    email: req.body.email,
+    password: req.body.password ? bcrypt.hashSync(req.body.password, 10) : '',
+    facebook: req.body.facebook ? req.body.facebook : null,
+    status: {
+      online: true,
+      lastOnline: new Date(),
+      currentStatus: 'online',
+    }
+    // otp: {
+    //   token: Math.floor(Math.random() * 900000) + 100000,
+    //   active: true
+    // }
+  });
+  user.save()
+    .then((savedUser) => {
+      const token = jwt.sign({
+        email: savedUser.email
+      }, config.jwtSecret);
+      const userCpy = savedUser;   // update the user status object to
+      userCpy.status.activeToken = token;
+      userCpy.save().then((upU) => {
+        // upU.otp = {};
+        res.json({ //eslint-disable-line
+          token,
+          user: upU,
+        })
+        // if (userCpy.isRARequested == true && !userCpy.RAData.verificationSent) {
+        //   emailVerification.sendIsRAVerificationEmail(upU);
+        // }
+        // emailVerification.sendVerificationEmail(upU)
+        //   .then(({ success, notified }) => {
+        //     notified.otp = {};
+        //     success ? res.json({ //eslint-disable-line
+        //       token,
+        //       user: notified,
+        //     }) : res.error('not successful notifying user by email')
+        //   });
+      });
+    })
+    .catch((exc) => {
+      next(exc);
+    });
 }
 
 function verifyOtp(req, res, next) {
@@ -175,12 +196,6 @@ function update(req, res, next) {
           });
       });
     }
-  } else if (body.device) {
-    User.get(mongoose.Types.ObjectId(req.params.userId)) //eslint-disable-line
-      .then((user) => {
-        user.device = body.device; //eslint-disable-line
-        user.save().then(savedUser => res.json(savedUser));
-      });
   } else {
     User.update({ _id: req.params.userId }, { $set: req.body }, (err) => { //eslint-disable-line
       if (err) {
@@ -218,10 +233,8 @@ function listForUser(req, res, next) {
     .then(user => {
       User.findOne({ '_id': req.params.userId }, { 'blocked.user': 1 }).exec()
         .then(bu => {
-          if (bu.blocked) {
-            for (var i = 0; i < bu.blocked.length; i++) {
-              user.push({ _id: bu.blocked[i].user });
-            }
+          for (var i = 0; i < bu.blocked.length; i++) {
+            user.push({ _id: bu.blocked[i].user });
           }
           User.list({ limit: Number.parseInt(limit, 10), skip: Number.parseInt(skip, 10), blocked: user })
             .then(users => res.json(users))
@@ -262,10 +275,8 @@ function listByResidenceForUser(req, res, next) {
     .then(user => {
       User.findOne({ '_id': req.params.userId }, { 'blocked.user': 1 }).exec()
         .then(bu => {
-          if (bu.blocked) {
-            for (var i = 0; i < bu.blocked.length; i++) {
-              user.push({ _id: bu.blocked[i].user });
-            }
+          for (var i = 0; i < bu.blocked.length; i++) {
+            user.push({ _id: bu.blocked[i].user });
           }
           User.listByResidence({
             residence: req.params.residence, limit: Number.parseInt(limit, 10),
@@ -554,6 +565,32 @@ function getNamesFromArray(nameList) {
   return names.join(', ') + (allNames.length > 3 ? (allNames.length - 3) : '');
 }
 
+function sendNotification(req, res, next) {
+  // console.log('=========================================================');
+  var toId = 'f-WoY-10gpU:APA91bGV6JVX0UnQSmkZqGIFlK_WnN4YMyuVuhnWrnn4-br7WdX1HeXvCg1f8msuULZMoXCATV06X6RAUo789h-qBWl4MRnJ2FkwsOcESbR-TWLivzHHi8vu2aYzDZ3Sswo9cRphGOU0'; // required fill with device token or topics
+  var token = [toId];
+  var message = {
+    title: 'Haller',
+    notId: req.params.msg,
+    your_custom_data_key: 'your_custom_data_value',
+    message: 'Body of your push notification' + req.params.msg,
+  }
+  // console.info('message', message);
+  // console.log('----------------------------------------------------------');
+  FCMSender.send(token, message)
+    .then(function (response) {
+      // console.log("Successfully sent with response: ", response);
+      // console.log('=========================================================');
+      res.json(response);
+    })
+    .catch(function (err) {
+      console.log("Something has gone wrong!");
+      console.error(err);
+      // console.log('=========================================================');
+      res.json(err);
+    })
+}
+
 export default {
   get,
   getById,
@@ -576,5 +613,6 @@ export default {
   addInterest,
   getActivities,
   getNotification,
-  readNotification
+  readNotification,
+  sendNotification
 };
