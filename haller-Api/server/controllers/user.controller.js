@@ -370,6 +370,16 @@ function verifyUserIsRA(req, res, next) {
   });
 }
 
+function getAllOrganization(req, res, next) {
+  console.info('here', 'getAllOrganization');
+  Organization.getAll().then((organizations) => {
+    res.json(organizations);
+  }).catch((e) => {
+    console.info('organizations error', e); //eslint-disable-line
+    next(e);
+  });
+}
+
 function getOrganization(req, res, next) {
   Organization.getByName(req.params.name).then((organizations) => {
     res.json(organizations);
@@ -614,5 +624,6 @@ export default {
   getActivities,
   getNotification,
   readNotification,
-  sendNotification
+  sendNotification,
+  getAllOrganization
 };

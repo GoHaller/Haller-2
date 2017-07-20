@@ -82,7 +82,8 @@ function create(req, res, next) {
           });
         });
       })
-      .catch(() => {
+      .catch((error) => {
+        console.info('error', error);
         const err = new APIError('Error Updating Post!', httpStatus.INTERNAL_SERVER_ERROR);
         next(err);
       });
@@ -1035,6 +1036,19 @@ function sendUniversityNotification(notification) {
     });
 }
 
+//Admin APIS
+function adminListByResidence(req, res, next) {
+  const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
+  Post.listByResidenceForAdmin({ residence: req.params.residence, limit, skip, event, sortBy, asc })
+    .then(posts => {
+      // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
+      res.json(posts)
+    })
+    .catch((e) => {
+      console.log(e); //eslint-disable-line
+      next(e);
+    });
+}
 
 export default {
   get,
@@ -1067,5 +1081,7 @@ export default {
   listLibraryItems,
   removeStandAloneLibraryItem,
   listUserFavorites,
-  createUniversityNotification
+  createUniversityNotification,
+  //adminAPIS
+  adminListByResidence
 };

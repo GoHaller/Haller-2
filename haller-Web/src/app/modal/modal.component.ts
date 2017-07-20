@@ -26,7 +26,7 @@ export class ModalComponent implements OnInit {
       console.error('modal must have an id');
       return;
     }
-    console.info('this.id', this.id);
+    // console.info('this.id', this.id);
 
     // move element to bottom of page (just before </body>) so it can be displayed above everything else
     this.element.appendTo('body');

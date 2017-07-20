@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 
 import { ModalComponent } from '../modal/modal.component';
 import { ModalService } from "../../services/modal.service";
+import { PostService } from '../../services/post.services';
 
 @NgModule({
   imports: [
@@ -15,6 +16,6 @@ import { ModalService } from "../../services/modal.service";
     RouterModule.forChild(FeedRoutes),
   ],
   declarations: [FeedComponent, ModalComponent],
-  providers: [ModalService]
+  providers: [PostService, ModalService]
 })
 export class FeedModule { }

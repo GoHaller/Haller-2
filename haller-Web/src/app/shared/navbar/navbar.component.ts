@@ -8,6 +8,7 @@ var misc: any = {
     disabled_collapse_init: 0,
 }
 declare var $: any;
+declare var swal: any;
 @Component({
     moduleId: module.id,
     selector: 'navbar-cmp',
@@ -23,7 +24,7 @@ export class NavbarComponent implements OnInit {
 
     @ViewChild("navbar-cmp") button;
 
-    constructor(location: Location, private renderer: Renderer, private element: ElementRef) {
+    constructor(location: Location, private router: Router, private renderer: Renderer, private element: ElementRef) {
         this.location = location;
         this.nativeElement = element.nativeElement;
         this.sidebarVisible = false;
@@ -101,5 +102,23 @@ export class NavbarComponent implements OnInit {
     getPath() {
         // console.log(this.location);
         return this.location.prepareExternalUrl(this.location.path());
+    }
+    logmeOut() {
+        swal({
+            title: 'Are you sure?',
+            // text: "You won't be able to revert this!",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonClass: 'btn btn-success',
+            cancelButtonClass: 'btn btn-default',
+            confirmButtonText: 'Yes, log me out',
+            buttonsStyling: false
+        }).then(() => {
+            localStorage.setItem('uid', '');
+            localStorage.setItem('auth', '');
+            localStorage.setItem('userInfo', '');
+
+            this.router.navigate(['/login']);
+        });
     }
 }
