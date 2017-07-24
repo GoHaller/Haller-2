@@ -19,13 +19,16 @@ export class FeedComponent implements OnInit {
   public detail: any;
   public posts = [];
   public postIndex: number = 0;
-  public residence: string = 'Oliver';
+  public residence: any = { home: 'Oliver' };
 
   file: File;
   ngOnInit() {
     // console.info('posts', this.posts);
     $('.comment-section').perfectScrollbar();
     this.getFeeds();
+    if ($(".selectpicker").length != 0) {
+      $(".selectpicker").selectpicker();
+    }
   }
   constructor(private location: Location, private modalService: ModalService, public postService: PostService) {
     let title = this.location.prepareExternalUrl(this.location.path());
@@ -56,6 +59,7 @@ export class FeedComponent implements OnInit {
           }
         });
       }
+
     }, 500);
   }
 
@@ -92,7 +96,7 @@ export class FeedComponent implements OnInit {
   }
 
   getFeeds() {
-    this.postService.getFeedByResidence(this.residence, this.isEvent).subscribe((res: any) => {
+    this.postService.getFeedByResidence(this.residence.home, this.isEvent).subscribe((res: any) => {
       if (res)
         this.posts = res;
     }, error => {
@@ -209,10 +213,6 @@ export class FeedComponent implements OnInit {
           console.info('likeComment error', error);
         });
     }
-  }
-
-  onChangeResidence(event) {
-    this.getFeeds();
   }
 
 }

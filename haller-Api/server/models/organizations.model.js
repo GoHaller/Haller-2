@@ -36,6 +36,12 @@ OrganizationSchema.method({
 });
 
 OrganizationSchema.statics = {
+    getAll() {
+        return this.find({}).exec()
+            .then((organozations) => {
+                return organozations;
+            });
+    },
     getByName(name) {
         return this.find({ name: { $regex: '^' + name, $options: 'i' } }).limit(10)
             .exec()

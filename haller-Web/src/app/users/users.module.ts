@@ -4,11 +4,14 @@ import { UsersComponent } from './users.component';
 import { UsersRoutes } from "./users.routing";
 import { RouterModule } from "@angular/router";
 
+import { UserService } from '../../services/user.service';
+
 @NgModule({
   imports: [
     CommonModule,
     RouterModule.forChild(UsersRoutes),
   ],
-  declarations: [UsersComponent]
+  declarations: [UsersComponent],
+  providers: [UserService]
 })
 export class UsersModule { }

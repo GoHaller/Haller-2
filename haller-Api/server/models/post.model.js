@@ -74,6 +74,14 @@ const Comment = new mongoose.Schema({
     id: { type: mongoose.Schema.Types.Mixed },
     still: { type: mongoose.Schema.Types.Mixed },
     gif: { type: mongoose.Schema.Types.Mixed }
+  },
+  isHidden: {
+    type: Boolean,
+    default: false
+  },
+  actionStatus: {
+    type: Number,
+    default: 0
   }
 });
 /*
@@ -105,9 +113,11 @@ const populateMap = () =>
     path: 'going.actedBy',
     model: 'User'
   }, {
-    path: 'cover'
+    path: 'cover',
+    model: 'Library'
   }, {
-    path: 'comments.image'
+    path: 'comments.image',
+    model: 'Library'
   }
   ];
 
@@ -186,9 +196,21 @@ const PostSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
     required: true
+  },
+  isHidden: {
+    type: Boolean,
+    default: false
+  },
+  actionStatus: {
+    type: Number,
+    default: 0
   }
 });
-
+/*
+actionStatus
+    0: Nothing
+    1: No further action needed
+ */
 /**
  * Add your
  * - pre-save hooks
@@ -356,7 +378,28 @@ PostSchema.statics = {
 
   getUserCommentedPosts(userId) {
     return this.find({ 'comments.createdBy': userId, $or: [{ deteled: { $exists: false } }, { deteled: false }] }).populate(populateMap()).sort({ 'comments.createdAt': -1 }).exec();
-  }
+  },
+
+  listByResidenceForAdmin({ residence, skip = 0, limit = 50, event = false, sortBy = 'createdAt', asc = false } = {}) {
+    var sort = {};
+    sort[sortBy] = asc ? 1 : -1;
+    return this.find({ authorResidence: residence, isEvent: event })
+      .populate(populateMap())
+      .sort(sort)
+      .skip(parseInt(skip))
+      .limit(parseInt(limit))
+      .exec();
+  },
+
+  findByCustomQuery({ q = {}, skip = 0, limit = 50 } = {}) {
+    console.info('q', q);
+    return this.find(q)
+      .populate(populateMap())
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+  },
 };
 /**
  * @typedef Post

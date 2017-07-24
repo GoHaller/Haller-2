@@ -29,9 +29,9 @@ after((done) => {
 before(() => {
   User.remove({}, () => {
     user.save()
-    .catch((e) => {
-      console.log(e); // eslint-disable-line
-    });
+      .catch((e) => {
+        console.log(e); // eslint-disable-line
+      });
   });
 });
 describe('## Auth APIs', () => {

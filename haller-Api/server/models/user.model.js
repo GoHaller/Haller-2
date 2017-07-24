@@ -167,7 +167,15 @@ const UserSchema = new mongoose.Schema({
     at: { type: Date, default: new Date() }
   }],
   interests: [{ name: { type: String, required: true }, createdAt: { type: Date, default: new Date() } }],
-  facebook: { type: mongoose.Schema.Types.Mixed }
+  facebook: { type: mongoose.Schema.Types.Mixed },
+  role: {
+    type: String,
+    default: 'student'
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false
+  }
 }, {
     toObject: {
       virtuals: true
@@ -207,6 +215,7 @@ UserSchema.statics = {
    * @returns {Promise<User, APIError>}
    */
   get(id) {
+    console.info('getId', id);
     try {
       if (id.toString().match(/^[0-9a-fA-F]{24}$/).length > 0) {
         const objectId = mongoose.Types.ObjectId(id); //eslint-disable-line

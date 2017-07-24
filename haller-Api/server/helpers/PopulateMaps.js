@@ -25,5 +25,8 @@ const postsMap = [{
 }, {
   path: 'cover',
   model: 'Library'
+}, {
+  path: 'comments.image',
+  model: 'Library'
 }];
 export default { postsMap };

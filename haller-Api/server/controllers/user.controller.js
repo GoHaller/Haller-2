@@ -601,6 +601,64 @@ function sendNotification(req, res, next) {
     })
 }
 
+//admin users list 
+function allUsersByFilter(req, res, next) {
+  var search = req.body.search.value || '';
+  var limit = req.body.length || 25;
+  var skip = req.body.start || 0;
+  User.find({
+    $and: [{
+      $or: [
+        { firstName: { $regex: '^' + search, $options: 'i' } },
+        { lastName: { $regex: '^' + search, $options: 'i' } },
+        { residence: { $regex: '^' + search, $options: 'i' } },
+        { role: { $regex: '^' + search, $options: 'i' } }]
+    }, { _id: { $ne: req.params.userId } }]
+  }).count().exec().then(function (userCount) {
+    User.find({
+      $and: [{
+        $or: [
+          { firstName: { $regex: '^' + search, $options: 'i' } },
+          { lastName: { $regex: '^' + search, $options: 'i' } },
+          { residence: { $regex: '^' + search, $options: 'i' } },
+          { role: { $regex: '^' + search, $options: 'i' } }]
+      }, { _id: { $ne: req.params.userId } }]
+    }).select({ "currentProfile": 1, "firstName": 1, "lastName": 1, "residence": 1, "role": 1, "isBlocked": 1 })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec()
+      .then((Users) => {
+        if (Users) {
+          return res.json({
+            "draw": 1,
+            "recordsTotal": Users.length,
+            "recordsFiltered": userCount,
+            "data": Users
+          });
+        }
+        const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+        return Promise.reject(err);
+      }).catch((e) => {//eslint-disable-line
+        return next(e);
+      });
+  });
+}
+
+
+function toggleUserStatus(req, res, next) {
+  User.update({ _id: req.body.userId }, { $set: { isBlocked: req.body.sataus } }).exec().then((status) => {
+    if (status) {
+      res.json(status);
+    } else {
+      const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+      return Promise.reject(err);
+    }
+  }).catch((e) => {//eslint-disable-line
+    return next(e);
+  });;
+}
+
 export default {
   get,
   getById,
@@ -625,5 +683,7 @@ export default {
   getNotification,
   readNotification,
   sendNotification,
-  getAllOrganization
+  getAllOrganization,
+  allUsersByFilter,
+  toggleUserStatus
 };

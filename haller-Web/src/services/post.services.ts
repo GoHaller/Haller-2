@@ -64,7 +64,7 @@ export class PostService {
     }
 
     createComment(postId: string, commentObj: any) {
-        this.createAuthorizationHeader()
+        this.createAuthorizationHeader();
         return this.http.post(environment.ApiBaseUrl + 'posts/' + postId + '/comments', commentObj, { headers: this.headers }).map(this.extractData)
     }
 
@@ -81,19 +81,38 @@ export class PostService {
     }
 
     private likePost(postId: String, likeObject) {
+        this.createAuthorizationHeader();
         return this.http.post(environment.ApiBaseUrl + 'posts/' + postId + '/likes', likeObject, { headers: this.headers }).map(this.extractData)
     }
 
     private deleteLikePost(postId: String, likeId: String) {
+        this.createAuthorizationHeader();
         return this.http.delete(environment.ApiBaseUrl + 'posts/' + postId + '/likes/' + likeId, { headers: this.headers }).map(this.extractData)
     }
 
     likeComment(postId: String, commentId: String, flagObject: Object) {
+        this.createAuthorizationHeader();
         return this.http.post(environment.ApiBaseUrl + 'posts/' + postId + '/comments/' + commentId + '/likes', flagObject, { headers: this.headers }).map(this.extractData)
     }
 
     deleteLikeComment(postId: String, commentId: String, likeId: String) {
+        this.createAuthorizationHeader();
         return this.http.delete(environment.ApiBaseUrl + 'posts/' + postId + '/comments/' + commentId + '/likes/' + likeId, { headers: this.headers }).map(this.extractData)
+    }
+
+    getFlagedData(section: string, sort: number) {
+        this.createAuthorizationHeader();
+        return this.http.get(this.adminApiUrl + 'flagged/' + section + '/' + sort, { headers: this.headers }).map(this.extractData)
+    }
+
+    flaggedAction(postId: string, obj: any) {
+        this.createAuthorizationHeader();
+        return this.http.post(this.adminApiUrl + postId + '/flagaction', obj, { headers: this.headers }).map(this.extractData)
+    }
+
+    getDashBoardCount() {
+        this.createAuthorizationHeader();
+        return this.http.get(this.adminApiUrl + 'desboard/count', { headers: this.headers }).map(this.extractData);
     }
 
     private extractData(res: any) {

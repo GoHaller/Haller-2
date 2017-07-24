@@ -9,6 +9,35 @@ import { load, getToken } from '../helpers/AuthorizationHelper';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
+//admin APIS
+router.route('/admin/residence/:residence')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), validate(paramValidation.listByResidence),
+  postCtrl.adminListByResidence);
+
+router.route('/admin/flagged/:section/:sort')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), postCtrl.adminGetFlagedPost);
+
+router.route('/admin/:postId/flagaction')
+  .post(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), postCtrl.adminFlagAction)
+
+router.route('/admin/desboard/count')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), postCtrl.adminDashboardCount);
+
+// router.route('/admin/hide/:postId/comment/:commentId')
+//App APIS
+
 router.route('/')
   /** GET /api/posts - Get list of posts */
   .get(expressJwt({

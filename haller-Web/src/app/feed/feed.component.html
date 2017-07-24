@@ -6,9 +6,9 @@
       <div class="col-lg-8 col-md-6 col-sm-8">
         <div class="row">
           <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-            <select class="selectpicker" [(ngModel)]="residence" (ngModelChange)="onChangeResidence($event)" data-style="select-with-transition"
-              title="Choose residence" data-size="4">
-              <option disabled>Choose residence</option>
+            <select class="selectpicker" [(ngModel)]="residence.home" (ngModelChange)="getFeeds()" data-style="btn btn-primary btn-round"
+              title="" data-size="4">
+              <!-- <option disabled>Choose residence</option> -->
               <option value="Oliver" [attr.selected]="residence == 'Oliver'">Oliver</option>
               <option value="Scholarship Halls" [attr.selected]="residence == 'Scholarship Halls'">Scholarship Halls</option>
               <option value="University" [attr.selected]="residence == 'University'">University</option>

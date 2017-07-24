@@ -79,16 +79,16 @@ const sendNotification = (item) => {
                 notiesObj.body = data + ' ' + 'liked your ' + (item.post.isEvent ? 'event' : 'post');
             }
             // console.info('notiesObj', notiesObj.notId);
-            send(token, notiesObj, os)
-                .then(function (response) {
-                    console.log("Successfully sent with response");//, JSON.stringify(response));
-                    console.log('=========================================================');
-                })
-                .catch(function (err) {
-                    console.log("Something has gone wrong!");
-                    console.error(err);
-                    console.log('=========================================================');
-                })
+            // send(token, notiesObj, os)
+            //     .then(function (response) {
+            //         console.log("Successfully sent with response");//, JSON.stringify(response));
+            //         console.log('=========================================================');
+            //     })
+            //     .catch(function (err) {
+            //         console.log("Something has gone wrong!");
+            //         console.error(err);
+            //         console.log('=========================================================');
+            //     })
         }
     });
 }
@@ -128,16 +128,16 @@ const sendMsgNotification = (message, convo) => {
                 else
                     notiesObj.body += ' has sent you a message';
                 // console.info('msg notiesObj', notiesObj.notId);
-                send(token, notiesObj, os)
-                    .then(function (response) {
-                        console.log("Successfully sent with response");//, JSON.stringify(response));
-                        console.log('=========================================================');
-                    })
-                    .catch(function (err) {
-                        console.log("Something has gone wrong!");
-                        console.error(err);
-                        console.log('=========================================================');
-                    })
+                // send(token, notiesObj, os)
+                //     .then(function (response) {
+                //         console.log("Successfully sent with response");//, JSON.stringify(response));
+                //         console.log('=========================================================');
+                //     })
+                //     .catch(function (err) {
+                //         console.log("Something has gone wrong!");
+                //         console.error(err);
+                //         console.log('=========================================================');
+                //     })
             }
         });
     }
@@ -160,18 +160,18 @@ const sendUniversityNotification = (participants, message) => {
             notiesObj._id = message._id;
             notiesObj.type = 20;
             notiesObj.notId = message._id.toString().substr(-4) + notiesObj.type;
-            send(token, notiesObj, os)
-                .then(function (response) {
-                    console.log('=======================success===========================');
-                    console.log("Successfully sent with response");//, JSON.stringify(response));
-                    console.log('=========================================================');
-                })
-                .catch(function (err) {
-                    console.log('========================error============================');
-                    console.log("Something has gone wrong!");
-                    console.info('err', err);
-                    console.log('=========================================================');
-                })
+            // send(token, notiesObj, os)
+            //     .then(function (response) {
+            //         console.log('=======================success===========================');
+            //         console.log("Successfully sent with response");//, JSON.stringify(response));
+            //         console.log('=========================================================');
+            //     })
+            //     .catch(function (err) {
+            //         console.log('========================error============================');
+            //         console.log("Something has gone wrong!");
+            //         console.info('err', err);
+            //         console.log('=========================================================');
+            //     })
         }
     });
 }

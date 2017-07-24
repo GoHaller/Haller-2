@@ -1,0 +1,81 @@
+.post-list .card-header{
+        padding: 5px;
+}
+.post-list .card-header img{ width:72px;}
+.post-list .stats .btn{
+    padding: 2px 30px;
+}
+.post-list .stats .material-icons{
+    top:0px;
+}
+.post-list legend{
+    margin-bottom: 0px;
+}
+
+.post-list .card-footer.action{
+    margin: 0 20px 5px;
+    padding-top: 5px;
+}
+.post-list .etitle{
+    text-align: center;
+}
+.margin-top-10{
+    margin-top: 10px;
+}
+.margin-bottom-10{
+    margin-bottom: 10px;
+}
+
+.card-content{
+    padding: 10px 15px;
+}
+.card-content .card-title  {
+    padding-bottom: 0px !important;
+    margin-bottom: 0px;
+}
+
+.comment-section{
+    position: fixed;
+    right: 18px;
+    width: 400px;
+    height: calc(100vh - 131px);
+    /*overflow-y: auto;
+    overflow-x: visible;*/
+    padding-left: 30px;
+}
+
+.comment-section .post-detail {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.comment-list .card{
+    margin-bottom: 5px;
+}
+.comment-list .card-header{
+    margin-left: -10px;
+    border-radius: 50px;
+}
+.comment-list .card-header img{
+    border-radius: 50px;
+    width:60px
+}
+.comment-list .card-content{
+    padding-bottom: 0px;
+}
+
+.comment-image{
+    text-align: center;
+}
+.comment-image img{
+    max-height: 200px;
+    width: auto;
+    max-width: 100%;
+}
+
+.comment-btn{
+    margin: 0px;
+    padding: 0px;
+    text-transform: none;
+}

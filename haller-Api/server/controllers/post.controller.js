@@ -1050,6 +1050,103 @@ function adminListByResidence(req, res, next) {
     });
 }
 
+/*
+req.params.sort
+  0:All Flagged Pictures”, 
+  1:“Pictures with 3 or more flags”, 
+  2:“No further action needed”
+*/
+function adminGetFlagedPost(req, res, next) {
+  var section = req.params.section.toLowerCase();
+  var q = {};
+  if (req.params.sort == 0 || req.params.sort == 1) {
+    var comments = '';
+    if (section == 'comment') comments = 'comments.';
+    var s = comments + "flagged." + (req.params.sort == 0 ? 0 : 2);
+    q[s] = { "$exists": true };
+  } else {
+    q['actionStatus'] = 1;
+  }
+
+  if (section == 'event') {
+    q['isEvent'] = true;
+  } else if (section == 'feed') {
+    q['isEvent'] = false;
+  }
+  Post.findByCustomQuery({ q: q })
+    .then(posts => {
+      res.json(posts);
+    }).catch((e) => {
+      console.log(e); //eslint-disable-line
+      next(e);
+    });
+}
+
+/*
+  req.body
+    - commentId : if action if performed on comment
+    - acction ; action to be performed 0: hide, 1: unhide,2: flag for noferther action needed
+*/
+function adminFlagAction(req, res, next) {
+  Post.get(req.params.postId)
+    .then(post => {
+      if (req.body.commentId) {
+        var comment = post.comments.id(req.body.commentId)
+        if (req.body.action != 2) {
+          if (req.body.action == 0)
+            comment.isHidden = true;
+          else if (req.body.action == 1)
+            comment.isHidden = false;
+        } else {
+          if (!comment.actionStatus || comment.actionStatus == 0)
+            comment.actionStatus = 1;
+          else if (comment.actionStatus == 1) {
+            comment.actionStatus = 0;
+          }
+        }
+      } else {
+        if (req.body.action != 2) {
+          if (req.body.action == 0)
+            post.isHidden = true;
+          else if (req.body.action == 1)
+            post.isHidden = false;
+        } else {
+          if (!post.actionStatus || post.actionStatus == 0)
+            post.actionStatus = 1;
+          else if (comment.actionStatus == 1) {
+            post.actionStatus = 0;
+          }
+        }
+      }
+
+      post.save().then(updatedPost => {
+        return res.json(updatedPost);
+      })
+        .error(e => next(e))
+        .catch(e => next(e));
+    })
+    .error(e => next(e))
+    .catch(e => next(e));
+}
+
+
+function adminDashboardCount(req, res, next) {
+  var d = new Date();
+  d.setDate(d.getDate() - 3);
+  Post.aggregate()
+    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+    .group({ _id: '$isEvent', count: { $sum: 1 }, goingCount: { $sum: { $size: "$going" } } })
+    .exec().then(threeDays => {
+      d.setDate(d.getDate() + 1);
+      Post.aggregate()
+        .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+        .group({ _id: '$isEvent', count: { $sum: 1 }, goingCount: { $sum: { $size: "$going" } } })
+        .exec().then(towDays => {
+          res.json({ threeDays, towDays });
+        });
+    });
+}
+
 export default {
   get,
   create,
@@ -1083,5 +1180,8 @@ export default {
   listUserFavorites,
   createUniversityNotification,
   //adminAPIS
-  adminListByResidence
+  adminListByResidence,
+  adminGetFlagedPost,
+  adminFlagAction,
+  adminDashboardCount
 };

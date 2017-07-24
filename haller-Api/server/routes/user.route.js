@@ -10,6 +10,29 @@ import config from '../../config/env';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
+//admin APIS
+router.route('/admin/:userId/list')
+  .post(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.allUsersByFilter);
+
+router.route('/admin/change-user-sataus')
+  .post(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.toggleUserStatus);
+
+
+//App APIS
+router.route('/organization')
+  /** GET /api/users/organization - Get organization */
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.getAllOrganization)
+  .post(validate(paramValidation.postOrganization), userCtrl.createOrganization);
+
 router.route('/sendnoti/:msg')
   .get(userCtrl.sendNotification)
 router.route('/')
@@ -159,17 +182,16 @@ router.route('/:userId/otp/:otp')
       return null;
     }
   }), load, userCtrl.verifyOtp])
+
+
+
+
 router.route('/organization/:name')
   /** GET /api/users/organization/:name - Get organization */
   .get(expressJwt({
     secret: config.jwtSecret,
     getToken
   }), validate(paramValidation.getOrganization), userCtrl.getOrganization);
-
-router.route('/organization')
-  /** GET /api/users/organization - Get organization */
-  .post(validate(paramValidation.postOrganization), userCtrl.createOrganization);
-
 
 
 export default router;
