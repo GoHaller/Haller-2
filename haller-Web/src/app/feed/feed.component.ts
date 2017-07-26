@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { ModalService } from '../../services/modal.service';
 import { PostService } from '../../services/post.services';
+import {Ng2PaginationModule} from 'ng2-pagination';
+
 
 declare var $: any;
 declare var swal: any;

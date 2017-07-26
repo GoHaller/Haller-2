@@ -25,15 +25,15 @@
           </select>
           </div>
         </div>
-        <div class="row" *ngFor="let post of posts; let i = index">
+        <div class="row" *ngFor="let post of posts | paginate: {itemsPerPage: 2, currentPage:page, id: '1'}; let i = index">
           <div class="col-lg-10 col-sm-12">
-            <div class="card">
+            <div class="card" *ngIf="post.flagged.length < 3 || this.flagOfthree">
               <div class="card-header card-header-icon" data-background-color="blue">
                 <i *ngIf="!post.createdBy || !post.createdBy.currentProfile" class="material-icons">person</i>
                 <img width="100px" *ngIf="post.createdBy && post.createdBy.currentProfile" [src]="post.createdBy.currentProfile.secure_url"
                 />
               </div>
-              <div class="card-content">
+              <div class="card-content" >
                 <h5 class="card-title">{{(post.createdBy?post.createdBy.firstName:'no-name')+' '+(post.createdBy?post.createdBy.lastName:'no-name')}}
                   <p class="category">{{post.createdAt | date:'short'}} <span class="pull-right btn-rose" *ngIf="post.isHidden">Hidden</span></p>
                 </h5>
@@ -63,6 +63,9 @@
                       <li>
                         <a href="javascript:void(0);" (click)="flagAction(post.isHidden?1:0,post._id)">{{post.isHidden?'Unhide':'Hide'}}</a>
                       </li>
+                      <li>
+                      <a href="javascript:void(0);" (click)="deletePost(post._id)">Delete Post</a>
+                    </li>
                       <li>
                         <a href="javascript:void(0);" (click)="flagAction(2,post._id)">No action needed</a>
                       </li>
@@ -146,3 +149,8 @@
     </div>
   </div>
 </div>
+<pagination-controls (pageChange)="page = $event" id="1"
+                      maxSize="5"
+                      directionLinks="true"
+                      autoHide="true">
+                </pagination-controls>

@@ -115,6 +115,11 @@ export class PostService {
         return this.http.get(this.adminApiUrl + 'desboard/count', { headers: this.headers }).map(this.extractData);
     }
 
+    getDashBoardEventJoinners(days: string) {
+        this.createAuthorizationHeader();
+        return this.http.get(this.adminApiUrl + 'desboard/eventjoiners/'+days, { headers: this.headers }).map(this.extractData);
+    }
+
     private extractData(res: any) {
         return (typeof res == 'object') ? res.json() : res;
     }

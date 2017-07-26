@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PostService } from '../../services/post.services';
+import {Ng2PaginationModule} from 'ng2-pagination';
 
 declare var $: any;
 
@@ -13,6 +14,9 @@ export class FlagComponent implements OnInit {
   public sort: any = 0;
   public postIndex: number = 0;
   public posts = [];
+  public postid='';  
+  public flagOfthree=false;  
+  public noFurtureAction=false;
   constructor(private postService: PostService) { }
 
   ngOnInit() {
@@ -28,6 +32,21 @@ export class FlagComponent implements OnInit {
       // console.info('getFlagedData error', res);
       if (res)
         this.posts = res;
+        if(this.sort==1)
+                {           
+                  this.flagOfthree=true;
+                }
+                else{
+                     this.flagOfthree=false;
+                    }
+                if(this.sort==3)
+                {
+                   this.noFurtureAction=true;
+                }
+                else{
+                   this.noFurtureAction=false; 
+                   }
+
     }, error => {
       console.info('getFlagedData error', error);
     })
@@ -49,6 +68,10 @@ export class FlagComponent implements OnInit {
       }, error => {
         console.info('flaggedAction error', error);
       })
+  }
+  deletePost(postid:any)  
+  { 
+     console.log("post id",postid); 
   }
 
 }

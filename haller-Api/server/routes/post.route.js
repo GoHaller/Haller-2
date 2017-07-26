@@ -35,6 +35,12 @@ router.route('/admin/desboard/count')
     getToken
   }), postCtrl.adminDashboardCount);
 
+router.route('/admin/desboard/eventjoiners/:days')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), postCtrl.getJoinDetails);
+  
 // router.route('/admin/hide/:postId/comment/:commentId')
 //App APIS
 

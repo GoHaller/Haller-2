@@ -19,7 +19,7 @@
             <button class="btn btn-info btn-simple" (click)="openModal('new-feed-form')">Create {{isEvent?'Event':'Feed'}}</button>
           </div>
         </div>
-        <div class="row" *ngFor="let post of posts; let i = index">
+        <div class="row" *ngFor="let post of posts | paginate: {itemsPerPage: 3, currentPage:page, id: '1'}; let i = index">
           <div class="col-lg-10 col-sm-12">
             <div class="card">
               <div class="card-header card-header-icon" data-background-color="blue">
@@ -110,6 +110,11 @@
     </div>
   </div>
 </div>
+ <pagination-controls (pageChange)="page = $event" id="1"
+                      maxSize="5"
+                      directionLinks="true"
+                      autoHide="true">
+                </pagination-controls>
 
 <!--Create new post modal start -->
 <modal id="new-feed-form">

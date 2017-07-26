@@ -1147,6 +1147,36 @@ function adminDashboardCount(req, res, next) {
     });
 }
 
+function getJoinDetails(req, res, next) { 
+    var days = parseInt(req.params.days);
+    var d = new Date();
+    d.setDate(d.getDate() - days); 
+    var userName = []; 
+    Post.aggregate()
+        .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+        .exec().then(threeDays => {   
+          var count = 0;               
+          for(var go in threeDays){
+              if((threeDays[count].going).length>0){
+                var goingCount = 0;
+                for(var i in threeDays[count].going){
+                  User.get(threeDays[count].going[goingCount].actedBy)
+                                .then(user =>{     
+                                                      
+                                  userName.push(user.firstName);
+                                });                
+                  goingCount = goingCount+1;
+                }
+                
+              }
+              count= count+1;
+          }
+          setTimeout(function () {
+              res.json({ userName  });
+          }, 1000)
+          });
+}
+
 export default {
   get,
   create,
@@ -1183,5 +1213,6 @@ export default {
   adminListByResidence,
   adminGetFlagedPost,
   adminFlagAction,
-  adminDashboardCount
+  adminDashboardCount,
+  getJoinDetails,
 };

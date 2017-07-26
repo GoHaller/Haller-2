@@ -11,11 +11,35 @@ export class AnaliticsDashboardComponent implements OnInit {
   public baseUrl: string = 'none';
   public countData: any;
   public showCaseData: any = {};
+  public showDiv:boolean=false;
+  public showNameList:boolean=false;
+  public users:any=[];
+  public userslist:any=[];
   constructor(private postService: PostService) { }
 
   ngOnInit() {
     this.getDashBoardCount();
   }
+  
+showNameData(days){
+  this.postService.getDashBoardEventJoinners(days).subscribe((res: any) => {
+        this.userslist = res.userName;
+      }, error => {
+        console.info('error', error);
+      })
+
+  this.showNameList=!this.showNameList;
+  
+}
+
+showName(days){
+  this.postService.getDashBoardEventJoinners(days).subscribe((res: any) => {
+        this.users = res.userName;
+      }, error => {
+        console.info('error', error);
+      })
+  this.showDiv=!this.showDiv;
+}
 
   getDashBoardCount() {
     this.postService.getDashBoardCount()

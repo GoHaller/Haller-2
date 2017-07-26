@@ -13,8 +13,8 @@
           </div>
           <div class="card-footer">
             <div class="stats">
-              <i class="material-icons">local_offer</i> Total posts in last 24 hours : 12 <br>
-              <i class="material-icons">local_offer</i> Total posts in last 24 hours : 36 <br>
+              <i class="material-icons">local_offer</i> Total posts in last 24 hours : {{showCaseData['24']?showCaseData['24'].feed:0}} <br>
+              <!-- <i class="material-icons">local_offer</i> Total posts in last 24 hours : 36 <br> -->
             </div>
           </div>
         </div>
@@ -30,8 +30,8 @@
           </div>
           <div class="card-footer">
             <div class="stats">
-              <i class="material-icons">local_offer</i> Total posts in last 24 hours : 12 <br>
-              <i class="material-icons">local_offer</i> Total posts in last 24 hours : 36 <br>
+              <i class="material-icons">local_offer</i> Total posts in last 24 hours : {{showCaseData['72']?showCaseData['72'].feed:0}} <br>
+              <!-- <i class="material-icons">local_offer</i> Total posts in last 24 hours : 36 <br> -->
             </div>
           </div>
         </div>
@@ -46,13 +46,20 @@
           </div>
           <div class="card-content">
             <p class="category">Events in last 24 hours</p>
-            <h3 class="card-title"># {{showCaseData['24']?showCaseData['24'].event:0}}</h3>
+            <h3 class="card-title"># {{showCaseData['24']?showCaseData['24'].going:0}}</h3>
           </div>
-          <div class="card-footer">
+          <div class="card-footer" (click)="showName(2);">
             <div class="stats">
-              <i class="material-icons">local_offer</i> Total events in last 24 hours : 12 <br>
-              <i class="material-icons">local_offer</i> Total events in last 24 hours : 36 <br>
+              <i class="material-icons"  >local_offer</i><a>Total joins in last 24 hours : {{showCaseData['24']?showCaseData['24'].going:0}} </a><br>
+             <!--  <i class="material-icons">local_offer</i> Total events in last 24 hours : 36 <br> -->
             </div>
+            <div *ngIf="showDiv"> 
+            <div class="card card-stats" style="text-align: center;"> <b>Joiner Names : </b>         
+              <div *ngFor="let item of users;">
+                  {{item}}, <br>
+              </div>          
+            </div>
+         </div>
           </div>
         </div>
       </div>
@@ -63,13 +70,20 @@
           </div>
           <div class="card-content">
             <p class="category">Events in last 72 hours</p>
-            <h3 class="card-title"># {{showCaseData['72']?showCaseData['72'].event:0}}</h3>
+            <h3 class="card-title"># {{showCaseData['72']?showCaseData['72'].going:0}}</h3>
           </div>
-          <div class="card-footer">
+          <div class="card-footer" (click)="showNameData(3);">
             <div class="stats">
-              <i class="material-icons">local_offer</i> Total events in last 24 hours : 12 <br>
-              <i class="material-icons">local_offer</i> Total events in last 24 hours : 36 <br>
+              <i class="material-icons">local_offer</i> <a>Total joins in last 72 hours : {{showCaseData['72']?showCaseData['72'].going:0}} </a><br>
+              <!-- <i class="material-icons">local_offer</i> Total events in last 24 hours : 36 <br> -->
             </div>
+            <div *ngIf="showNameList"> 
+            <div class="card card-stats" style="text-align: center;"> <b>Joiner Names : </b>         
+              <div *ngFor="let item of userslist;">
+                  {{item}}, <br>
+              </div>          
+            </div>
+         </div>
           </div>
         </div>
       </div>
