@@ -108,6 +108,15 @@ router.route('/:postId/comments/:commentId')
   validate(paramValidation.unComment),
   postCtrl.removeCommentFromPost)
 
+router.route('/admin/:postId/comments/:commentId')
+  .delete(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }),
+  validate(paramValidation.unComment),
+  postCtrl.deleteComment)
+  
+
   .put(expressJwt({
     secret: config.jwtSecret,
     getToken

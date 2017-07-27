@@ -1264,6 +1264,23 @@ function deletePost(req, res, next) {
     });
 }
 
+function deleteComment(req, res, next) {
+   Post.get(req.params.postId)
+    .then((post) => {
+      post.comments.id(req.params.commentId).isHidden = true;
+      post.save()
+
+      .then((doc) => {         
+          return res.json(doc);
+        })
+        
+        .catch((e) => {
+          console.log(e); //eslint-disable-line
+          next(e);
+        });
+    });
+}
+
 export default {
   get,
   create,
@@ -1304,4 +1321,5 @@ export default {
   getJoinDetails,
   getStaffJoinDetails,
   deletePost,
+  deleteComment,
 };

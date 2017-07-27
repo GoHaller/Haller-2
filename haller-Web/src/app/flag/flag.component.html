@@ -27,7 +27,7 @@
         </div>
         <div class="row" *ngFor="let post of posts | paginate: {itemsPerPage: 2, currentPage:page, id: '1'}; let i = index">
           <div class="col-lg-10 col-sm-12">
-            <div class="card" *ngIf="(post.flagged.length < 3 || this.flagOfthree) && !post.deteled ">
+            <div class="card" *ngIf="(post.flagged.length < 3 || this.flagOfthree) && !post.deteled">
               <div class="card-header card-header-icon" data-background-color="blue">
                 <i *ngIf="!post.createdBy || !post.createdBy.currentProfile" class="material-icons">person</i>
                 <img width="100px" *ngIf="post.createdBy && post.createdBy.currentProfile" [src]="post.createdBy.currentProfile.secure_url"
@@ -80,7 +80,8 @@
       <!--Post Section End-->
       <!--Comment Section Start-->
       <div class="col-lg-4 col-md-6 col-sm-4 comment-section">
-        <div class="row" *ngIf="posts[postIndex] && !post.deteled">
+<!--         ================={{posts[postIndex]}}===============-->
+         <div class="row" *ngIf="posts[postIndex]">
           <div class="card" style="margin-bottom: 0px;">
             <div class="card-header card-header-icon" data-background-color="blue">
               <i *ngIf="!posts[postIndex].createdBy || !posts[postIndex].createdBy.currentProfile" class="material-icons">person</i>
