@@ -11,6 +11,7 @@ import APIError from '../helpers/APIError';
 import FCMSender from '../helpers/FCMSender';
 import { postsMap } from '../helpers/PopulateMaps';
 import { sendFlaggedEmailWithMailgun } from '../cronJobs/sendFlaggedPostEmail';
+var unique = require('array-unique');
 
 
 /**
@@ -1142,7 +1143,36 @@ function adminDashboardCount(req, res, next) {
         .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
         .group({ _id: '$isEvent', count: { $sum: 1 }, goingCount: { $sum: { $size: "$going" } } })
         .exec().then(towDays => {
-          res.json({ threeDays, towDays });
+          
+          d.setDate(d.getDate() -1 );
+          Post.aggregate()
+          .match({ createdAt: { $gt: d } },  { _id: 1, going: 1 })               
+          .exec().then(staffThreeDays => {
+              var count = 0; 
+              var threeDayStaffCount = 0;              
+              for(var go in staffThreeDays){
+                  if(staffThreeDays[count].authorResidence == "University"){
+                  threeDayStaffCount += 1;
+                }                  
+                  count= count+1;
+              }
+
+              d.setDate(d.getDate() +1 );
+              Post.aggregate()
+              .match({ createdAt: { $gt: d }  }, { _id: 1, going: 1 })               
+              .exec().then(TwoDayStaffDays => {
+                  var count = 0; 
+                  var TwoDayStaffCount = 0;              
+                  for(var go in staffThreeDays){
+                      if(staffThreeDays[count].authorResidence == "University"){
+                      TwoDayStaffCount += 1;
+                    }                  
+                      count= count+1;
+                  }          
+              res.json({ threeDays, towDays ,threeDayStaffCount,TwoDayStaffCount });    
+            });                  
+        });
+
         });
     });
 }
@@ -1151,7 +1181,8 @@ function getJoinDetails(req, res, next) {
     var days = parseInt(req.params.days);
     var d = new Date();
     d.setDate(d.getDate() - days); 
-    var userName = []; 
+    var userName = [];
+    var userId =[]; 
     Post.aggregate()
         .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
         .exec().then(threeDays => {   
@@ -1159,19 +1190,24 @@ function getJoinDetails(req, res, next) {
           for(var go in threeDays){
               if((threeDays[count].going).length>0){
                 var goingCount = 0;
-                for(var i in threeDays[count].going){
-                  User.get(threeDays[count].going[goingCount].actedBy)
-                                .then(user =>{     
-                                                      
-                                  userName.push(user.firstName);
-                                });                
-                  goingCount = goingCount+1;
-                }
-                
+                for(var i in threeDays[count].going){   
+                var actedCount =0;                 
+                  for(var dataAct =0 ; i<threeDays[count].going.length;i++){ 
+                        userId.push(threeDays[count].going[actedCount].actedBy);
+                        actedCount += 1;
+                  }
+                }                
               }
               count= count+1;
           }
+          userId = unique(userId);
+          for(var i =0 ; i<userId.length;i++){
+            User.get(userId[i]).then(user =>{        
+                                      userName.push(user.firstName);
+                                    });
+          }
           setTimeout(function () {
+              userName = unique(userName);
               res.json({ userName  });
           }, 1000)
           });
@@ -1215,4 +1251,5 @@ export default {
   adminFlagAction,
   adminDashboardCount,
   getJoinDetails,
+  adminDashboardStaffCount,
 };

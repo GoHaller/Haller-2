@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { PostService } from '../../services/post.services';
-
+import { ModalService } from '../../services/modal.service';
+import {Ng2PaginationModule} from 'ng2-pagination';
+import { EventJoinComponent } from "../modal/eventJoin.component";
 @Component({
   selector: 'app-analitics-dashboard',
   templateUrl: './analitics-dashboard.component.html',
@@ -14,8 +16,12 @@ export class AnaliticsDashboardComponent implements OnInit {
   public showDiv:boolean=false;
   public showNameList:boolean=false;
   public users:any=[];
-  public userslist:any=[];
-  constructor(private postService: PostService) { }
+  public staffCount:any = [];
+ 
+  public id;
+  public listuser=[];
+
+  constructor(private postService: PostService, private modalService: ModalService) { }
 
   ngOnInit() {
     this.getDashBoardCount();
@@ -23,28 +29,38 @@ export class AnaliticsDashboardComponent implements OnInit {
   
 showNameData(days){
   this.postService.getDashBoardEventJoinners(days).subscribe((res: any) => {
-        this.userslist = res.userName;
+        this.listuser = res.userName;
       }, error => {
         console.info('error', error);
       })
-
-  this.showNameList=!this.showNameList;
+  this.modalService.open("Eventinseventytwo");
+  //this.showNameList=!this.showNameList;
   
 }
 
 showName(days){
   this.postService.getDashBoardEventJoinners(days).subscribe((res: any) => {
-        this.users = res.userName;
+       this.users = res.userName;
       }, error => {
         console.info('error', error);
       })
-  this.showDiv=!this.showDiv;
+  this.modalService.open("EventJoinner");
+  //this.showDiv=!this.showDiv;
 }
+
+
+  closeModal(id: string) {
+    this.modalService.close(id);
+   
+  }
 
   getDashBoardCount() {
     this.postService.getDashBoardCount()
       .subscribe((res: any) => {
         this.countData = res;
+        this.staffCount[0]= res['TwoDayStaffCount']
+        this.staffCount[1]= res['threeDayStaffCount'] 
+
         res['threeDays'].forEach(three => {
           if (!this.showCaseData['72']) this.showCaseData['72'] = {};
           if (three._id) {
