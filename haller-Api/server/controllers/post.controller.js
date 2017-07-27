@@ -1251,5 +1251,4 @@ export default {
   adminFlagAction,
   adminDashboardCount,
   getJoinDetails,
-  adminDashboardStaffCount,
 };
