@@ -41,7 +41,19 @@ router.route('/admin/desboard/eventjoiners/:days')
     getToken
   }), postCtrl.getJoinDetails);
 
+router.route('/admin/desboard/staffeventjoiners/:days')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), postCtrl.getStaffJoinDetails);
 
+router.route('/admin/:postId/deletepost')
+  .delete(expressJwt({
+     secret: config.jwtSecret,
+     getToken  
+  }),postCtrl.deletePost)
+
+  
 // router.route('/admin/hide/:postId/comment/:commentId')
 //App APIS
 

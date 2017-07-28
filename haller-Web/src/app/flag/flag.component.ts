@@ -3,6 +3,7 @@ import { PostService } from '../../services/post.services';
 import {Ng2PaginationModule} from 'ng2-pagination';
 
 declare var $: any;
+declare var swal:any;
 
 @Component({
   selector: 'app-flag',
@@ -69,9 +70,49 @@ export class FlagComponent implements OnInit {
         console.info('flaggedAction error', error);
       })
   }
-  deletePost(postid:any)  
-  { 
-     console.log("post id",postid); 
+
+  deletePost(postid:any){ 
+    this.postService.deletePostApi(postid).subscribe((res: any) => { 
+          console.log("got fronted response"); 
+           
+           }, error => {
+                   console.info('error', error);    
+                     })
   }
+  selectPost(index){    
+    this.postIndex = index;  
+ }
+ showSwal(postid:any){
+             swal({
+                    title: '',
+                    text: "Are you sure want to delete this post?",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonClass: 'btn btn-success',
+                    cancelButtonClass: 'btn btn-danger',
+                    confirmButtonText: 'Yes, delete it!',
+                    buttonsStyling: false
+                }).then(() => {               
+            this.deletePost(postid) 
+            swal({         
+                  title: 'Deleted!',
+                  text: 'Post has been deleted.',      
+                  type: 'success',  
+                  confirmButtonClass: "btn btn-success",
+                  buttonsStyling: false
+               })
+ });
+ }
+  deleteComment(postId, commentId){ 
+    if(postId && commentId){
+        this.postService.deleteCommentApi(postId, commentId).subscribe((res: any) => { 
+          console.log("got fronted response");     
+           }, error => {
+                   console.info('error', error);    
+                     })
+    }
+  }
+  
+  
 
 }

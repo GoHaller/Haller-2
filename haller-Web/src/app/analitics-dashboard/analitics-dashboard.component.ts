@@ -15,11 +15,14 @@ export class AnaliticsDashboardComponent implements OnInit {
   public showCaseData: any = {};
   public showDiv:boolean=false;
   public showNameList:boolean=false;
-  public users:any=[];
+  public users:any= [];
+  public eventType: string = 'none';
+
   public staffCount:any = [];
+  public staffJoinerCount:any =[];
  
   public id;
-  public listuser=[];
+
 
   constructor(private postService: PostService, private modalService: ModalService) { }
 
@@ -27,27 +30,28 @@ export class AnaliticsDashboardComponent implements OnInit {
     this.getDashBoardCount();
   }
   
-showNameData(days){
+
+showEventUserName(days){
   this.postService.getDashBoardEventJoinners(days).subscribe((res: any) => {
-        this.listuser = res.userName;
+       this.users =res.userName;
+       this.eventType = "Event Joiners";
+       this.modalService.open("EventJoinner"); 
       }, error => {
         console.info('error', error);
       })
-  this.modalService.open("Eventinseventytwo");
-  //this.showNameList=!this.showNameList;
   
 }
 
-showName(days){
-  this.postService.getDashBoardEventJoinners(days).subscribe((res: any) => {
+showStaffUserName(days){
+    this.postService.getDashBoardStaffEventJoinners(days).subscribe((res: any) => {
        this.users = res.userName;
+       this.eventType = "Staff Event Joiners";
+       this.modalService.open("EventJoinner");  
       }, error => {
         console.info('error', error);
       })
-  this.modalService.open("EventJoinner");
-  //this.showDiv=!this.showDiv;
+  
 }
-
 
   closeModal(id: string) {
     this.modalService.close(id);
@@ -58,8 +62,11 @@ showName(days){
     this.postService.getDashBoardCount()
       .subscribe((res: any) => {
         this.countData = res;
-        this.staffCount[0]= res['TwoDayStaffCount']
-        this.staffCount[1]= res['threeDayStaffCount'] 
+        this.staffCount[0]= res['twoDayStaffCount']
+        this.staffCount[1]= res['threeDayStaffCount']
+
+        this.staffJoinerCount[0]= res['twoDayStaffJoiner']
+        this.staffJoinerCount[1]= res['threeDayStaffJoiner'] 
 
         res['threeDays'].forEach(three => {
           if (!this.showCaseData['72']) this.showCaseData['72'] = {};

@@ -119,6 +119,20 @@ export class PostService {
         this.createAuthorizationHeader();
         return this.http.get(this.adminApiUrl + 'desboard/eventjoiners/'+days, { headers: this.headers }).map(this.extractData);
     }
+    getDashBoardStaffEventJoinners(days: string) {
+        this.createAuthorizationHeader();
+        return this.http.get(this.adminApiUrl + 'desboard/staffeventjoiners/'+days, { headers: this.headers }).map(this.extractData);
+    }
+    
+    deletePostApi(postId: string) { 
+       this.createAuthorizationHeader();
+               return this.http.delete(this.adminApiUrl + postId +'/deletepost' , { headers: this.headers }).map(this.extractData)    
+    }
+
+    deleteCommentApi(postId: string, commentId: string) { 
+       this.createAuthorizationHeader();
+               return this.http.delete(this.adminApiUrl + postId +'/comments/' + commentId , { headers: this.headers }).map(this.extractData)    
+    }
 
     private extractData(res: any) {
         return (typeof res == 'object') ? res.json() : res;

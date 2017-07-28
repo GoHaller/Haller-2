@@ -27,7 +27,7 @@
         </div>
         <div class="row" *ngFor="let post of posts | paginate: {itemsPerPage: 2, currentPage:page, id: '1'}; let i = index">
           <div class="col-lg-10 col-sm-12">
-            <div class="card" *ngIf="post.flagged.length < 3 || this.flagOfthree">
+            <div class="card" *ngIf="(post.flagged.length < 3 || this.flagOfthree) && !post.deteled ">
               <div class="card-header card-header-icon" data-background-color="blue">
                 <i *ngIf="!post.createdBy || !post.createdBy.currentProfile" class="material-icons">person</i>
                 <img width="100px" *ngIf="post.createdBy && post.createdBy.currentProfile" [src]="post.createdBy.currentProfile.secure_url"
@@ -64,7 +64,7 @@
                         <a href="javascript:void(0);" (click)="flagAction(post.isHidden?1:0,post._id)">{{post.isHidden?'Unhide':'Hide'}}</a>
                       </li>
                       <li>
-                      <a href="javascript:void(0);" (click)="deletePost(post._id)">Delete Post</a>
+                      <a href="javascript:void(0);" (click)="showSwal(post._id)">Delete Post</a>
                     </li>
                       <li>
                         <a href="javascript:void(0);" (click)="flagAction(2,post._id)">No action needed</a>
@@ -80,7 +80,7 @@
       <!--Post Section End-->
       <!--Comment Section Start-->
       <div class="col-lg-4 col-md-6 col-sm-4 comment-section">
-        <div class="row" *ngIf="posts[postIndex]">
+        <div class="row" *ngIf="posts[postIndex] && !post.deteled">
           <div class="card" style="margin-bottom: 0px;">
             <div class="card-header card-header-icon" data-background-color="blue">
               <i *ngIf="!posts[postIndex].createdBy || !posts[postIndex].createdBy.currentProfile" class="material-icons">person</i>
@@ -102,9 +102,11 @@
             <legend class="margin-top-10">Comments</legend>
           </div>
         </div>
-        <div class="row comment-list" *ngIf="posts[postIndex]">
-          <div class="card" *ngFor="let cmnt of posts[postIndex].comments">
-            <div class="card-header card-header-icon" data-background-color="blue">
+        <div class="row comment-list" *ngIf="posts[postIndex]"  >
+          <div class="card" *ngFor="let cmnt of posts[postIndex].comments" >
+          
+            <div *ngIf="!cmnt.isHidden">
+            <div class="card-header card-header-icon" data-background-color="blue" >
               <i *ngIf="!cmnt.createdBy || !cmnt.createdBy.currentProfile" class="material-icons">person</i>
               <img *ngIf="cmnt.createdBy && cmnt.createdBy.currentProfile" [src]="cmnt.createdBy.currentProfile.secure_url" />
             </div>
@@ -136,6 +138,9 @@
                       <a href="javascript:void(0);" (click)="flagAction(cmnt.isHidden?1:0,posts[postIndex]._id,cmnt._id)">{{cmnt.isHidden?'Unhide':'Hide'}}</a>
                     </li>
                     <li>
+                         <a href="javascript:void(0);" (click)="deleteComment(posts[postIndex]._id,cmnt._id)">Delete Comment</a>
+                    </li>
+                      <li>
                       <a href="javascript:void(0);" (click)="flagAction(2,posts[postIndex]._id,cmnt._id)">No action needed</a>
                     </li>
                   </ul>
@@ -143,6 +148,7 @@
               </div>
             </div>
           </div>
+          </div><!--card close-->
         </div>
       </div>
       <!--Comment Section End-->
