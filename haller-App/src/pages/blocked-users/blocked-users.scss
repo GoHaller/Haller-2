@@ -5,9 +5,23 @@ page-blocked-users {
         .item-block:last-child, .item-wrapper:last-child .item-block{
             border-bottom: none;
         }
-
-        .item ion-avatar[item-left], .item ion-thumbnail[item-left]{
-            margin-left: 10px
+        .item-block:first-child { min-height: 2.4rem !important;}
+        .blocked-item {
+            font-size:12px;
+            .label{
+                margin: 7px 8px 7px 0;
+            }
+            
+        }
+        
+        .item{
+            .ion-ios-remove-circle-outline{
+                margin: 8px 0px 8px 8px;
+            }
+            ion-avatar{
+                margin-left: 10px !important;
+                margin-right: 0px;
+            }
         }
 
         .view-profile-btn{

@@ -3,7 +3,10 @@ import { IonicPageModule } from 'ionic-angular';
 
 import { HttpClient } from '../../shared/providers/http-client';
 import { Saved } from './saved';
-import { SavedProvider } from './saved.provider';
+import { FeedProvider } from '../../shared/providers/feed.provider';
+import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 
 @NgModule({
   declarations: [
@@ -15,8 +18,8 @@ import { SavedProvider } from './saved.provider';
   exports: [
     Saved
   ],
-  providers:[
-    SavedProvider, HttpClient
+  providers: [
+    FeedProvider, HttpClient, CloudinaryProvider, Camera, Transfer
   ]
 })
-export class SavedModule {}
+export class SavedModule { }

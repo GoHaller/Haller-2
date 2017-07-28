@@ -13,10 +13,14 @@ import { Storage } from '@ionic/storage';
 export class HttpClient {
   private local: Storage;
   public activeToken: String;
-  private ApiBaseUrl = 'http://192.168.1.7:4040/api';
+  // private ApiBaseUrl = 'http://10.0.0.4:4040/api';
+  private ApiBaseUrl = 'https://haller-api-v2.herokuapp.com/api';
   //private ApiBaseUrl = 'https://haller-api-app-stage.herokuapp.com/api';
   //private ApiBaseUrl = 'https://haller-app-api.herokuapp.com/api';
   public emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  public kuEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@ku.edu$/;
+  public userAvatar = 'assets/img/default-user.png';
+  public groupAvatar = 'assets/img/user-group.png';
 
   private headers = new Headers();
 
@@ -92,9 +96,19 @@ export class HttpClient {
     if (today.toDateString() == d.toDateString())
       return 'shortTime';
     else if (yesterday.toDateString() == d.toDateString())
-      return "'Yesterday' h:m a";
+      return "'Yesterday'";// h:m a";
     else
       return 'yy/M/d';
+  }
+
+  getProfileImageToDisplay(user) {
+    // console.info('user', user);
+    if (user && user.currentProfile)
+      return user.currentProfile.secure_url || this.userAvatar;
+    else if (user && user.facebook && user.facebook.picture && user.facebook.picture.data)
+      return user.facebook.picture.data.url || this.userAvatar;
+    else
+      return this.userAvatar;
   }
 
 }

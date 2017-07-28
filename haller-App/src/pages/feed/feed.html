@@ -33,7 +33,8 @@
 
     <ion-item>
       <ion-avatar item-left (click)="viewProfile(feed.createdBy)">
-        <img [src]="(feed.createdBy && feed.createdBy.currentProfile) ? feed.createdBy.currentProfile.secure_url : 'assets/img/default-user.png'">
+        <!-- <img [src]="(feed.createdBy && feed.createdBy.currentProfile) ? feed.createdBy.currentProfile.secure_url : userAvatar"> -->
+        <img [src]="feedProvider.httpClient.getProfileImageToDisplay(feed.createdBy)">
       </ion-avatar>
       <h2 (click)="viewProfile(feed.createdBy)">{{(feed.createdBy ? feed.createdBy.firstName : 'No One' ) + ' ' + (feed.createdBy ? feed.createdBy.lastName : 'No One')}}</h2>
       <ion-note>{{feed.createdAt | date: getDateFormatr(feed.createdAt)}}</ion-note>
@@ -45,24 +46,24 @@
     </ion-card-content>
     <ion-row class="action-count">
       <ion-col *ngIf="feed.liked.length > 0 || feed.comments.length > 0">
-        <span style="float:left" *ngIf="feed.liked.length > 0">{{feed.liked.length +' Likes'}}</span>
+        <span style="float:left" *ngIf="feed.liked.length > 0" (click)="openLikeModel(feed.liked)">{{feed.liked.length +' Likes'}}</span>
         <span style="float:right" *ngIf="feed.comments.length > 0" (click)="gototFeedDetail(feed)">{{feed.comments.length + ' Comments'}}</span>
       </ion-col>
     </ion-row>
     <ion-row class="feed-actions">
       <ion-col center text-center class="have-badge">
         <button ion-button icon-left clear small color="{{feed._userLiked ? 'primary':'newlight'}}" (click)="likeFeed(feed)">
-          <ion-icon name="{{feed._userLiked ? 'ios-thumbs-up' : 'ios-thumbs-up-outline'}}"></ion-icon>&nbsp;Likes          
+          <ion-icon name="{{feed._userLiked ? 'ios-thumbs-up':'ios-thumbs-up-outline'}}"></ion-icon>&nbsp;Like
         </button>
       </ion-col>
       <ion-col center text-center class="have-badge">
         <button ion-button icon-left clear small color="newlight" (click)="gototFeedDetail(feed)">
-          <ion-icon name="ios-chatbubbles-outline"></ion-icon>&nbsp;Comments
+          <ion-icon class="icon comment-icon"></ion-icon>&nbsp;Comment
         </button>
       </ion-col>
       <ion-col center text-center>
         <button ion-button icon-left clear small color="{{feed._userStarred ? 'primary':'newlight'}}" (click)="starFeed(feed)">
-          <ion-icon name="{{feed._userStarred ? 'ios-heart' : 'ios-heart-outline'}}"></ion-icon>&nbsp;Save</button>
+          <ion-icon name="{{feed._userStarred ? 'ios-heart':'ios-heart-outline'}}"></ion-icon>&nbsp;Save</button>
       </ion-col>
     </ion-row>
 

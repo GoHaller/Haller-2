@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { App, IonicPage, NavController, NavParams, ActionSheetController, Events } from 'ionic-angular';
+import { App, IonicPage, NavController, NavParams, ActionSheetController, Events, AlertController, LoadingController, ToastController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 
-import { LoginProvider } from '../login/login.provider';
-import { ProfileEditProvider } from "../profile-edit/profile-edit.provider";
+import { AuthProvider } from '../../shared/providers/auth.provider';
+import { ProfileProvider } from "../../shared/providers/profile.provider";
 
 /**
  * Generated class for the ProfileSettings page.
@@ -18,18 +18,17 @@ import { ProfileEditProvider } from "../profile-edit/profile-edit.provider";
 })
 export class ProfileSettings {
 
-  private local: Storage;
-  private userInfo: Object = {};
+  public local: Storage;
+  public userInfo: Object = {};
+  public notifications: Boolean = false;
+  // public facebookBtnShow: Boolean = false;
+  public fbAuthDetail: any;
   uid: String;
   constructor(private app: App, private navCtrl: NavController, private navParams: NavParams,
-    private loginProvider: LoginProvider, private actionSheetCtrl: ActionSheetController,
-    private profileEditProvider: ProfileEditProvider, private event: Events) {
+    private authProvider: AuthProvider, private actionSheetCtrl: ActionSheetController,
+    public profileProvider: ProfileProvider, private event: Events, public alertCtrl: AlertController,
+    public toastCtrl: ToastController, public loadingCtrl: LoadingController) {
     this.local = new Storage('localstorage');
-    this.local.get('userInfo').then(val => {
-      this.userInfo = JSON.parse(val);
-
-      this.uid = this.userInfo['_id'];
-    })
   }
 
   ionViewDidLoad() {
@@ -40,13 +39,21 @@ export class ProfileSettings {
     });
   }
 
+  ionViewDidEnter() {
+    this.local.get('userInfo').then(val => {
+      this.userInfo = JSON.parse(val);
+      this.notifications = this.userInfo['notifications'].enabled;
+      // this.facebookBtnShow = this.userInfo['facebook'] && this.userInfo['facebook'].id && this.userInfo['password'] ? true : false;
+      this.uid = this.userInfo['_id'];
+    })
+  }
+
   goToAddress(page: string) {
     this.navCtrl.push(page, { uid: this.uid }, { animate: true, direction: 'forward' });
   }
 
   logoutClicked() {
     let actionSheet = this.actionSheetCtrl.create({
-      // title: 'Logout! Are you sure?',
       buttons: [
         {
           text: 'Log me out',
@@ -65,7 +72,7 @@ export class ProfileSettings {
   }
 
   logMeOut() {
-    this.loginProvider.logout(this.uid).subscribe(res => {
+    this.authProvider.logout(this.uid).subscribe(res => {
       // console.info('res', res);
       this.local.remove('auth');
       this.local.remove('uid');
@@ -78,7 +85,7 @@ export class ProfileSettings {
 
   requestRA() {
     if (!this.userInfo['isRARequested']) {
-      this.profileEditProvider.updateUser(this.userInfo['_id'], { isRARequested: true })
+      this.profileProvider.updateUser(this.userInfo['_id'], { isRARequested: true })
         .subscribe((res: any) => {
           this.userInfo = res;
           this.local.set('userInfo', JSON.stringify(res)).then(() => { });
@@ -86,6 +93,122 @@ export class ProfileSettings {
           console.info('updateUser RA error', error);
         })
     }
+  }
+
+  switchNotificationSetting() {
+    if (this.notifications != this.userInfo['notifications'].enabled) {
+      this.upadteUserInfo(this.userInfo['_id'], { notifications: { enabled: this.notifications } });
+    }
+  }
+
+  upadteUserInfo(userId, data) {
+    this.profileProvider.updateUser(userId, data)
+      .subscribe((res: any) => {
+        this.userInfo = res;
+        this.local.set('userInfo', JSON.stringify(res)).then(() => {
+          // this.facebookBtnShow = this.userInfo['facebook'] && this.userInfo['facebook'].id ? true : false;
+          this.notifications = this.userInfo['notifications'].enabled;
+        });
+      }, error => {
+        console.info('updateUser RA error', error);
+      });
+  }
+
+  disableFacebook() {
+    if (this.userInfo && this.userInfo['password']) {
+      // this.logoutFacebook();
+      this.upadteUserInfo(this.userInfo['_id'], { facebook: null });
+      let alert = this.alertCtrl.create({
+        subTitle: 'Your facebook account successfully disconnected',
+        buttons: ['OK']
+      });
+      alert.present();
+    } else {
+      let alert = this.alertCtrl.create({
+        subTitle: 'You need to create an account password before unconnecting your Facebook account. Please go to your `Create Password` in the Settings to create your password.',
+        buttons: ['OK']
+      });
+      alert.present();
+    }
+  }
+
+  settingsFacebook() {
+    let btns: any = [];
+    if (this.userInfo['facebook']) {
+      btns = [{
+        text: 'Disconnect',
+        handler: () => {
+          this.disableFacebook();
+        }
+      }];
+    } else {
+      btns = [{
+        text: 'Connect',
+        handler: () => {
+          // this.getFbLoginStatus();
+          this.getFbLogin();
+        }
+      }];
+    }
+    let actionSheet = this.actionSheetCtrl.create({
+      // title: 'Logout! Are you sure?',
+      buttons: btns
+    });
+    actionSheet.present();
+  }
+
+  getFbLogin() {
+    this.authProvider.loginToFB()
+      .then((res: any) => {
+        if (res.status == 'connected') {
+          this.fbAuthDetail = res.authResponse;
+          this.getFbDetail();
+        }
+      }).catch(error => {
+        console.info('Error logging into Facebook', error);
+      });
+  }
+
+  getFbDetail() {
+    this.authProvider.getFBUserDetail(this.fbAuthDetail['userID'])
+      .then((res: any) => {
+        let loader = this.loadingCtrl.create({
+          content: "Please wait...",
+          // duration: 3000,
+          dismissOnPageChange: true
+        });
+        loader.present();
+        this.profileProvider.updateUser(this.userInfo['_id'], { facebook: res })
+          .subscribe((res: any) => {
+            this.local.set('userInfo', JSON.stringify(this.userInfo)).then(() => {
+              this.userInfo = res;
+              loader.dismiss();
+              let alert = this.alertCtrl.create({
+                subTitle: 'Your facebook account successfully connected',
+                buttons: ['OK']
+              });
+              alert.present();
+            });
+
+          }, error => {
+            console.info('updateUser error', error);
+            loader.dismiss();
+            if (error._body.indexOf('Facebook account is already in use.') > -1) {
+              let prompt = this.alertCtrl.create({
+                subTitle: "This facebook account is already connected with another user.",
+                buttons: ['Ok']
+              });
+              prompt.present();
+            }
+          });
+      }).catch(e => {
+        console.info('fb api error', e);
+      });
+  }
+  logoutFacebook() {
+    this.authProvider.logoutFromFB().then((response) => {
+      // console.info('response', response);
+    });
   }
 
   presentRequestRAActionSheet() {
@@ -97,3 +220,9 @@ export class ProfileSettings {
   }
 
 }
+// let toast = this.toastCtrl.create({
+//   message: 'Your facebook account successfully disconnected',
+//   duration: 3000,
+//   position: 'top'
+// });
+// message: 'Your account successfully connected',

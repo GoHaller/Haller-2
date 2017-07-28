@@ -5,22 +5,27 @@
   Ionic pages and navigation.
 -->
 <ion-header>
-
   <ion-navbar color="primary">
     <ion-title>Blocked Users</ion-title>
+    <ion-buttons right>
+      <button ion-button *ngIf="edit" (click)="edit = false">Cancel</button>
+      <button ion-button *ngIf="!edit" (click)="edit = true">Unblock</button>
+    </ion-buttons>
   </ion-navbar>
-
+  <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
 </ion-header>
-
 
 <ion-content>
   <ion-list class="blocked-list">
-    <ion-item *ngFor="let block of blockedUsers">
+    <ion-item class="blocked-item">Blocked</ion-item>
+    <ion-item *ngFor="let block of blockedUsers | blockedsearch:['firstName','lastName',searchText]">
+      <ion-icon *ngIf="edit" (click)="confirmUnblock(block.user._id)" item-left color="danger" name="ios-remove-circle-outline"></ion-icon>
       <ion-avatar item-left>
-        <img [src]="block.user.currentProfile ? block.user.currentProfile.secure_url : '../../assets/img/default-user.png'">
+        <!-- <img [src]="block.user.currentProfile ? block.user.currentProfile.secure_url : userAvatar"> -->
+        <img [src]="profileProvider.httpClient.getProfileImageToDisplay(block.user)">
       </ion-avatar>
       {{ block.user.firstName + ' ' + block.user.lastName }}
-      <button ion-button clear item-right (click)="confirmUnblock(block.user._id)">Unblock</button>
+      <!--<button ion-button clear item-right (click)="confirmUnblock(block.user._id)">Unblock</button>-->
     </ion-item>
   </ion-list>
 </ion-content>

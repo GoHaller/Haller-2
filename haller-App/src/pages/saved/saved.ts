@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
-import { SavedProvider } from "./saved.provider";
+import { FeedProvider } from '../../shared/providers/feed.provider';
 
 /**
  * Generated class for the Saved page.
@@ -20,10 +20,11 @@ export class Saved {
   private uid: String = '';
   private savedList = [];
   private refresher = null;
+  private userAvatar = '';
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private savedProvider: SavedProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public feedProvider: FeedProvider) {
     this.local = new Storage('localstorage');
-
+    this.userAvatar = feedProvider.httpClient.userAvatar;
   }
 
   ionViewDidLoad() {
@@ -35,10 +36,10 @@ export class Saved {
   }
 
   getList() {
-    this.savedProvider.list(this.uid)
+    this.feedProvider.listSaved(this.uid)
       .subscribe((res: any) => {
         res.forEach(feed => {
-          feed = this.processFeed(feed);
+          feed = this.feedProvider.processFeed(feed);
         });
         this.savedList = res;
         if(this.refresher) this.refresher.complete();
@@ -49,7 +50,7 @@ export class Saved {
   }
 
   getDateFormate(date) {
-    return this.savedProvider.httpClient.getDateFormate(date);
+    return this.feedProvider.httpClient.getDateFormate(date);
   }
 
   gototFeedDetail(feed) {
@@ -63,35 +64,11 @@ export class Saved {
 
   updateFeed(oldFeed, newFeed) {
     let index = this.savedList.indexOf(oldFeed);
-    newFeed = this.processFeed(newFeed);
+    newFeed = this.feedProvider.processFeed(newFeed);
     if (newFeed._userStarred)
       this.savedList[index] = newFeed;
     else
       this.savedList.splice(index, 1);
-  }
-
-  processFeed(post) {
-    let _userLiked = post.liked.filter(l => {
-      return l.actedBy._id == this.uid;
-    })[0];
-    post._userLiked = (_userLiked && _userLiked._id);
-
-    let _userGoing = post.going.filter(g => {
-      return g.actedBy._id == this.uid;
-    })[0];
-    post._userGoing = (_userGoing && _userGoing._id);
-
-    let _userStarred = post.starred.filter(g => {
-      return g.actedBy._id == this.uid;
-    })[0];
-    post._userStarred = (_userStarred && _userStarred._id);
-
-    let _userFlagged = post.flagged.filter(g => {
-      return g.actedBy._id == this.uid;
-    })[0];
-    post._userFlagged = (_userFlagged && _userFlagged._id);
-
-    return post;
   }
 
   doRefresh(refresher) {

@@ -1,0 +1,16 @@
+page-like-list {
+  .likes-list{
+        padding: 0px 0px 0px 0px;
+        .select{
+            background-color: #DBDBDB;
+        }
+        .item ion-avatar[item-left], .item ion-thumbnail[item-left]{
+            margin-left: 10px;
+            margin-right: 0px;
+        }
+
+        .item-block:last-child, .item-wrapper:last-child .item-block{
+            border-bottom: none;
+        }
+    }
+}

@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ModalController, LoadingController, Events } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { Validators, FormBuilder } from '@angular/forms';
-import { ProfileEditProvider } from "./profile-edit.provider";
+import { ProfileProvider } from "../../shared/providers/profile.provider";
 import { ImageFullComponent } from '../../shared/pages/image.full';
-import { CloudinaryProvider } from '../../shared/providers/cloudinary-provider';
+import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
 
 /**
  * Generated class for the ProfileEdit page.
@@ -20,24 +20,28 @@ import { CloudinaryProvider } from '../../shared/providers/cloudinary-provider';
 export class ProfileEdit {
 
   private local: Storage;
-  private userInfo: Object = {};
-  private orgList = [];
-  private interestList = [];
-  private userForm: any;
-  private cloudinaryImageData: Object = null;
-  private userInterest: string = '';
+  public userInfo: Object = {};
+  public orgList = [];
+  public interestList = [];
+  public userForm: any;
+  public cloudinaryImageData: Object = null;
+  public userInterest: string = '';
+  public showOrgForm: Boolean = false;
+  public showInterestForm: Boolean = false;
+  public orgSearchText: String = '';
+  public userAvatar = '';
 
-  constructor(private navCtrl: NavController, private navParams: NavParams, private profileEditProvider: ProfileEditProvider,
+  constructor(private navCtrl: NavController, private navParams: NavParams, public profileProvider: ProfileProvider,
     private formBuilder: FormBuilder, private modalCtrl: ModalController, private cloudinaryProvider: CloudinaryProvider,
     public loadingCtrl: LoadingController, private event: Events) {
     this.local = new Storage('localstorage');
-
+    this.userAvatar = profileProvider.httpClient.userAvatar;
     this.userForm = this.formBuilder.group({
       firstName: ['', Validators.compose([Validators.maxLength(50), Validators.required])],
       lastName: ['', Validators.compose([Validators.maxLength(50), Validators.required])],
-      pronouns: ['', Validators.compose([Validators.maxLength(30), Validators.required])],
-      major: ['', Validators.compose([Validators.maxLength(30), Validators.required])],
-      hometown: ['', Validators.compose([Validators.maxLength(30), Validators.required])]
+      pronouns: ['', Validators.compose([Validators.maxLength(30)])],
+      major: ['', Validators.compose([Validators.maxLength(30)])],
+      hometown: ['', Validators.compose([Validators.maxLength(30)])]
     });
 
     this.local.get('userInfo').then(val => {
@@ -46,9 +50,9 @@ export class ProfileEdit {
       this.userForm = this.formBuilder.group({
         firstName: [this.userInfo['firstName'] || '', Validators.compose([Validators.maxLength(50), Validators.required])],
         lastName: [this.userInfo['lastName'] || '', Validators.compose([Validators.maxLength(50), Validators.required])],
-        pronouns: [this.userInfo['genderPronouns'].join(', ') || '', Validators.compose([Validators.maxLength(30), Validators.required])],
-        major: [this.userInfo['major'] || '', Validators.compose([Validators.maxLength(30), Validators.required])],
-        hometown: [this.userInfo['hometown'] || '', Validators.compose([Validators.maxLength(30), Validators.required])]
+        pronouns: [this.userInfo['genderPronouns'].join(', ') || '', Validators.compose([Validators.maxLength(30)])],
+        major: [this.userInfo['major'] || '', Validators.compose([Validators.maxLength(30)])],
+        hometown: [this.userInfo['hometown'] || '', Validators.compose([Validators.maxLength(30)])]
       });
     })
   }
@@ -56,13 +60,14 @@ export class ProfileEdit {
   ionViewDidLoad() { }
 
   goBack() {
-    this.navParams.get('resolve')(this.userInfo);
+    let resolve = this.navParams.get('resolve');
+    if (resolve) resolve(this.userInfo);
     this.navCtrl.pop();
   }
 
   viewFullImage(currentProfile) {
     if (currentProfile) {
-      let modal = this.modalCtrl.create(ImageFullComponent, { imgeSrc: currentProfile.secure_url });
+      let modal = this.modalCtrl.create(ImageFullComponent, { imgeSrc: currentProfile });
       modal.present();
     }
   }
@@ -101,7 +106,7 @@ export class ProfileEdit {
   }
 
   saveProfileImage(loader) {
-    this.profileEditProvider.updateUser(this.userInfo['_id'], { currentProfile: this.cloudinaryImageData })
+    this.profileProvider.updateUser(this.userInfo['_id'], { currentProfile: this.cloudinaryImageData })
       .subscribe((res: any) => {
         // console.info('updateUser res', res);
         this.userInfo = res;
@@ -120,7 +125,7 @@ export class ProfileEdit {
     // console.info('Interest', val);
     this.interestList = [];
     if (val.length > 0) {
-      this.profileEditProvider.getInterestList(val)
+      this.profileProvider.getInterestList(val)
         .subscribe((res: any) => {
           res.forEach(interest => {
             let interestFiltered = this.userInfo['interests'].filter(item => {
@@ -143,6 +148,8 @@ export class ProfileEdit {
     if (orgFiltered.length == 0)
       this.userInfo['interests'].push({ name: interest.name });
 
+    this.showInterestForm = false;
+    this.interestList = [];
     let index = this.interestList.indexOf(interest);
     this.interestList.splice(index, 1);
     this.userInterest = '';
@@ -153,9 +160,11 @@ export class ProfileEdit {
       let orgFiltered = this.userInfo['interests'].filter(item => {
         return item.name == this.userInterest;
       })
+      this.showInterestForm = false;
+      this.interestList = [];
       if (orgFiltered.length == 0)
         this.userInfo['interests'].push({ name: this.userInterest });
-        this.userInterest = '';
+      this.userInterest = '';
     }
   }
 
@@ -168,7 +177,7 @@ export class ProfileEdit {
     let val = event.target.value;
     this.orgList = [];
     if (val.length > 0) {
-      this.profileEditProvider.searchOrg(val)
+      this.profileProvider.searchOrg(val)
         .subscribe((res: any) => {
           res.forEach(org => {
             let orgFiltered = this.userInfo['organizations'].filter(item => {
@@ -191,7 +200,9 @@ export class ProfileEdit {
     })
     if (orgFiltered.length == 0)
       this.userInfo['organizations'].push(org);
-
+    this.showOrgForm = false;
+    this.orgSearchText = '';
+    this.orgList = [];
     let index = this.orgList.indexOf(org);
     this.orgList.splice(index, 1);
   }
@@ -216,17 +227,20 @@ export class ProfileEdit {
     let user = {
       firstName: data['firstName'],
       lastName: data['lastName'],
-      genderPronouns: data['pronouns'].split(', '),
+      genderPronouns: data['pronouns'] ? data['pronouns'].split(', ') : [],
       graduationYear: data['graduationYear'],
-      major: data['major'],
+      major: data['major'] || '',
       residence: this.userInfo['residence'],
       bio: this.userInfo['bio'],
-      hometown: data['hometown'],
+      hometown: data['hometown'] || '',
       organizations: selectOrg,
       interests: selInterest
     }
+    // if (data['pronouns']) user['genderPronouns'] = data['pronouns'].split(', ');
+    // if (data['major']) user['major'] = data['major'];
+    // if (data['hometown']) user['hometown'] = data['hometown'];
 
-    this.profileEditProvider.updateUser(this.userInfo['_id'], user)
+    this.profileProvider.updateUser(this.userInfo['_id'], user)
       .subscribe((res: any) => {
         // console.info('updateUser res', res);
         this.userInfo = res;
@@ -238,6 +252,16 @@ export class ProfileEdit {
       }, error => {
         console.info('updateUser error', error);
       });
+  }
+
+  popupOrganizerList() {
+    let modal = this.modalCtrl.create('Lists', { orgList: this.userInfo['organizations'] });
+    modal.onDidDismiss(data => {
+      this.userInfo['organizations'] = data;
+      this.saveProfile(this.userForm.value);
+      // console.info('data', data);
+    });
+    modal.present();
   }
 
 }

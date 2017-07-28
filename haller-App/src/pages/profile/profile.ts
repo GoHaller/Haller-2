@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
-import { ModalController, IonicPage, NavController, NavParams, Events } from 'ionic-angular';
+import { ModalController, IonicPage, NavController, NavParams, Events, ToastController, ActionSheetController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
+import { ProfileProvider } from "../../shared/providers/profile.provider";
 
 import { ImageFullComponent } from '../../shared/pages/image.full';
+import { TabsPage } from "../tabs/tabs";
 /**
  * Generated class for the Profile page.
  *
@@ -17,23 +19,28 @@ import { ImageFullComponent } from '../../shared/pages/image.full';
 export class Profile {
 
   private local: Storage;
-  private userId: String = '';
-  public uid: String = '';
+  public userId: string = '';
+  public uid: string = '';
   public userInfo: Object = {};
   public showMsgBtn: Boolean = false;
-  private tagBorderColor: string = 'dark';
+  public tagBorderColor: string = 'dark';
+  public userAvatar = '';
 
   constructor(public modalCtrl: ModalController, public navCtrl: NavController, public navParams: NavParams,
-    private event: Events) {
+    private event: Events, public profileProvider: ProfileProvider, public toastCtrl: ToastController, public actionSheetCtrl: ActionSheetController) {
     this.uid = this.navParams.data.uid || null;
     this.userInfo = this.navParams.data.userData || {};
     this.showMsgBtn = this.navParams.data.allowMessage == false ? false : true;
-
+    this.userAvatar = profileProvider.httpClient.userAvatar;
     this.local = new Storage('localstorage');
   }
 
   goBack() {
-    this.navCtrl.pop();
+    if (this.navCtrl.length() > 1) {
+      this.navCtrl.pop();
+    } else {
+      this.navCtrl.setRoot(TabsPage);
+    }
   }
 
   ionViewDidLoad() {
@@ -66,7 +73,7 @@ export class Profile {
 
   viewFullImage(currentProfile) {
     if (currentProfile) {
-      let modal = this.modalCtrl.create(ImageFullComponent, { imgeSrc: currentProfile.secure_url });
+      let modal = this.modalCtrl.create(ImageFullComponent, { imgeSrc: currentProfile });
       modal.present();
     }
   }
@@ -84,6 +91,35 @@ export class Profile {
 
   }
 
+  confirmBlock(blockUserId) {
+    let options = [{ text: 'Block', handler: () => { this.blockUser(); } }];
+    options.push({ text: 'No', handler: () => { } });
+    let actionSheet = this.actionSheetCtrl.create({ buttons: options });
+    actionSheet.present();
+  }
+
+  blockUser() {
+    if (this.userId != this.userInfo['_id']) {
+      this.profileProvider.blockUser(this.userId, this.userInfo['_id'])
+        .subscribe((res: any) => {
+          if (res['_id'] == this.userId) {
+            this.userInfo = res;
+            this.local.set('userInfo', JSON.stringify(res)).then(() => {
+              this.goBack();
+            });
+          }
+        }, error => {
+          let toast = this.toastCtrl.create({
+            message: 'Please try later',
+            duration: 3000,
+            position: 'top'
+          });
+          toast.present();
+          console.info('sendProblem error', error);
+        });
+    }
+  }
+
   getOrganizationAsString(organizations) {
     if (organizations) {
       let oArray = [];
@@ -95,6 +131,10 @@ export class Profile {
       return null;
     }
 
+  }
+
+  getFbLikesObject(user) {
+    return user.facebook && user.facebook.likes ? user.facebook.likes.data : [];
   }
 
 }

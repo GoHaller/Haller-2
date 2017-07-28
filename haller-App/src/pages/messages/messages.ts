@@ -1,8 +1,8 @@
-import { Component, PipeTransform, Pipe } from '@angular/core';
-import { IonicPage, NavController, NavParams, ActionSheetController } from 'ionic-angular';
+import { Component, PipeTransform, Pipe, NgZone } from '@angular/core';
+import { IonicPage, NavController, NavParams, ActionSheetController, Events } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 
-import { MessagesProvider } from './messages.provider'
+import { ConvoProvider } from "../../shared/providers/convo.provider";
 /**
  * Generated class for the Messages page.
  *
@@ -21,16 +21,22 @@ export class Messages {
   public messageList = [];
   private refresher = null;
   private searchText: String = '';
-  private numbers;
+  private userAvatar = '';
+  private groupAvatar = '';
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public messagesProvider: MessagesProvider,
-    public actionSheetCtrl: ActionSheetController) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public convoProvider: ConvoProvider,
+    public actionSheetCtrl: ActionSheetController, private event: Events, private zone: NgZone) {
     this.local = new Storage('localstorage');
+    this.userAvatar = convoProvider.httpClient.userAvatar;
+    this.groupAvatar = convoProvider.httpClient.groupAvatar;
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
       this.getMessageList();
     });
-    this.numbers = new Array(5).fill(5).map((x, i) => i + 1);//Array(5).fill().map((x,i)=>i); // [0,1,2,3,4]
+    // this.numbers = new Array(5).fill(5).map((x, i) => i + 1);//Array(5).fill().map((x,i)=>i); // [0,1,2,3,4]
+    this.event.subscribe('notification:messagerecieve', (conversationId) => {
+      this.getMessageList();
+    });
   }
   ionViewWillEnter() {
     if (this.userInfo['_id']) {
@@ -38,20 +44,28 @@ export class Messages {
     }
   }
 
-  getMessageList() {
-    this.messagesProvider.getMessageList(this.userInfo['_id'], '').subscribe((res: any) => {
-      this.messageList = res;
-      if (this.refresher) {
-        this.refresher.complete();
-        this.refresher = null;
-      }
-    }, error => {
-      if (this.refresher) {
-        this.refresher.complete();
-        this.refresher = null;
-      }
-      console.info('error', error);
+  onPageWillLeave() {
+    this.event.unsubscribe('notification:messagerecieve', (data) => {
+
     });
+  }
+
+  getMessageList() {
+    if (this.userInfo['_id']) {
+      this.convoProvider.getMessageList(this.userInfo['_id'], '').subscribe((res: any) => {
+        this.messageList = res;
+        if (this.refresher) {
+          this.refresher.complete();
+          this.refresher = null;
+        }
+      }, error => {
+        if (this.refresher) {
+          this.refresher.complete();
+          this.refresher = null;
+        }
+        console.info('error', error);
+      });
+    }
   }
 
   ionViewDidLoad() {
@@ -75,7 +89,7 @@ export class Messages {
   }
 
   getMessageDateFormate(date) {
-    return this.messagesProvider.httpClient.getDateFormate(date);
+    return this.convoProvider.httpClient.getDateFormate(date);
   }
 
   doRefresh(refresher) {
@@ -87,8 +101,15 @@ export class Messages {
     this.searchText = event.target.value;
   }
 
-  checkMsgIfReadByOther(msg) {
-    return msg && msg.createdBy._id !== this.userInfo['_id'] && !msg.read ? true : false;
+  checkMsgIfRead(msg) {
+    if (msg.readBy && msg.createdBy._id != this.userInfo['_id']) {
+      let read = msg.readBy.filter(readBy => {
+        return readBy.user == this.userInfo['_id'];
+      });
+      return read.length == 0;
+    } else return false;
+
+    // return msg && msg.createdBy._id !== this.userInfo['_id'] && !msg.read ? true : false;
   }
 
   presentEditActionSheet(convo) {
@@ -101,7 +122,7 @@ export class Messages {
   }
 
   deleteConvo(convo) {
-    this.messagesProvider.deleteConvo(convo['_id'], this.userInfo['_id'])
+    this.convoProvider.deleteConvo(convo['_id'], this.userInfo['_id'])
       .subscribe((res: any) => {
         let index = this.messageList.indexOf(convo);
         this.messageList.splice(index, 1);

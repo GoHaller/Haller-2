@@ -155,6 +155,30 @@ function changePassword(req, res, next) {
   }
 }
 
+function createPassword(req, res, next) {
+  if (req.params.userId && req.body.password) {
+    User.get(req.params.userId).then((user) => {
+      if (user) {
+        const userCpy = user;
+        userCpy.password = bcrypt.hashSync(req.body.password, 10);
+        userCpy.save().then(updatedUser => {
+          updatedUser.otp = {};
+          res.json(updatedUser)
+        });
+      } else {
+        const error = new APIError('No User Found with that email!', httpStatus.NOT_FOUND);
+        return next(error);
+      }
+    }).catch((e) => {
+      console.log(e); //eslint-disable-line
+      next(e);
+    });
+  } else {
+    const err = new APIError('Authentication error-2', httpStatus.UNAUTHORIZED);
+    return next(err);
+  }
+}
+
 function reportProblem(req, res, next) {
   if (req.params.userId && req.body.title && req.body.description) {
     User.get(req.params.userId).then((user) => {
@@ -201,4 +225,4 @@ function adminlogin(req, res, next) {
   }
 }
 
-export default { login, adminlogin, getRandomNumber, logout, encryptPassword, changePassword, reportProblem };
+export default { login, adminlogin, getRandomNumber, logout, encryptPassword, changePassword, createPassword, reportProblem };

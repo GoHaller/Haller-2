@@ -23,7 +23,12 @@ page-event {
                 padding-left: 0px;
                 padding-right: 0px;
                 .ev-detail{
-                    padding: 0px 16px 0px 16px;
+                    padding: 0px 16px 0px 16px;                    
+                }
+                .ev-join{
+                    max-width: 150px;
+                    width: 20vh;
+                    border-radius: 2px;
                 }
             }
             .item{

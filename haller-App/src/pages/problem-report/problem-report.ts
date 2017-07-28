@@ -31,6 +31,8 @@ export class ProblemReport {
     });
   }
 
+  goBack() { this.navCtrl.pop(); }
+
   ionViewDidLoad() {
     this.local.get('uid').then(val => {
       this.uid = val;

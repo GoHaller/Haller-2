@@ -25,7 +25,8 @@
       <ion-col col-12>
         <ion-item>
           <ion-avatar item-left>
-            <img [src]="userInfo.currentProfile ? userInfo.currentProfile.secure_url : 'assets/img/default-user.png'">
+            <!-- <img [src]="userInfo.currentProfile ? userInfo.currentProfile.secure_url : userAvatar"> -->
+            <img [src]="feedProvider.httpClient.getProfileImageToDisplay(userInfo)">
           </ion-avatar>
           <h2>{{userInfo.firstName + ' ' + userInfo.lastName}}</h2>
         </ion-item>
@@ -39,7 +40,7 @@
     <ion-row>
       <ion-col col-12>
         <ion-item>
-          <ion-textarea class="post-detail" [(ngModel)]="feed.details" rows="4" placeholder="What do you want to say?"></ion-textarea>
+          <ion-textarea class="post-detail" [(ngModel)]="feed.details" rows="15" placeholder="What do you want to say?"></ion-textarea>
         </ion-item>
       </ion-col>
     </ion-row>
@@ -60,13 +61,10 @@
 <ion-footer>
   <ion-row class="msg-attachment" style="padding: 5px;">
     <ion-col center text-center>
-      <ion-icon name="link"></ion-icon>
+      <ion-icon (click)="takePictureFromCamera()" name="camera"></ion-icon>
     </ion-col>
     <ion-col center text-center>
       <ion-icon (click)="takePictureFromPhotoLibrary()" name="images"></ion-icon>
-    </ion-col>
-    <ion-col center text-center>
-      <ion-icon (click)="takePictureFromCamera()" name="camera"></ion-icon>
     </ion-col>
   </ion-row>
 </ion-footer>

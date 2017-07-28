@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { PopoverController, IonicPage, NavController, NavParams, LoadingController, ActionSheetController, AlertController, Events } from 'ionic-angular';
+import { PopoverController, IonicPage, NavController, NavParams, LoadingController, ActionSheetController, AlertController, Events, ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
-import { FeedProvider } from './feed.provoder'
+import { FeedProvider } from '../../shared/providers/feed.provider';
 
 @IonicPage()
 @Component({
@@ -12,20 +12,22 @@ export class Feed {
 
   private local: Storage;
   public userInfo: Object = {};
-  private whichfeed: String = 'residents';
-  private feedList = [];
-  private refresher = null;
-  private infiniteScroll = null;
-  private startskip = 0;
-  private skip: number = 0;
-  private limit: number = 50;
-  private cleanList: Boolean = false;
+  public whichfeed: String = 'residents';
+  public feedList = [];
+  public refresher = null;
+  public infiniteScroll = null;
+  public startskip = 0;
+  public skip: number = 0;
+  public limit: number = 50;
+  public cleanList: Boolean = false;
+  public userAvatar = '';
   // private loader: any;
   constructor(public navCtrl: NavController, public navParams: NavParams,
-    private feedProvider: FeedProvider, private loadingCtrl: LoadingController,
+    public feedProvider: FeedProvider, private loadingCtrl: LoadingController,
     private popoverCtrl: PopoverController, public actionSheetCtrl: ActionSheetController,
-    private alertCtrl: AlertController, private event: Events) {
+    private alertCtrl: AlertController, private event: Events, private modalCtrl: ModalController) {
     this.local = new Storage('localstorage');
+    this.userAvatar = feedProvider.httpClient.userAvatar;
   }
 
   ionViewDidLoad() {
@@ -208,15 +210,12 @@ export class Feed {
     }
   }
 
-  // shareFeed(feed) {
-
-  // }
-
   getDateFormatr(date) {
     return this.feedProvider.httpClient.getDateFormate(date);
   }
 
   changeSegment(segmentName) {
+    this.skip = 0;
     this.whichfeed = segmentName;
     this.cleanList = true;
     this.getFeeds();
@@ -233,5 +232,13 @@ export class Feed {
     this.infiniteScroll = infiniteScroll;
     this.skip += this.limit;
     this.getFeeds();
+  }
+
+  openLikeModel(likes) {
+    let modal = this.modalCtrl.create('LikeListPage', { likes: likes, userAvatar: this.userAvatar });
+    modal.onDidDismiss(data => {
+      console.info('data', data);
+    });
+    modal.present();
   }
 }

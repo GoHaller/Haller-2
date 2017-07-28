@@ -1,7 +1,7 @@
-<ion-tabs [selectedIndex]="mySelectedIndex" color="colorwhite">
+<ion-tabs  #mainTabs selectedIndex="{{mySelectedIndex}}" color="colorwhite">
   <ion-tab [root]="tab1Root" tabTitle="Feed" tabIcon="list-box"></ion-tab>
   <ion-tab [root]="tab2Root" tabTitle="Event" tabIcon="calendar"></ion-tab>
-  <ion-tab [root]="tab3Root" tabTitle="Messages" tabIcon="chatbubbles"></ion-tab>
-  <ion-tab [root]="tab4Root" tabTitle="Notifications" tabIcon="notifications"></ion-tab>
-  <ion-tab [root]="tab5Root" tabTitle="Peers" tabIcon="ios-people-outline"></ion-tab>
+  <ion-tab [root]="tab3Root" tabBadge="{{msgCount}}" tabBadgeStyle="danger" tabTitle="Messages" tabIcon="chatbubbles"></ion-tab>
+  <ion-tab [root]="tab4Root" tabBadge="{{notiCount}}" tabBadgeStyle="danger" tabTitle="Notifications" tabIcon="notifications"></ion-tab>
+  <ion-tab [root]="tab5Root" tabTitle="Peers" tabIcon="ios-people"></ion-tab>
 </ion-tabs>

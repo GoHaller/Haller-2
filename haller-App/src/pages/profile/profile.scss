@@ -12,7 +12,7 @@ page-profile {
         .card-content{
             padding: 0px;
             .tag-text{
-                max-width: 75px;
+                max-width: 300px;
                 justify-content: initial;
                 -webkit-justify-content: initial;
                 text-overflow: ellipsis;
@@ -45,7 +45,9 @@ page-profile {
             right: 0;
             margin: auto;
         }
-        
+        .block-btn{
+            margin-top:30px
+        }
 
         .mini-detail{
             margin: 15px 0px;

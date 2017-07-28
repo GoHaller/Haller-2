@@ -6,38 +6,42 @@
 -->
 <ion-header>
 
-  <ion-navbar color="primary">
+  <ion-navbar color="primary" hideBackButton>
+    <ion-buttons left><button ion-button (click)="goBack()">Cancel</button></ion-buttons>
     <ion-title>{{headerText}}</ion-title>
     <ion-buttons right>
-      <button ion-button (click)="addEditEvent()">{{saveButtonText}}</button>
+      <button ion-button [disabled]="!eventForm.valid" (click)="addEditEvent(eventForm.value)">{{saveButtonText}}</button>
     </ion-buttons>
   </ion-navbar>
 
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-item>
-      <ion-input placeholder="Title" [(ngModel)]="event.title"></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-datetime placeholder="Date Time" pickerFormat="h:m a MMM D, YYYY" displayFormat="h:m A MMMM D, YYYY" [(ngModel)]="event.date"></ion-datetime>
-    </ion-item>
-    <ion-item>
-      <ion-input placeholder="Location" [(ngModel)]="event.location"></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-textarea placeholder="Details" [(ngModel)]="event.details"></ion-textarea>
-    </ion-item>
-  </ion-list>
+  <form [formGroup]="eventForm">
+    <ion-list>
+      <ion-item>
+        <ion-input placeholder="Title" formControlName="title"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-datetime placeholder="Date Time" pickerFormat="H:m MMM D, YYYY" [min]="minDate" [max]="maxDate" displayFormat="H:m MMM D, YYYY"
+          formControlName="date"></ion-datetime>
+      </ion-item>
+      <ion-item>
+        <ion-input placeholder="Location" formControlName="location"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-textarea placeholder="Description" row="4" formControlName="details"></ion-textarea>
+      </ion-item>
+    </ion-list>
+  </form>
   <ion-grid>
-    <ion-row class="event-image" *ngIf="eventProvider.cloudinaryProvider && eventProvider.cloudinaryProvider.imageLocalPath">
+    <ion-row class="event-image" *ngIf="feedProvider.cloudinaryProvider && feedProvider.cloudinaryProvider.imageLocalPath">
       <ion-col col-12>
         <button ion-button icon-only color="dark" clear class="remove-image-btn" (click)="removeImage()"><ion-icon name="close"></ion-icon></button>
-        <img [src]="eventProvider.cloudinaryProvider.imageLocalPath" />
+        <img [src]="feedProvider.cloudinaryProvider.imageLocalPath" />
       </ion-col>
     </ion-row>
-    <ion-row class="event-image" *ngIf="eventProvider.cloudinaryProvider.imageLocalPath == null && event.cover && event.cover[0]">
+    <ion-row class="event-image" *ngIf="feedProvider.cloudinaryProvider.imageLocalPath == null && event.cover && event.cover[0]">
       <ion-col col-12>
         <img [src]="event.cover[event.cover.length - 1].secure_url" />
       </ion-col>
@@ -48,13 +52,10 @@
 <ion-footer>
   <ion-row class="msg-attachment" style="padding: 5px;">
     <ion-col center text-center>
-      <ion-icon name="link"></ion-icon>
+      <ion-icon (click)="takePictureFromCamera()" name="camera"></ion-icon>
     </ion-col>
     <ion-col center text-center>
       <ion-icon (click)="takePictureFromPhotoLibrary()" name="images"></ion-icon>
-    </ion-col>
-    <ion-col center text-center>
-      <ion-icon (click)="takePictureFromCamera()" name="camera"></ion-icon>
     </ion-col>
   </ion-row>
 </ion-footer>

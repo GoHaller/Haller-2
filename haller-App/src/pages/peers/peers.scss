@@ -2,6 +2,11 @@ page-peers {
     .toolbar-ios .segment-button{
         max-width: 65px;
     }
+    .segment{
+        padding-top: 0px !important;
+        height: auto !important;
+        min-height: auto !important;;
+    }
     .segment-md .segment-button{
         flex: none;
         width: 65px;
@@ -11,7 +16,9 @@ page-peers {
     }
     .peer-list{
         padding: 0px 0px 0px 0px;
-
+        .select{
+            background-color: #DBDBDB;
+        }
         .item ion-avatar[item-left], .item ion-thumbnail[item-left]{
             margin-left: 10px;
             margin-right: 0px;

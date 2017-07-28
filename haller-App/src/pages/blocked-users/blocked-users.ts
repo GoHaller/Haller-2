@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, PipeTransform, Pipe } from '@angular/core';
 import { IonicPage, NavController, NavParams, ActionSheetController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 
-import { ProfileEditProvider } from "../profile-edit/profile-edit.provider";
-import { MessagesProvider } from "../messages/messages.provider";
+import { ProfileProvider } from "../../shared/providers/profile.provider";
+import { ConvoProvider } from "../../shared/providers/convo.provider";
 
 /**
  * Generated class for the BlockedUsers page.
@@ -21,11 +21,14 @@ export class BlockedUsers {
   private local: Storage;
   private userInfo: Object = {};
   private blockedUsers = [];
+  private searchText: String = '';
+  private userAvatar = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams,
-    private profileEditProvider: ProfileEditProvider, private messageProvider: MessagesProvider,
+    public profileProvider: ProfileProvider, private convoProvider: ConvoProvider,
     public actionSheetCtrl: ActionSheetController) {
     this.local = new Storage('localstorage');
+    this.userAvatar = convoProvider.httpClient.userAvatar;
     this.local.get('userInfo').then(val => {
       this.userInfo = JSON.parse(val);
       this.getBlockedUsers();
@@ -33,14 +36,19 @@ export class BlockedUsers {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad BlockedUsers');
+    // console.log('ionViewDidLoad BlockedUsers');
+  }
+
+  ionViewWillEnter() {
+    if (this.userInfo['_id']) {
+      this.getBlockedUsers();
+    }
   }
 
   getBlockedUsers() {
-    this.profileEditProvider.getBlockedUsers(this.userInfo['_id'])
+    this.profileProvider.getBlockedUsers(this.userInfo['_id'])
       .subscribe((res: any) => {
         this.blockedUsers = res;
-        console.info('this.blockedUsers', this.blockedUsers);
       }, error => {
         console.info('getBlockedUsers error', error);
       });
@@ -58,7 +66,7 @@ export class BlockedUsers {
   }
 
   unBlockUser(blockUserId) {
-    this.messageProvider.blockUser(this.userInfo['_id'], blockUserId)
+    this.convoProvider.blockUser(this.userInfo['_id'], blockUserId)
       .subscribe((res: any) => {
         if (res['_id'] == this.userInfo['_id']) {
           this.userInfo = res;
@@ -69,5 +77,29 @@ export class BlockedUsers {
 
       });
   }
+
+  getItems(ev: any) {
+    this.searchText = ev.target.value;
+  }
+
+}
+
+
+@Pipe({
+  name: "blockedsearch",
+  pure: false
+})
+export class BlockedFilterPipe implements PipeTransform {
+  transform(items: any, conditions: string[]): any {
+    return items.filter(item => {
+      if (conditions[2] && conditions[2].length > 0) {
+        let name = item.user[conditions[0]] + ' ' + item.user[conditions[1]];
+        if (name.toUpperCase().startsWith(conditions[2].toUpperCase())) {
+          return true;
+        }
+        else return false;
+      } else return true;
+    });
+  };
 
 }

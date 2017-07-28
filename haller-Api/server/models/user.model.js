@@ -277,8 +277,9 @@ UserSchema.statics = {
           user.otp = {};
           return user;
         }
-        const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
-        return Promise.reject(err);
+        else return null;
+        // const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+        // return Promise.reject(err);
       });
   },
 
@@ -339,7 +340,8 @@ UserSchema.statics = {
   },
 
   userWhoBlockedMe(id) {
-    return this.find({ 'blocked.user': { $in: [id] } }, { id: true }).exec();
+    // return this.find({ 'blocked.user': { $in: [id] } }, { id: true }).exec();
+    return this.find({ $or: [{ 'blocked.user': { $in: [id] } }, { 'deleted': true }] }, { _id: 1 }).exec();
   },
   getBlockedUsers(id) {
     try {

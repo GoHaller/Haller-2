@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { ProfileEdit } from './profile-edit';
-import { ProfileEditProvider } from "./profile-edit.provider";
+import { ProfileProvider } from "../../shared/providers/profile.provider";
 import { HttpClient } from '../../shared/providers/http-client';
 
 import { Camera } from '@ionic-native/camera';
 import { Transfer } from '@ionic-native/transfer';
-import { CloudinaryProvider } from '../../shared/providers/cloudinary-provider';
+import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
 
 @NgModule({
   declarations: [
-    ProfileEdit,
+    ProfileEdit
   ],
   imports: [
     IonicPageModule.forChild(ProfileEdit),
@@ -18,6 +18,6 @@ import { CloudinaryProvider } from '../../shared/providers/cloudinary-provider';
   exports: [
     ProfileEdit
   ],
-  providers: [ProfileEditProvider, HttpClient, CloudinaryProvider, Camera, Transfer]
+  providers: [ProfileProvider, HttpClient, CloudinaryProvider, Camera, Transfer]
 })
 export class ProfileEditModule { }

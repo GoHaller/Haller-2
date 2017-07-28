@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { Peers, PeerFilterPipe } from './peers';
-import { PeersProvider } from './peers.provider';
+import { ProfileProvider } from "../../shared/providers/profile.provider";
 import { HttpClient } from '../../shared/providers/http-client';
 
 @NgModule({
@@ -14,6 +14,6 @@ import { HttpClient } from '../../shared/providers/http-client';
   exports: [
     Peers
   ],
-  providers: [PeersProvider, HttpClient]
+  providers: [ProfileProvider, HttpClient]
 })
 export class PeersModule { }

@@ -1,10 +1,12 @@
-import { Pipe, PipeTransform, Component, ViewChild } from '@angular/core';
+import { Pipe, PipeTransform, Component, ViewChild, NgZone } from '@angular/core';
 import { Events, Content, ModalController, IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
+import { AlertController } from 'ionic-angular';
 
-import { MessagesProvider } from '../messages/messages.provider';
+import { TabsPage } from "../tabs/tabs";
+import { ConvoProvider } from "../../shared/providers/convo.provider";
 import { ImageFullComponent } from '../../shared/pages/image.full';
-import { CloudinaryProvider } from '../../shared/providers/cloudinary-provider';
+import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
 
 /**
  * Generated class for the Message page.
@@ -29,16 +31,20 @@ export class Message {
   // recipientId: String;
   userList = [];
   searchText: String = '';
+  searchInputText: string = '';
   //data to send new message
   msgContent: String;
   private localImage: String = null;
   private cloudinaryImageData: Object = null;
+  private userAvatar = '';
 
   constructor(public modalCtrl: ModalController, public navCtrl: NavController, public navParams: NavParams,
-    public messageProvider: MessagesProvider, public cloudinaryProvider: CloudinaryProvider, private event: Events,
-    public loadingCtrl: LoadingController) {
+    public convoProvider: ConvoProvider, public cloudinaryProvider: CloudinaryProvider, private event: Events,
+    public loadingCtrl: LoadingController, private zone: NgZone, public alertCtrl: AlertController) {
     this.conversationId = this.navParams.data.conversationId;
+
     this.recipients = this.navParams.data.recipients ? [this.navParams.data.recipients] : [];
+    this.userAvatar = convoProvider.httpClient.userAvatar;
 
     this.local = new Storage('localstorage');
     this.local.get('userInfo').then((val) => {
@@ -53,17 +59,41 @@ export class Message {
         this.getUsers();
       }
     });
+    this.event.subscribe('notification:message', (conversationId) => {
+      this.zone.run(() => {
+        this.conversationId = conversationId;
+        this.getConversation();
+      });
+    });
+    this.event.subscribe('notification:messagerecieve', (conversationId) => {
+      if (this.conversationId.toString() == conversationId.toString()) {
+        this.zone.run(() => {
+          this.conversationId = conversationId;
+          this.getConversation();
+        });
+      }
+    });
+  }
+
+  onPageWillLeave() {
+    this.event.unsubscribe('notification:messagerecieve', (data) => {
+
+    });
   }
 
   goBack() {
-    let resolver = this.navParams.get('resolve');
-    if (resolver) resolver(this.conversation);
-    this.navCtrl.pop();
+    if (this.navCtrl.length() > 1) {
+      let resolver = this.navParams.get('resolve');
+      if (resolver) resolver(this.conversation);
+      this.navCtrl.pop();
+    } else {
+      this.navCtrl.setRoot(TabsPage);
+    }
   }
 
   ionViewDidLoad() {
     setTimeout(() => {
-      this.content.scrollToBottom(300);
+      this.content.scrollTo(0, 100000);
     }, 1000);
     this.event.subscribe('image-loaded', () => {
       this.localImage = this.cloudinaryProvider.imageLocalPath;
@@ -77,19 +107,40 @@ export class Message {
     }
   }
 
+
   removeImage() {
     this.localImage = null;
     this.cloudinaryProvider.imageLocalPath = null;
     this.cloudinaryImageData = null;
+    this.cloudinaryProvider.gif = {};
   }
 
   //Recipient Section Start
   findParticipants(event) {
-    this.searchText = event.target.value;
+    // console.info('key Code', event.keyCode);
+    let uData = event.target.value.split(',');
+    if (this.recipients.length != 0 && this.recipients.length == (uData.length - 2)) {
+      uData.splice((uData.length - 2), 1);
+      this.searchInputText = uData.join(',');
+    } else if (event.keyCode == 8) {
+      if (this.recipients.length != 0 && this.recipients.length == uData.length) {
+        uData.splice((uData.length - 1), 1);
+        this.searchInputText = uData.length > 0 ? (uData.join(',') + ',') : '';
+        uData = this.searchInputText.split(',');
+        this.recipients.splice((this.recipients.length - 1), 1);
+        this.onRecipientsChange();
+      }
+    }
+    this.searchText = uData[uData.length == 0 ? 0 : (uData.length - 1)];
   }
-  selectRecipient(user) {
+  selectRecipient(user, input) {
     if (this.recipients.indexOf(user) == -1) {
       this.recipients.push(user);
+      let uData = this.searchInputText.split(',');
+      uData[uData.length == 0 ? 0 : (uData.length - 1)] = user.firstName + ' ' + user.lastName;
+      this.searchInputText = uData.join(',') + ',';
+      this.searchText = '';
+      input.setFocus();
       this.onRecipientsChange();
     }
   }
@@ -106,7 +157,7 @@ export class Message {
     }
   }
   getConversationForRecipient() {
-    this.messageProvider.getConversationForRecipient(this.userInfo['_id'], this.recipients[0]['_id']).subscribe((res: any) => {
+    this.convoProvider.getConversationForRecipient(this.userInfo['_id'], this.recipients[0]['_id']).subscribe((res: any) => {
       // res[0].messages = this.setMessagesIfUserDeleted(res[0]);
       this.conversation = res[0];
       if (this.conversation)
@@ -119,21 +170,21 @@ export class Message {
   //Recipient Section end
 
   getUsers() {
-    this.messageProvider.getUsers(this.userInfo['_id'], 0, 50).subscribe((res: any) => {
+    this.convoProvider.getUsers(this.userInfo['_id'], 0, 50).subscribe((res: any) => {
       this.userList = res;
     }, error => {
       console.info('usres error', error);
     });
   }
   getConversation() {
-    this.messageProvider.getConversation(this.conversationId, this.userInfo['_id']).subscribe((res: any) => {
-      // console.info('conversation', res);
+    this.convoProvider.getConversation(this.conversationId, this.userInfo['_id']).subscribe((res: any) => {
       // res.messages = this.setMessagesIfUserDeleted(res);
       this.conversation = res;
+      // console.info('conversation', this.conversation);
       this.recipients = this.conversation['participants'].filter(part => {
         return part._id !== this.userInfo['_id'];
       });
-      this.content.scrollToBottom(300);
+      this.content.scrollTo(0, 100000);
       this.markMessageAsRead();
     }, error => {
       console.info('usres error', error);
@@ -190,7 +241,7 @@ export class Message {
     }
   }
   addMessage() {
-    if (this.msgContent && this.recipients.length > 0) {
+    if ((this.msgContent || this.cloudinaryImageData != null || this.cloudinaryProvider.gif['id']) && this.recipients.length > 0) {
       let messagesObj: Object = {
         body: this.msgContent,
         createdBy: this.userInfo['_id'],
@@ -202,13 +253,15 @@ export class Message {
         messagesObj['giphy'] = this.cloudinaryProvider.gif;
       }
       if (this.conversationId) {
-        this.messageProvider.putMessage(this.conversationId, { message: messagesObj }, this.userInfo['_id'])
+        this.convoProvider.putMessage(this.conversationId, { message: messagesObj }, this.userInfo['_id'])
           .subscribe((res: any) => {
             this.isNewConvo = false;
             this.conversation = res;
             this.msgContent = '';
             this.localImage = '';
             this.cloudinaryImageData = null;
+            this.cloudinaryProvider.gif = {};
+            this.content.scrollTo(0, 100000);
           }, error => {
             console.info('putMessage error', error);
           });
@@ -217,7 +270,7 @@ export class Message {
         this.recipients.forEach(recipient => {
           participants.push(recipient['_id']);
         });
-        this.messageProvider.createConversation({
+        this.convoProvider.createConversation({
           createdBy: this.userInfo['_id'],
           participants: participants,
           messages: [messagesObj]
@@ -227,17 +280,27 @@ export class Message {
           this.msgContent = '';
           this.localImage = '';
           this.cloudinaryImageData = null;
+          this.cloudinaryProvider.gif = {};
+          this.content.scrollTo(0, 100000);
         }, error => {
           console.info('createConversation error', error);
         });
       }
+    } else {
+      let notificationMsg = "";
+      if (this.recipients.length == 0) notificationMsg = "Please select at least one recipients";
+      else if (!this.msgContent) notificationMsg = "Please enter massage";
+      this.alertCtrl.create({ subTitle: notificationMsg, buttons: ['OK'] }).present();
     }
   }
 
   newMessageChange(event) {
     let ele = event.target;
-    if (ele.clientHeight < ele.scrollHeight) ele.rows = 2;
-    else if (ele.value.length == 0) ele.rows = 1;
+    let row = ele.rows;
+    if (ele.clientHeight < ele.scrollHeight && row < 6) {
+      row += 1;
+    }
+    ele.rows = row;
   }
 
   takePicture() {
@@ -249,24 +312,30 @@ export class Message {
   }
 
   getMessageDateFormate(date) {
-    return this.messageProvider.httpClient.getDateFormate(date);
+    return this.convoProvider.httpClient.getDateFormate(date);
   }
 
   markMessageAsRead() {
     if (this.conversation && this.conversation['messages']) {
       let intervalId = setInterval(() => {
         let msg = this.conversation['messages'].filter(msg => {
-          return (!msg.read && msg.recipient['_id'] == this.userInfo['_id'])
+          if (msg.readBy) {
+            let userMsg = msg.readBy.filter(readBy => {
+              return readBy.user == this.userInfo['_id'];
+            });
+            return userMsg.length == 0;
+          } else return true;
+          // return (!msg.read && msg.recipient['_id'] == this.userInfo['_id'])
         })[0];
         if (msg) {
-          this.messageProvider.updateMessage(this.conversationId, msg['_id'], { message: { read: true }, userId: this.userInfo['_id'] })
+          this.convoProvider.updateMessage(this.conversationId, msg['_id'], { message: { read: true }, userId: this.userInfo['_id'] })
             .subscribe((res: any) => {
               this.conversation = res;
             }, error => {
               console.info('updateMessage error', error);
             });
         }
-        else { clearTimeout(intervalId); }
+        else { clearTimeout(intervalId); this.event.publish('notification:count'); }
       }, 2000);
     }
   }
@@ -285,7 +354,7 @@ export class Message {
   }
 
   checkIfUserHasLeft() {
-    if (this.conversation['leftUser']) {
+    if (this.conversation && this.conversation['leftUser']) {
       let user = this.conversation['leftUser'].filter(user => {
         return user.user == this.userInfo['_id'];
       })
@@ -300,13 +369,33 @@ export class Message {
       return this.conversation['groupName']
     else {
       let groupName = [];
-      this.conversation['participants'].forEach(parti => {
-        if (parti._id !== this.userInfo['_id'] && groupName.length < 2) {
-          groupName.push(parti.firstName + ' ' + parti.lastName);
-        }
-      });
-      return groupName.join(', ');
+      if (this.conversation['participants']) {
+        this.conversation['participants'].forEach(parti => {
+          if (parti._id !== this.userInfo['_id'] && groupName.length < 2) {
+            groupName.push(parti.firstName + ' ' + parti.lastName);
+          }
+        });
+        return groupName.join(', ');
+      } else {
+        return 'New group chat'
+      }
     }
+  }
+
+  showUserList() {
+    new Promise((resolve, reject) => {
+      this.navCtrl.push('Peers', { resolve: resolve }, { animate: true, direction: 'forward' })
+    }).then((data: any) => {
+      if (data.length > 0) {
+        this.recipients = data;
+        let uData = [];//this.searchInputText.split(',');
+        data.forEach(user => {
+          uData.push(user.firstName + ' ' + user.lastName);
+        });
+        this.searchInputText = uData.join(',');
+        if (data.length == 1) this.getConversationForRecipient();
+      }
+    });
   }
 }
 

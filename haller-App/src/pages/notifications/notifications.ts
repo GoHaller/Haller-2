@@ -1,13 +1,8 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Events } from 'ionic-angular';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Storage } from '@ionic/storage';
-/**
- * Generated class for the Notifications page.
- *
- * See http://ionicframework.com/docs/components/#navigation for more info
- * on Ionic pages and navigation.
- */
+
 @IonicPage()
 @Component({
   selector: 'page-notifications',
@@ -19,12 +14,26 @@ export class Notifications {
   public userInfo: Object = {};
   private userMessage: string = '';
   private notifications = [];
+  private whichnotification: String = 'personal';
+  private userAvatar = '';
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private httpClient: HttpClient) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public httpClient: HttpClient, private event: Events) {
     this.local = new Storage('localstorage');
+    this.userAvatar = httpClient.userAvatar;
+    event.subscribe('notification:university', () => {
+      this.whichnotification = 'university';
+      this.getNotification();
+    })
   }
 
   ionViewDidLoad() {
+    this.local.get('university-notification').then((data) => {
+      if (data) {
+        this.whichnotification = 'university';
+        this.local.set('university-notification', '').then(() => { });
+        this.ionViewWillEnter();
+      }
+    });
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
       this.getNotification();
@@ -36,31 +45,34 @@ export class Notifications {
     }
   }
 
+
   //http://localhost:4040/api/users/58c96fcf8b3c3400044cd3c0/notifications
   getNotification() {
-    this.httpClient.get('/users/' + this.userInfo['_id'] + '/notifications').map(this.httpClient.extractData)
+    this.httpClient.get('/notifications/users/' + this.userInfo['_id'] + '?university=' + (this.whichnotification == 'university')).map(this.httpClient.extractData)
       .subscribe((res: any) => {
-        this.userMessage = res.length > 0 ? '' : 'It seems you haven\'t share/post anything yet.';
+        this.userMessage = res.length > 0 ? '' : 'Nothing here yet.';
         this.notifications = res;
+        if (res.length > 0) {
+          if (this.whichnotification == 'personal') {
+            this.local.set('last-notification-showed', JSON.stringify(res[0])).then(() => {
+              this.event.publish('notification:count');
+            });
+          }
+        }
       }, error => {
         console.info('error', error);
       })
   }
 
-  gototFeedDetail(noti) {
-    this.httpClient.get('/users/' + this.userInfo['_id'] + '/notification/' + noti._id + '/read').map(this.httpClient.extractData)
-      .subscribe((res: any) => {
-        let index = this.notifications.indexOf(noti);
-        this.notifications[index] = res;
-      }, error => {
-        console.info('error', error);
-      });
-    this.navCtrl.push('FeedDetail', { feedId: noti.post._id }, { animate: true, direction: 'forward' });
+  changeSegment(segment) {
+    // this.skip = 0;
+    this.whichnotification = segment;
+    this.getNotification();
   }
 
-
-
-
+  gototFeedDetail(noti) {
+    this.navCtrl.push('FeedDetail', { feedId: noti.post._id, notificationId: noti._id }, { animate: true, direction: 'forward' });
+  }
 
   getDateFormate(date) {
     return this.httpClient.getDateFormate(date);

@@ -7,7 +7,7 @@
 <ion-header>
 
   <ion-navbar color="primary">
-    <ion-title>Profile Settings</ion-title>
+    <ion-title>Settings</ion-title>
   </ion-navbar>
 
 </ion-header>
@@ -17,7 +17,8 @@
   <ion-item-group>
     <button ion-item (click)="goToAddress('Profile')">
       <ion-avatar item-left>
-        <img [src]="userInfo.currentProfile ? userInfo.currentProfile.secure_url : '../../assets/img/default-user.png'">
+        <!-- <img [src]="userInfo.currentProfile ? userInfo.currentProfile.secure_url : 'assets/img/default-user.png'"> -->
+        <img [src]="profileProvider.httpClient.getProfileImageToDisplay(userInfo)">
       </ion-avatar>
       {{userInfo.firstName+' '+userInfo.lastName}}
     </button>
@@ -30,13 +31,17 @@
   </ion-item-group>
   <ion-item-group>
     <ion-item-divider color="light">&nbsp;</ion-item-divider>
+    <ion-item>
+      <ion-label>Notifications</ion-label>
+      <ion-toggle [(ngModel)]="notifications" (ionChange)="switchNotificationSetting()"></ion-toggle>
+    </ion-item>
     <!--<button ion-item [disabled]="userInfo.isRARequested" (click)="presentRequestRAActionSheet()">Request RA Account</button>-->
-    <button ion-item (click)="goToAddress('BlockedUsers')">Block Users</button>
-    <button ion-item>Disable Facebook</button>
-    <button ion-item (click)="goToAddress('ChangePassword')">Change Password</button>
-    <button ion-item>Change Notifications</button>
+    <button ion-item (click)="goToAddress('BlockedUsers')">Blocked Users</button>
+    <button ion-item (click)="settingsFacebook()">Facebook Settings</button>
+    <button ion-item (click)="goToAddress('ChangePassword')">{{userInfo.password?'Change Password':'Create Password'}}</button>
+    <!--<button ion-item>Change Notifications</button>-->
     <button ion-item (click)="goToAddress('ProblemReport')">Report a Problem</button>
-    <button ion-item>Privacy Policy</button>
+    <button ion-item (click)="goToAddress('PrivacyPolicy')">Privacy Policy</button>
   </ion-item-group>
   <ion-item-group>
     <ion-item-divider color="light">&nbsp;</ion-item-divider>

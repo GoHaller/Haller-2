@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { Messages, ConvoFilterPipe } from './messages';
-import { MessagesProvider } from './messages.provider'
+import { ConvoProvider } from "../../shared/providers/convo.provider";
 import { HttpClient } from '../../shared/providers/http-client';
 
 @NgModule({
@@ -14,6 +14,6 @@ import { HttpClient } from '../../shared/providers/http-client';
   exports: [
     Messages
   ],
-  providers: [MessagesProvider, HttpClient]
+  providers: [ConvoProvider, HttpClient]
 })
 export class MessagesModule { }

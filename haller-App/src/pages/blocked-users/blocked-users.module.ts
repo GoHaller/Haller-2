@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
-import { BlockedUsers } from './blocked-users';
-import { ProfileEditProvider } from "../profile-edit/profile-edit.provider";
+import { BlockedUsers, BlockedFilterPipe } from './blocked-users';
+import { ProfileProvider } from "../../shared/providers/profile.provider";
 import { HttpClient } from '../../shared/providers/http-client';
-import { MessagesProvider } from "../messages/messages.provider";
+import { ConvoProvider } from "../../shared/providers/convo.provider";
 
 @NgModule({
   declarations: [
-    BlockedUsers,
+    BlockedUsers, BlockedFilterPipe
   ],
   imports: [
     IonicPageModule.forChild(BlockedUsers),
@@ -15,6 +15,6 @@ import { MessagesProvider } from "../messages/messages.provider";
   exports: [
     BlockedUsers
   ],
-  providers: [ProfileEditProvider, HttpClient, MessagesProvider]
+  providers: [ProfileProvider, HttpClient, ConvoProvider]
 })
 export class BlockedUsersModule { }

@@ -6,11 +6,11 @@
 -->
 
 <ion-header>
-  <ion-toolbar color="primary">
-    <!--<ion-buttons start>
+  <ion-toolbar no-border-top color="primary" hideBackButton>
+    <ion-buttons left *ngIf="chooseUser">
       <button ion-button color="light" (click)="goBack()">Back</button>
-    </ion-buttons>-->
-    <ion-segment [(ngModel)]="selectedPeers" color="light">
+    </ion-buttons>
+    <ion-segment [(ngModel)]="selectedPeers" color="colorwhite">
       <ion-segment-button value="residents" (ionSelect)="changeSegment('residents')">
         Hall
       </ion-segment-button>
@@ -18,6 +18,9 @@
         Campus
       </ion-segment-button>
     </ion-segment>
+    <ion-buttons right *ngIf="chooseUser">
+      <button ion-button color="light" (click)="goBack()">Done</button>
+    </ion-buttons>
   </ion-toolbar>
   <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
 </ion-header>
@@ -26,18 +29,18 @@
 <ion-content>
   <ion-list class="peer-list">
     <ng-template ngFor let-peer [ngForOf]="peersList | peersearch:['firstName','lastName',searchText]">
-      <ion-item *ngIf="peer._id != userInfo._id">
+      <button ion-item *ngIf="peer._id != userInfo._id" (click)="viewProfile(peer)" [ngClass]="isUserSelected(peer)?'select':''">
         <ion-avatar item-left>
-          <img [src]="peer.currentProfile ? peer.currentProfile.secure_url : '../../assets/img/default-user.png'">
+          <!-- <img [src]=" peer.currentProfile ? peer.currentProfile.secure_url : userAvatar "> -->
+          <img [src]="profileProvider.httpClient.getProfileImageToDisplay(peer)">
         </ion-avatar>
         {{ peer.firstName + ' ' + peer.lastName }}
-        <button class="view-profile-btn" ion-button clear item-right (click)="viewProfile(peer)"></button>
-      </ion-item>
+      </button>
     </ng-template>
   </ion-list>
-  <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
-    <ion-infinite-scroll-content loadingSpinner="bubbles">
-      <!--loadingText="Loading more data...">-->
+  <ion-infinite-scroll (ionInfinite)="doInfinite($event) ">
+    <ion-infinite-scroll-content loadingSpinner="bubbles ">
+      <!--loadingText="Loading more data... ">-->
     </ion-infinite-scroll-content>
   </ion-infinite-scroll>
 </ion-content>

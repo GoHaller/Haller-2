@@ -1,4 +1,11 @@
 page-notifications {
+    .toolbar-ios .segment-button{
+        max-width: 65px;
+    }
+    .segment-md .segment-button{
+        flex: none;
+        width: 65px;
+    }
     .list > .item-block:first-child{
         border-top: none;        
     }
@@ -16,5 +23,9 @@ page-notifications {
     }
     .item.unread{
         background-color: #fff;
+    }
+    .unwrap-text{
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }

@@ -5,8 +5,8 @@ import { Transfer } from '@ionic-native/transfer';
 
 import { FeedDetail } from './feed-detail';
 import { HttpClient } from '../../shared/providers/http-client';
-import { FeedProvider } from '../feed/feed.provoder';
-import { CloudinaryProvider } from '../../shared/providers/cloudinary-provider';
+import { FeedProvider } from '../../shared/providers/feed.provider';
+import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
 
 @NgModule({
   declarations: [

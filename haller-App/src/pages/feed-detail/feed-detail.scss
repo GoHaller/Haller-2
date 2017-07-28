@@ -13,11 +13,43 @@ page-feed-detail {
                 border-bottom:none;
             }
     }
-    .comment-list{
+    .ev-join{
+        max-width: 150px;
+        width: 20vh;
+        border-radius: 2px;
+    }
+    .comment-list{        
+        padding: 0px 16px 0px 16px;
+        .row.border-top{
+            border-top: 2px solid #f4f4f4;
+        }
         .item{
             -webkit-align-items: flex-start;
             -ms-flex-align: flex-start;
-            align-items: flex-start;            
+            align-items: flex-start;
+            padding-left: 0px !important;
+            .item-inner{
+                padding: 0px 0px 0px 10px;
+                .label{
+                    margin: 11px 0px 0px 0;
+                    p{
+                        white-space: normal;
+                        line-height: 1.2;
+                    }
+                    .powered-giphy {
+                        border: 1px solid #c4c4c4;
+                        border-bottom-left-radius: 5px;
+                        border-bottom-right-radius: 5px;
+                    }
+                }
+            }
+        }
+        .comment-action{
+            min-height: 4rem;
+            .button-small[item-left],.button-small[item-right]{
+                margin-bottom: 0px;
+                margin-right: 0px;
+            }
         }
     }
     .comment-image{
@@ -34,7 +66,10 @@ page-feed-detail {
     }
     .new-comment{
         border: 1px solid rgba(0,0,0,0.2);
-        border-radius: 6px;
+        border-radius: 8px;
+        .input-cover{
+            position: static;
+        }
         textarea,input {
             margin: 8px;
         }
@@ -48,7 +83,14 @@ page-feed-detail {
                 margin-top: 45%;
             }
         }
-        
+        .msg-attachment{
+            border-top: 1px solid #e4e4e4;
+            ion-col{
+                text-align: center;
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+        }
         .image-to-upload{
             img{
                 max-height: 200px;

@@ -6,10 +6,11 @@
     <ion-title><img src="assets/img/giphy-h.gif" /></ion-title>
   </ion-navbar>
   <ion-toolbar color="black">
-    <ion-searchbar [(ngModel)]="searchText"></ion-searchbar>
+
+    <ion-searchbar (keyup)="searchGif($event)" [(ngModel)]="searchText"></ion-searchbar>
     <ion-buttons right>
       <button ion-button icon-only color="light" (click)="makeSearch()">
-        <ion-icon name="send"></ion-icon>
+        <ion-icon name="search"></ion-icon>
       </button>
     </ion-buttons>
   </ion-toolbar>

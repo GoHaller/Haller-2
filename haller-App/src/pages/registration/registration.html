@@ -1,49 +1,40 @@
 <ion-content class="app-background">
   <div class="reg-div">
-    <button ion-button clear color="light" style="position: absolute;top: 0;" *ngIf="currentTab > 2" (click)="swipeBack()">Back</button>
+    <button ion-button clear color="light" style="position: absolute;top: 0;" *ngIf="(currentTab > 2 && currentTab < 5)" (click)="swipeBack()">Back</button>
     <h3 class="color-white text-center" style="margin-top: 15vh">Haller</h3>
     <ion-slides>
-      <ion-slide>
-        <h5 class="color-white">&nbsp;</h5>
-        <!--Must be a valid @ku.edu email address.-->
-        <form [formGroup]="authForm" (ngSubmit)="createAccount(authForm.value)">
-          <ion-list>
-            <ion-item>
-              <ion-input type="text" full placeholder="Email" formControlName="email"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-input type="password" placeholder="Password" formControlName="password"></ion-input>
-            </ion-item>
-          </ion-list>
-        </form>
-        <button class="auth-btn" [disabled]="!authForm.valid" ion-button color="light" (click)="createAccount(authForm.value)">Sign up</button>
-        <button ion-button block (click)="gotoLoginPage()" clear color="light" style="margin-top:5px">Already have an account? Login</button>
-      </ion-slide>
 
       <!--Verify Your Account-->
       <ion-slide>
-        <h5 class="color-white">Verify Your Account</h5>
+        <h5 class="color-white font-size-12">Verification Code</h5>
         <ion-list>
           <ion-item>
-            <ion-input type="text" placeholder="Verification Code" [(ngModel)]="verificatioCode"></ion-input>
+            <ion-input type="text" placeholder="Please enter the verification code" (input)="checkInviteCode($event)"></ion-input>
           </ion-item>
         </ion-list>
-        <button class="auth-btn" ion-button color="light" [disabled]="verificatioCode.length != 6" (click)="checkOtp()">Next</button>
-        <!--<button class="auth-btn" ion-button block color="light" (click)="swipeTo(0)">Back</button>-->
+        <button ion-button block (click)="gotoLoginPage()" clear color="light" style="margin-top:10px">Already have an account? Log in.</button>
+      </ion-slide>
+
+      <!--Enter email address-->
+      <ion-slide>
+        <p class="color-white font-size-12">Must be a valid @ku.edu email address.</p>
+        <form>
+          <ion-list>
+            <ion-item>
+              <ion-input type="email" #emailInput full name="email" placeholder="Email" [(ngModel)]="email"></ion-input>
+            </ion-item>
+          </ion-list>
+        </form>
+        <button class="auth-btn" ion-button color="light" (click)="checkEmail()">Next</button>
+        <button ion-button block (click)="gotoLoginPage()" clear color="light" style="margin-top:5px">Already have an account? Log In</button>
       </ion-slide>
 
       <!--Residence Hall-->
       <ion-slide>
-        <h5 class="color-white">Residence Hall</h5>
+        <h5 class="color-white font-size-12">Residence Hall</h5>
         <ion-list style="margin-bottom:0px">
-          <!--<ion-item>
-            <ion-select full placeholder="Residence" [(ngModel)]="userInfo.residence" [selectOptions]="{title: 'Residence Hall'}">
-              <ion-option value="Oliver">Oliver</ion-option>
-              <ion-option value="Scholarship Halls">Scholarship Halls</ion-option>
-            </ion-select>
-          </ion-item>-->
           <ion-item (click)="showResidenceOption = !showResidenceOption">
-            <ion-input disabled="disabled" [(ngModel)]="userInfo.residence" placeholder="Residence Hall"></ion-input>
+            <ion-input disabled="disabled" [(ngModel)]="residence" placeholder="Residence Hall"></ion-input>
             <ion-icon name="ios-arrow-down-outline" item-right></ion-icon>
           </ion-item>
         </ion-list>
@@ -51,16 +42,32 @@
           <ion-item (click)="selectResidence('Oliver')">Oliver</ion-item>
           <ion-item (click)="selectResidence('Scholarship Halls')">Scholarship Halls</ion-item>
         </ion-list>
-        <button class="auth-btn" style="margin-top:32px" ion-button color="light" [disabled]="!userInfo.residence" (click)="swipeTo(3)">Next</button>
-        <!--<button class="auth-btn" ion-button block color="light" (click)="swipeTo(1)">Back</button>-->
+        <button class="auth-btn" style="margin-top:32px" ion-button color="light" [disabled]="!residence" (click)="swipeTo(3)">Next</button>
       </ion-slide>
 
       <!--Account Information Facebook-->
       <ion-slide>
         <h5 class="color-white">Account Information</h5>
-        <button class="auth-btn" ion-button color="light" (click)="swipeTo(4)">Import from Facebook</button>
-        <button class="auth-btn-width" ion-button (click)="swipeTo(4)" outline color="light">Or fill out manually</button>
+        <button class="auth-btn" ion-button color="light" (click)="getFbLogin()">Import from Facebook</button>
+        <button class="auth-btn-width" ion-button clear (click)="swipeTo(4)" outline color="light">Or fill out manually</button>
       </ion-slide>
+
+      <!--Enter password-->
+      <ion-slide>
+        <p class="color-white font-size-12">&nbsp;</p>
+        <form [formGroup]="authForm">
+          <ion-list>
+            <ion-item>
+              <ion-input type="password" full placeholder="Enter Password" formControlName="pwd1"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input type="password" placeholder="Re-enter Password" formControlName="pwd2"></ion-input>
+            </ion-item>
+          </ion-list>
+        </form>
+        <button class="auth-btn" [disabled]="!authForm.valid" ion-button color="light" (click)="createAccount(authForm.value)">Next</button>
+      </ion-slide>
+
 
       <!--Account Information Manual-->
       <ion-slide>
@@ -73,14 +80,14 @@
             <ion-item>
               <ion-input type="text" formControlName="lastName" placeholder="Last Name"></ion-input>
             </ion-item>
+            <!--<ion-item> <ion-input type="text" formControlName="hometown" placeholder="Hometown"></ion-input> </ion-item>-->
+            <!--<ion-item> <ion-input type="text" formControlName="pronouns" placeholder="Gender Pronouns"></ion-input> </ion-item>-->
+            <!--<ion-item> <ion-input type="text" formControlName="major" placeholder="Major"></ion-input> </ion-item>-->
             <ion-item>
-              <ion-input type="text" formControlName="pronouns" placeholder="Gender Pronouns"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-input type="text" formControlName="major" placeholder="Major"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-input type="text" formControlName="graduationYear" placeholder="Graduation year"></ion-input>
+              <ion-label>Anticipated Grad Year</ion-label>
+              <ion-select formControlName="graduationYear">
+                <ion-option *ngFor="let yr of years" [value]="yr">{{yr}}</ion-option>
+              </ion-select>
             </ion-item>
           </ion-list>
           <button class="auth-btn" ion-button [disabled]="!detailForm.valid" color="light" type="submit">Finish</button>
@@ -88,42 +95,35 @@
       </ion-slide>
     </ion-slides>
   </div>
-  <div center text-center class="help-btn">
+  <!--<div center text-center class="help-btn">
     <button ion-button clear color="light">Help</button>
-  </div>
+  </div>-->
+  <button ion-button block clear color="light" style="margin-top:10vh">Help</button>
 </ion-content>
 
-<!--<form [formGroup]="authForm" (ngSubmit)="finishRegistration(authForm.value)">
-          <ion-list class="border-radius-5">
-            <ion-item>
-              <ion-input type="text" formControlName="name" placeholder="Full Name"></ion-input>
+<!--<ion-item (click)="showGraduationYear = !showGraduationYear">
+              <ion-input type="text" disabled="disabled" [(ngModel)]="userInfo.graduationYear" placeholder="Anticipated Graduation year"></ion-input>
+              <ion-icon name="ios-arrow-down-outline" item-right></ion-icon>
             </ion-item>
-            <ion-item>
-              <ion-input type="text" formControlName="pronouns" placeholder="Gender Pronouns"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-input type="text" formControlName="major" placeholder="Major"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-input type="text" formControlName="graduationYear" placeholder="Graduation year"></ion-input>
-            </ion-item>
-          </ion-list>
-          <button class="auth-btn" ion-button block disabled="!authForm.valid" color="light" type="submit">Finish</button>
-        </form>-->
+            <ion-item *ngIf="showGraduationYear" style="position:absolute;z-index:5;width:100%;">
+              <ion-list class="sub-list">
+                <ion-item (click)="selectGraduationYear('2018')">2018</ion-item>
+                <ion-item (click)="selectGraduationYear('2019')">2019</ion-item>
+                <ion-item (click)="selectGraduationYear('2020')">2020</ion-item>
+                <ion-item (click)="selectGraduationYear('2021')">2021</ion-item>
+                <ion-item (click)="selectGraduationYear('2022')">2022</ion-item>
+                <ion-item (click)="selectGraduationYear('2023')">2023</ion-item>
+                <ion-item (click)="selectGraduationYear('2024')">2024</ion-item>
+              </ion-list>
+            </ion-item>-->
 
-<!--
-        <ion-list class="border-radius-5">
-          <ion-item>
-            <ion-input type="text" [(ngModel)]="userInfo.firstName" placeholder="Full Name"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-input type="text" [(ngModel)]="userInfo.pronouns" placeholder="Gender Pronouns"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-input type="text" [(ngModel)]="userInfo.major" placeholder="Major"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-input type="text" [(ngModel)]="userInfo.graduationYear" placeholder="Graduation year"></ion-input>
-          </ion-item>
-        </ion-list>
-        <button class="auth-btn" ion-button block color="light" (click)="finishRegistration()">Finish</button>-->
+<!--<ion-item (click)="showGenderOption = !showGenderOption">
+              <ion-input type="text" disabled="disabled" [(ngModel)]="userInfo.genderPronouns" placeholder="Gender Pronouns"></ion-input>
+              <ion-icon name="ios-arrow-down-outline" item-right></ion-icon>
+            </ion-item>
+            <ion-item *ngIf="showGenderOption" style="position:absolute;z-index:5;width:100%;">
+              <ion-list class="sub-list">
+                <ion-item (click)="selectGender('He, Him, His')">He, Him, His</ion-item>
+                <ion-item (click)="selectGender('She, Her')">She, Her</ion-item>
+              </ion-list>
+            </ion-item>-->

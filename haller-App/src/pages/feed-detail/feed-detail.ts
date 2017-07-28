@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, AlertController, ActionSheetController, ModalController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, AlertController, ActionSheetController, ModalController, Events } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
-import { FeedProvider } from '../feed/feed.provoder';
+import { FeedProvider } from '../../shared/providers/feed.provider';
+import { TabsPage } from "../tabs/tabs";
 
 @IonicPage()
 @Component({
@@ -14,25 +15,51 @@ export class FeedDetail {
   public userInfo: Object = {};
   public feed: Object = {};
   public feedId: string = '';
-  private commentContent: String;
-  private commentId: String = null;
-  private localImage: String = null;
+  public commentContent: String;
+  public commentId: String = null;
+  public localImage: String = null;
+  public refresher: any;
+  public userAvatar = '';
 
-
-  constructor(public navCtrl: NavController, public navParams: NavParams, private feedProvider: FeedProvider,
-    private alertCtrl: AlertController, public actionSheetCtrl: ActionSheetController, public modalCtrl: ModalController) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public feedProvider: FeedProvider,
+    private alertCtrl: AlertController, public actionSheetCtrl: ActionSheetController, public modalCtrl: ModalController,
+    private event: Events) {
     this.local = new Storage('localstorage');
+    this.userAvatar = feedProvider.httpClient.userAvatar;
 
     this.feed = navParams.get('feed') || {};
     if (this.feed) this.feedId = this.feed['_id'];
-    this.feedId = navParams.get('feedId') || null;
+    this.feedId = navParams.get('feedId') || this.feedId;
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
       this.feedProvider.userId = this.userInfo['_id'];
       if (this.feedId) {
         this.getFeedDetail();
       }
+      let notificationId = this.navParams.get('notificationId') || null;
+      this.markNotificationAsRead(notificationId);
     });
+    this.event.subscribe('notification:feeddetail', (feedId, notificationId) => {
+      this.feedId = feedId;
+      this.getFeedDetail();
+      this.markNotificationAsRead(notificationId);
+    });
+  }
+
+  doRefresh(refresher) {
+    if (this.feedId) {
+      this.getFeedDetail();
+      this.refresher = refresher;
+    } else {
+      refresher.complete();
+    }
+  }
+
+  markNotificationAsRead(notificationId) {
+    if (notificationId) {
+      this.feedProvider.markNotificationAsRead(notificationId, this.userInfo['_id'])
+        .subscribe((res: any) => { }, error => { console.info('error', error); });
+    }
   }
 
   ionViewDidLoad() {
@@ -43,6 +70,10 @@ export class FeedDetail {
     this.feedProvider.getFeed(this.feedId)
       .subscribe((res: any) => {
         this.feed = this.feedProvider.processFeed(res);
+        if (this.refresher) {
+          this.refresher.complete();
+          this.refresher = null;
+        }
       }, err => {
         console.info('error', err);
       })
@@ -79,9 +110,13 @@ export class FeedDetail {
   }
 
   goBack() {
-    let resolver = this.navParams.get('resolve');
-    if (resolver) resolver(this.feed);
-    this.navCtrl.pop();
+    if (this.navCtrl.length() > 1) {
+      let resolver = this.navParams.get('resolve');
+      if (resolver) resolver(this.feed);
+      this.navCtrl.pop();
+    } else {
+      this.navCtrl.setRoot(TabsPage);
+    }
   }
 
   //Comment Section
@@ -105,8 +140,11 @@ export class FeedDetail {
 
   newCommentChange(event) {
     let ele = event.target;
-    if (ele.clientHeight < ele.scrollHeight) ele.rows = 2;
-    else if (ele.value.length == 0) ele.rows = 1;
+    let row = ele.rows;
+    if (ele.clientHeight < ele.scrollHeight && row < 6) {
+      row += 1;
+    }
+    ele.rows = row;
   }
 
   takePicture() {
@@ -122,10 +160,12 @@ export class FeedDetail {
       return (flagged.actedBy._id == this.userInfo['_id']) || (flagged.actedBy === this.userInfo['_id']);
     })[0];
     let options = [];
-    options.push({ text: flagObj ? 'Un-Flag' : 'Flag', handler: () => { this.flagComment(comment); } });
+
     if (comment.createdBy._id == this.userInfo['_id']) {
       options.push({ text: 'Edit', handler: () => { this.commentContent = comment.body; this.commentId = comment._id; } });
       options.push({ text: 'Delete', handler: () => { this.confirmCommentDeletion(comment); } });
+    } else {
+      options.push({ text: flagObj ? 'Un-Flag' : 'Flag', handler: () => { this.flagComment(comment); } });
     }
     let actionSheet = this.actionSheetCtrl.create({
       buttons: options
@@ -284,7 +324,6 @@ export class FeedDetail {
     }
   }
 
-
   joinEvent(event) {
     this.feedProvider.joinEvent(event['_id'], { actedBy: this.userInfo['_id'], actionType: 'going' })
       .subscribe((res: any) => {
@@ -330,5 +369,13 @@ export class FeedDetail {
       }
     });
     gifModal.present();
+  }
+
+  openLikeModel(likes) {
+    let modal = this.modalCtrl.create('LikeListPage', { likes: likes, userAvatar: this.userAvatar });
+    modal.onDidDismiss(data => {
+      console.info('data', data);
+    });
+    modal.present();
   }
 }

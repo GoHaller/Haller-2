@@ -39,6 +39,17 @@ router.route('/:userId/password')
     }
   }), authCtrl.changePassword])
 
+router.route('/:userId/create-password')
+  .put([expressJwt({
+    secret: config.jwtSecret,
+    getToken: (req) => {
+      if (req.headers && req.headers.authorization) {
+        return req.headers.authorization.split(':')[1];
+      }
+      return null;
+    }
+  }), authCtrl.createPassword])
+
 router.route('/logout/:userId')
   .get(validate(paramValidation.logout), authCtrl.logout);
 /** GET /api/auth/random-number - Protected route,

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ToastController, ActionSheetController, AlertController } from 'ionic-angular';
-import { MessagesProvider } from "../messages/messages.provider";
+import { ConvoProvider } from "../../shared/providers/convo.provider";
 import { Storage } from '@ionic/storage';
 
 /**
@@ -22,8 +22,9 @@ export class MessageSetting {
   private reciver: Object = {};
   private conversation: Object = {};
   private blockBtnText: string = 'Block'
+  private notificationBtn: Boolean = true;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private messageProvider: MessagesProvider,
+  constructor(public navCtrl: NavController, public navParams: NavParams, private convoProvider: ConvoProvider,
     public toastCtrl: ToastController, public actionSheetCtrl: ActionSheetController, public alertCtrl: AlertController) {
     this.local = new Storage('localstorage');
     this.conversation = this.navParams.data['conversation'] || {};
@@ -35,6 +36,14 @@ export class MessageSetting {
   }
 
   setBlockBtnText() {
+    if (this.conversation['notificationOffFor']) {
+      let user = this.conversation['notificationOffFor'].filter(item => {
+        return item.user == this.userInfo['_id'];
+      })
+      if (user.length > 0) {
+        this.notificationBtn = false;
+      }
+    }
     if (this.participants.length == 2) {
       this.reciver = this.participants[0]['_id'] == this.userInfo['_id'] ? this.participants[1] : this.participants[0];
       let participantId = this.participants[0]['_id'] == this.userInfo['_id'] ? this.participants[1]['_id'] : this.participants[0]['_id'];
@@ -56,7 +65,7 @@ export class MessageSetting {
   blockUser() {
     if (this.participants.length == 2) {
       let blockUserId = this.participants[0]['_id'] == this.userInfo['_id'] ? this.participants[1]['_id'] : this.participants[0]['_id'];
-      this.messageProvider.blockUser(this.userInfo['_id'], blockUserId)
+      this.convoProvider.blockUser(this.userInfo['_id'], blockUserId)
         .subscribe((res: any) => {
           if (res['_id'] == this.userInfo['_id']) {
             this.userInfo = res;
@@ -89,7 +98,7 @@ export class MessageSetting {
   }
 
   leaveConversation() {
-    this.messageProvider.leaveConvo(this.conversation['_id'], this.userInfo['_id'])
+    this.convoProvider.leaveConvo(this.conversation['_id'], this.userInfo['_id'])
       .subscribe((res: any) => {
         this.navCtrl.pop();
       }, error => {
@@ -121,7 +130,7 @@ export class MessageSetting {
           text: 'Save',
           handler: data => {
             console.log('Saved clicked', data);
-            this.messageProvider.putMessage(this.conversation['_id'], data, this.userInfo['_id'])
+            this.convoProvider.putMessage(this.conversation['_id'], data, this.userInfo['_id'])
               .subscribe((res: any) => {
                 this.conversation = res;
               }, error => {
@@ -132,6 +141,17 @@ export class MessageSetting {
       ]
     });
     prompt.present();
+  }
+
+  switchNotificationSetting() {
+    if (this.userInfo['_id']) {
+      this.convoProvider.putMessage(this.conversation['_id'], { 'notificationFor': this.userInfo['_id'], 'off': this.notificationBtn }, this.userInfo['_id'])
+        .subscribe((res: any) => {
+          this.conversation = res;
+        }, error => {
+          console.info('putMessage error', error);
+        });
+    }
   }
 
 }

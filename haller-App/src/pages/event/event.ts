@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, ToastController, AlertController, ActionSheetController, Events } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ToastController, AlertController, ActionSheetController, Events, ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
-import { FeedProvider } from '../feed/feed.provoder';
+import { FeedProvider } from '../../shared/providers/feed.provider';
 
 /**
  * Generated class for the Event page.
@@ -26,17 +26,19 @@ export class EventPage {
   private skip: number = 0;
   private limit: number = 50;
   private cleanList: Boolean = false;
+  private userAvatar = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController,
-    private eventProvider: FeedProvider, private alertCtrl: AlertController, public actionSheetCtrl: ActionSheetController,
-    private event: Events) {
+    public feedProvider: FeedProvider, private alertCtrl: AlertController, public actionSheetCtrl: ActionSheetController,
+    private event: Events, private modalCtrl: ModalController) {
     this.local = new Storage('localstorage');
+    this.userAvatar = feedProvider.httpClient.userAvatar;
   }
 
   ionViewDidLoad() {
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
-      this.eventProvider.userId = this.userInfo['_id'];
+      this.feedProvider.userId = this.userInfo['_id'];
       this.getEvents();
     });
     this.event.subscribe('user-updated', () => {
@@ -47,11 +49,15 @@ export class EventPage {
     });
   }
 
+  viewFullImage(image) {
+    this.feedProvider.viewFullImage(image);
+  }
+
   getEvents() {
-    this.eventProvider.listByFeed(this.userInfo['_id'], this.whichfeed, this.skip, this.limit, true)
+    this.feedProvider.listByFeed(this.userInfo['_id'], this.whichfeed, this.skip, this.limit, true)
       .subscribe((res: any) => {
         res.forEach(feed => {
-          feed = this.eventProvider.processFeed(feed);
+          feed = this.feedProvider.processFeed(feed);
         });
         if (this.cleanList) { this.eventList = res; this.cleanList = false; }
         else { this.eventList = this.eventList.concat(res); }
@@ -107,20 +113,20 @@ export class EventPage {
   }
 
   gotoProfileSetting() {
-    this.navCtrl.push('ProfileSettings', { }, { animate: true, direction: 'forward' });
+    this.navCtrl.push('ProfileSettings', {}, { animate: true, direction: 'forward' });
   }
 
   allowUserToPost() {
-    return (this.whichfeed == 'discovery' && this.eventProvider.isAdmin(this.userInfo['email'])) || this.whichfeed != 'discovery'
+    return (this.whichfeed == 'discovery' && this.feedProvider.isAdmin(this.userInfo['email'])) || this.whichfeed != 'discovery'
   }
 
   updateFeed(oldEvent, newEvent) {
     let index = this.eventList.indexOf(oldEvent);
-    this.eventList[index] = this.eventProvider.processFeed(newEvent);
+    this.eventList[index] = this.feedProvider.processFeed(newEvent);
   }
 
   starEvent(event) {
-    this.eventProvider.starFeed(event)
+    this.feedProvider.starFeed(event)
       .subscribe((res: any) => {
         this.updateFeed(event, res);
       }, error => {
@@ -129,7 +135,7 @@ export class EventPage {
   }
 
   likeEvent(event) {
-    this.eventProvider.likeFeed(event)
+    this.feedProvider.likeFeed(event)
       .subscribe((res: any) => {
         this.updateFeed(event, res);
         // console.info('likeFeed res', res);
@@ -139,7 +145,7 @@ export class EventPage {
   }
 
   joinEvent(event) {
-    this.eventProvider.joinEvent(event['_id'], { actedBy: this.userInfo['_id'], actionType: 'going' })
+    this.feedProvider.joinEvent(event['_id'], { actedBy: this.userInfo['_id'], actionType: 'going' })
       .subscribe((res: any) => {
         // console.info('joinEvent res', res);
         this.updateFeed(event, res);
@@ -163,7 +169,7 @@ export class EventPage {
     let goingObj = event['going'].filter(go => {
       return (go.actedBy._id == this.userInfo['_id']) || (go.actedBy === this.userInfo['_id']);
     })[0];
-    this.eventProvider.leaveEvent(event['_id'], goingObj['_id'])
+    this.feedProvider.leaveEvent(event['_id'], goingObj['_id'])
       .subscribe((res: any) => {
         console.info('joinEvent res', res);
         this.updateFeed(event, res);
@@ -197,13 +203,11 @@ export class EventPage {
 
   confirmEventDeletion(event) {
     let alert = this.actionSheetCtrl.create({
-      // title: 'Confirm deletion',
-      // message: 'Do you want to delete this event?',
       buttons: [
         {
           text: 'Delete',
           handler: () => {
-            this.eventProvider.deletePost(event['_id']).subscribe((res: any) => {
+            this.feedProvider.deletePost(event['_id']).subscribe((res: any) => {
               this.cleanList = true;
               this.getEvents();
             }, error => {
@@ -222,10 +226,11 @@ export class EventPage {
   }
 
   getDateFormatr(date) {
-    return this.eventProvider.httpClient.getDateFormate(date);
+    return this.feedProvider.httpClient.getDateFormate(date);
   }
 
   changeSegment(segmentName) {
+    this.skip = 0;
     this.whichfeed = segmentName;
     this.cleanList = true;
     this.getEvents();
@@ -242,5 +247,13 @@ export class EventPage {
     this.infiniteScroll = infiniteScroll;
     this.skip += this.limit;
     this.getEvents();
+  }
+
+  openLikeModel(likes) {
+    let modal = this.modalCtrl.create('LikeListPage', { likes: likes, userAvatar: this.userAvatar });
+    modal.onDidDismiss(data => {
+      console.info('data', data);
+    });
+    modal.present();
   }
 }

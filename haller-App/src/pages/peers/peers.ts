@@ -2,7 +2,7 @@ import { Pipe, PipeTransform, Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 
-import { PeersProvider } from './peers.provider'
+import { ProfileProvider } from "../../shared/providers/profile.provider";
 
 /**
  * Generated class for the Peers page.
@@ -21,22 +21,48 @@ export class Peers {
   private local: Storage;
   public userInfo: Object = {};
   public peersList = [];
+  public selectedUser = [];
   private clearList: Boolean = false;
   public skip = 0; public limit = 50;
   public searchText: String = '';
+  private userAvatar = '';
+  private chooseUser: boolean = false;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public peersProvider: PeersProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public profileProvider: ProfileProvider) {
     this.local = new Storage('localstorage');
+    this.userAvatar = profileProvider.httpClient.userAvatar;
+    this.chooseUser = this.navParams.get('resolve') ? true : false;
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
-      this.getPeersList();
+      // this.getPeersList();
     });
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad Peers');
+    // console.log('ionViewDidLoad Peers');
   }
+  ionViewDidLeave() {
+    // console.log('ionViewDidLeave Peers');
+    this.clearList = true;
+    this.peersList = [];
+  }
+
+  ionViewWillEnter() {
+    if (this.userInfo['_id']) {
+      this.clearList = true;
+      this.getPeersList();
+    } else {
+      setTimeout(() => {
+        this.clearList = true;
+        this.getPeersList();
+      }, 100);
+    }
+  }
+
   goBack() {
+    if (this.chooseUser) {
+      this.navParams.get('resolve')(this.selectedUser);
+    }
     this.navCtrl.pop();
   }
 
@@ -44,34 +70,39 @@ export class Peers {
     this.searchText = ev.target.value;
   }
 
-
   getPeersList() {
+    let response = null;
     if (this.selectedPeers == 'residents') {
-      this.peersProvider.getUserByResidence(this.userInfo['_id'], this.userInfo['residence'], this.skip, this.limit).subscribe((res: any) => {
-        if (this.clearList) {
-          this.peersList = res; this.clearList = false;
-        } else {
-          this.peersList = this.peersList.concat(res);
-        }
-      }, error => {
-        console.info('error', error);
-      })
+      response = this.profileProvider.getUserByResidence(this.userInfo['_id'], this.userInfo['residence'], this.skip, this.limit);
     } else {
-      this.peersProvider.listUser(this.userInfo['_id'], this.skip, this.limit).subscribe((res: any) => {
-        if (this.clearList) {
-          this.peersList = res; this.clearList = false;
-        } else {
-          this.peersList = this.peersList.concat(res);
-        }
-      }, error => {
-        console.info('error', error);
-      })
+      response = this.profileProvider.listUser(this.userInfo['_id'], this.skip, this.limit);
     }
+    response.subscribe((res: any) => {
+      if (this.clearList) {
+        this.peersList = res; this.clearList = false;
+      } else {
+        this.peersList = this.peersList.concat(res);
+      }
+    }, error => {
+      console.info('error', error);
+    })
+  }
+
+  isUserSelected(peer) {
+    return this.selectedUser.indexOf(peer) > -1
   }
 
   viewProfile(peer) {
     // console.info('peer', peer);
-    this.navCtrl.push('Profile', { userData: peer }, { animate: true, direction: 'forward' });
+    if (this.chooseUser) {
+      if (this.selectedUser.indexOf(peer) > -1) {
+        let index = this.selectedUser.indexOf(peer);
+        this.selectedUser.splice(index, 1);
+      } else {
+        this.selectedUser.push(peer);
+      }
+    } else
+      this.navCtrl.push('Profile', { userData: peer }, { animate: true, direction: 'forward' });
   }
 
   doInfinite(): Promise<any> {
@@ -82,6 +113,7 @@ export class Peers {
   }
 
   changeSegment(segment) {
+    this.skip = 0;
     this.selectedPeers = segment;
     this.clearList = true;
     this.getPeersList();

@@ -14,6 +14,9 @@ page-profile-edit {
     .no-bootom-border{
         border-bottom: none;
     }
+    .border-top-1px{
+        border-top: 0.55px solid #eaeaea;
+    }
     .item ion-avatar[item-left], .item ion-thumbnail[item-left]{
         padding-left: 16px;
         img.profile-img{
@@ -22,7 +25,7 @@ page-profile-edit {
         }
     }
     .tag-text{
-        max-width: 75px;
+        max-width: 300px;
         justify-content: initial;
         -webkit-justify-content: initial;
         text-overflow: ellipsis;

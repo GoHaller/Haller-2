@@ -8,7 +8,7 @@
 
   <ion-navbar color="primary" hideBackButton>
     <ion-buttons left>
-      <button ion-button (click)="goBack()">Back</button>
+      <button ion-button (click)="goBack()">Cancel</button>
     </ion-buttons>
     <ion-title>Edit Profile</ion-title>
     <ion-buttons end>
@@ -23,10 +23,11 @@
   <form [formGroup]="userForm">
     <ion-list>
       <ion-item>
-        <ion-avatar item-left (click)="viewFullImage(userInfo.currentProfile)">
-          <img class="profile-img" [src]="userInfo.currentProfile ? userInfo.currentProfile.secure_url : '../../assets/img/default-user.png'">
+        <ion-avatar item-left (click)="viewFullImage(profileProvider.httpClient.getProfileImageToDisplay(userInfo))">
+          <!-- <img class="profile-img" [src]="userInfo.currentProfile ? userInfo.currentProfile.secure_url : userAvatar"> -->
+          <img [src]="profileProvider.httpClient.getProfileImageToDisplay(userInfo)">
         </ion-avatar>
-        <button ion-button clear item-right (click)="choosePicture()">Edit</button>
+        <button ion-button clear item-right (click)="choosePicture()">Upload Photo</button>
       </ion-item>
       <ion-item>
         <ion-label>First name</ion-label>
@@ -58,42 +59,48 @@
     <ion-item>
       <ion-textarea rows="4" [(ngModel)]="userInfo.bio"></ion-textarea>
     </ion-item>
-    <ion-item class="no-bootom-border">
+    <!--Organizations Start-->
+    <ion-item class="no-bootom-border border-top-1px">
       <ion-label>Organizations</ion-label>
     </ion-item>
     <ion-item class="org-list no-bootom-border">
       <button *ngFor="let org of userInfo.organizations" color="primary" (click)="removeOrgFromUserList(org)" icon-right ion-button
         small outline><span class="tag-text">{{org.name}}</span><ion-icon color="dark" name="close"></ion-icon></button>
-      <button color="primary" icon-right ion-button small>Add<ion-icon name="add"></ion-icon></button>
+      <button color="primary" (click)="popupOrganizerList()" icon-right ion-button small>Add<ion-icon name="add"></ion-icon></button>
     </ion-item>
-    <ion-item>
-      <ion-input (input)="searchOrg($event)" placeholder="Search organization"></ion-input>
+    <ion-item *ngIf="showOrgForm">
+      <ion-input [(ngModel)]="orgSearchText" (input)="searchOrg($event)" placeholder="Search organization"></ion-input>
     </ion-item>
     <ion-item class="org-suggetion-list" *ngIf="orgList.length > 0">
       <ion-list>
         <ion-item *ngFor="let org of orgList" (click)="addOrgToUserList(org)">
           {{org.name}}
+          <ion-icon item-right name="add"></ion-icon>
         </ion-item>
       </ion-list>
     </ion-item>
-    <ion-item class="no-bootom-border">
+    <!--Organizations End-->
+    <!--Interests Start-->
+    <ion-item class="no-bootom-border border-top-1px">
       <ion-label>Interests</ion-label>
     </ion-item>
     <ion-item class="org-list no-bootom-border">
       <button *ngFor="let interest of userInfo.interests" color="primary" (click)="removeInterestFromUserList(interest)" icon-right
         ion-button small outline><span class="tag-text">{{interest.name}}</span><ion-icon color="dark" name="close"></ion-icon></button>
-      <button color="primary" icon-right ion-button small>Add<ion-icon name="add"></ion-icon></button>
+      <button color="primary" *ngIf="!showInterestForm" (click)="showInterestForm = true" icon-right ion-button small>Add<ion-icon name="add"></ion-icon></button>
     </ion-item>
-    <ion-item>
+    <ion-item *ngIf="showInterestForm">
       <ion-input (input)="searchInterest($event)" [(ngModel)]="userInterest" placeholder="Add here"></ion-input>
       <button ion-button clear item-right (click)="addInterestToUserListManual()">Add</button>
     </ion-item>
     <ion-item class="org-suggetion-list" *ngIf="interestList.length > 0">
       <ion-list>
         <ion-item *ngFor="let interest of interestList" (click)="addInterestToUserList(interest)">
-          {{interest.name}}<ion-icon item-right name="add"></ion-icon>
+          {{interest.name}}
+          <ion-icon item-right name="add"></ion-icon>
         </ion-item>
       </ion-list>
     </ion-item>
+    <!--Interests End-->
   </ion-list>
 </ion-content>

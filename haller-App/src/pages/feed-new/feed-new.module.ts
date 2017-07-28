@@ -4,8 +4,8 @@ import { Camera } from '@ionic-native/camera';
 import { Transfer } from '@ionic-native/transfer';
 import { FeedNew } from './feed-new';
 
-import { CloudinaryProvider } from '../../shared/providers/cloudinary-provider';
-import { FeedProvider } from '../feed/feed.provoder';
+import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
+import { FeedProvider } from '../../shared/providers/feed.provider';
 import { HttpClient } from '../../shared/providers/http-client';
 
 @NgModule({

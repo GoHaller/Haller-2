@@ -31,16 +31,17 @@
     <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles" refreshingText="Refreshing...">
     </ion-refresher-content>
   </ion-refresher>
+
   <ion-list class="msg-list">
     <ion-list-header>Conversations</ion-list-header>
-    <ion-item *ngFor="let msg of messageList | convosearch:['firstName','lastName',searchText]" [ngClass]="checkMsgIfReadByOther(msg.messages[msg.messages.length - 1]) ? '':'read-convo'">
+    <ion-item *ngFor="let msg of messageList | convosearch:['firstName','lastName',searchText]" [ngClass]="checkMsgIfRead(msg.messages[msg.messages.length - 1]) ? '':'read-convo'">
       <ion-icon *ngIf="edit" (click)="presentEditActionSheet(msg)" item-left color="danger" name="ios-remove-circle-outline"></ion-icon>
       <ion-avatar item-left *ngIf="msg.participants.length == 2" (click)="showConversation(msg)">
-        <img *ngIf="msg.participants[0] && msg.participants[0]._id !== userInfo._id" [src]="msg.participants[0].currentProfile ? msg.participants[0].currentProfile.secure_url : 'assets/img/default-user.png'">
-        <img *ngIf="msg.participants[1] && msg.participants[1]._id !== userInfo._id" [src]="msg.participants[1].currentProfile ? msg.participants[1].currentProfile.secure_url : 'assets/img/default-user.png'">
+        <img *ngIf="msg.participants[0] && msg.participants[0]._id !== userInfo._id" [src]="convoProvider.httpClient.getProfileImageToDisplay(msg.participants[0])">
+        <img *ngIf="msg.participants[1] && msg.participants[1]._id !== userInfo._id" [src]="convoProvider.httpClient.getProfileImageToDisplay(msg.participants[1])">
       </ion-avatar>
       <ion-avatar item-left *ngIf="msg.participants.length > 2" (click)="showConversation(msg)">
-        <img src="assets/img/user-group.png">
+        <img [src]="groupAvatar">
       </ion-avatar>
       <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length == 2 && msg.participants[0] && msg.participants[0]._id !== userInfo._id">{{msg.participants[0].firstName + ' ' + msg.participants[0].lastName}}</h2>
       <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length == 2 && msg.participants[1] && msg.participants[1]._id !== userInfo._id">{{msg.participants[1].firstName + ' ' + msg.participants[1].lastName}}</h2>

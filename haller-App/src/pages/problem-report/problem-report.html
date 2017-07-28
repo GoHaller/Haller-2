@@ -1,11 +1,9 @@
 <ion-header>
-
-  <ion-navbar color="primary">
+  <ion-navbar color="primary" hideBackButton>
+    <ion-buttons left><button ion-button (click)="goBack()">Cancel</button></ion-buttons>
     <ion-title>Report a Problem</ion-title>
   </ion-navbar>
-
 </ion-header>
-
 
 <ion-content>
   <form [formGroup]="problemForm" (ngSubmit)="submitProblemForm(problemForm.value)">

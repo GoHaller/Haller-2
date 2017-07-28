@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ViewController, Keyboard } from 'ionic-angular';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 
@@ -18,7 +18,7 @@ export class GiphyModel {
   private searchText = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public http: Http,
-    public viewCtrl: ViewController) {
+    public viewCtrl: ViewController,private keyboard: Keyboard) {
   }
 
   ionViewDidLoad() {
@@ -34,6 +34,12 @@ export class GiphyModel {
     this.getGiphyGifSearch();
   }
 
+  searchGif(event) {
+    if (event.keyCode == 13) {
+      this.makeSearch()
+    }
+  }
+
   getGiphyGifTrending() {
     let url = this.giphyBaseUrl + 'trending?api_key=' + this.giphyKey + '&limit=' + this.limit + '&offset=' + this.offset;
     this.getGifs(url).subscribe((res: any) => {
@@ -45,6 +51,7 @@ export class GiphyModel {
 
   getGiphyGifSearch() {
     if (this.searchText.length > 2) {
+      this.keyboard.close();
       let searchUrl = this.giphyBaseUrl + 'search?q=' + this.searchText.replace(' ', '+') + '&api_key=' + this.giphyKey + '&limit=' + this.limit + '&offset=' + this.offset;;
       this.getGifs(searchUrl).subscribe((res: any) => {
         this.gifList = this.gifList.concat(res.data);

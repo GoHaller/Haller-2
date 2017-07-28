@@ -5,28 +5,24 @@
   Ionic pages and navigation.
 -->
 <ion-header>
-
   <ion-navbar color="primary">
-    <ion-title>Message Setting</ion-title>
+    <ion-title>{{participants.length > 2 ? 'Group': 'Contact'}}</ion-title>
   </ion-navbar>
-
 </ion-header>
-
 
 <ion-content>
   <ion-item-group>
     <button *ngIf="participants.length > 2" (click)="doPrompt()" ion-item>Change Group Name</button>
-    <!--<button *ngIf="participants.length == 2" ion-item>Change Nickname</button>-->
-    <ion-item class="notification-toggle">
-      <ion-toggle checked="true"></ion-toggle>
-      <ion-label>Notification Settings</ion-label>
+    <ion-item>
+      <ion-toggle [(ngModel)]="notificationBtn" (ionChange)="switchNotificationSetting()"></ion-toggle>
+      <ion-label>Notifications</ion-label>
     </ion-item>
   </ion-item-group>
   <ion-item-group *ngIf="reciver._id">
     <ion-item-divider color="light">&nbsp;</ion-item-divider>
     <button ion-item (click)="goToProfile()">Go to {{reciver.firstName}}'s Profile</button>
   </ion-item-group>
-  <ion-item-group>
+  <ion-item-group style="padding-top:90px">
     <ion-item-divider color="light">&nbsp;</ion-item-divider>
     <button *ngIf="participants.length > 2" (click)="presentLeaveConvoActionSheet()" ion-item class="group-leave">Leave Group</button>
     <button *ngIf="participants.length == 2" (click)="blockUser()" ion-item class="contact-block">{{blockBtnText}}</button>

@@ -160,6 +160,26 @@ function verifyOtp(req, res, next) {
  */
 
 function update(req, res, next) {
+  console.info('req.body.facebook', req.body.facebook);
+  if (req.body.facebook) {
+    User.getByFBId(req.body.facebook.id)
+      .then((user) => {
+        if (user) {
+          const error = new APIError('Facebook account is already in use.', httpStatus.UNAUTHORIZED);
+          next(error);
+        } else {
+          updateUser(req, res, next);
+        }
+      }).catch((e) => {
+        next(e);
+        // updateUser(req, res, next);
+      });
+  } else {
+    updateUser(req, res, next);
+  }
+}
+
+function updateUser(req, res, next) {
   const body = req.body;
   if (body.currentProfile || body.currentCover) {
     let cover;
@@ -601,7 +621,7 @@ function sendNotification(req, res, next) {
     })
 }
 
-//admin users list 
+//admin users list
 function allUsersByFilter(req, res, next) {
   var search = req.body.search.value || '';
   var limit = req.body.length || 25;

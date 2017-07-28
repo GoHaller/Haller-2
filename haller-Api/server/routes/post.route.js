@@ -40,7 +40,8 @@ router.route('/admin/desboard/eventjoiners/:days')
     secret: config.jwtSecret,
     getToken
   }), postCtrl.getJoinDetails);
-  
+
+
 // router.route('/admin/hide/:postId/comment/:commentId')
 //App APIS
 

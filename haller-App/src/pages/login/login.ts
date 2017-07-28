@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, ModalController, ToastController } from 'ionic-angular';
+import { IonicPage, NavController, ToastController, LoadingController, AlertController } from 'ionic-angular';
 import { Validators, FormBuilder } from '@angular/forms';
 import { Storage } from '@ionic/storage';
-// import { Facebook, FacebookLoginResponse } from '@ionic-native/facebook';
-import { LocalNotifications } from '@ionic-native/local-notifications';
-import { LoginProvider } from './login.provider';
+import { StatusBar } from '@ionic-native/status-bar';
+import { SplashScreen } from '@ionic-native/splash-screen';
+
+import { TabsPage } from "../tabs/tabs";
+import { AuthProvider } from '../../shared/providers/auth.provider';
+import { ProfileProvider } from "../../shared/providers/profile.provider";
 
 /**
  * Generated class for the Login page.
@@ -18,99 +21,140 @@ import { LoginProvider } from './login.provider';
   templateUrl: 'login.html',
 })
 export class Login {
-
+  private fbAuthDetail: any;
+  // private facebookData: any;
   public authForm: any;
   local: Storage;
   // private fbAuthDetail: Object;
-  constructor(public navCtrl: NavController, public navParams: NavParams, public loginProvider: LoginProvider,
-    private formBuilder: FormBuilder, public modalCtrl: ModalController, public toastCtrl: ToastController,
-    private localNotifications: LocalNotifications) {
+  constructor(public navCtrl: NavController, public authProvider: AuthProvider,
+    private ProfileProvider: ProfileProvider, private formBuilder: FormBuilder, public toastCtrl: ToastController,
+    statusBar: StatusBar, splashScreen: SplashScreen, private loadingCtrl: LoadingController, public alertCtrl: AlertController) {
     this.authForm = this.formBuilder.group({
-      email: ['a033m771@ku.edu', Validators.compose([Validators.maxLength(30), Validators.required])],
-      password: ['HelloAlex', Validators.compose([Validators.maxLength(30), Validators.required])]
+      email: ['', Validators.compose([Validators.maxLength(30), Validators.required])],
+      password: ['', Validators.compose([Validators.maxLength(30), Validators.required])]
     });
     this.local = new Storage('localstorage');
-    this.localNotifications.on('click', (data: any) => {
-      console.info('data', data);
-    })
+    statusBar.styleDefault();
+    splashScreen.hide();
+    // email: ['m196f845@ku.edu', Validators.compose([Validators.maxLength(30), Validators.required])],
+    // password: ['MahdiHaller', Validators.compose([Validators.maxLength(30), Validators.required])]
+    // this.localNotifications.on('click', (data: any) => {
+    //   console.info('data', data);
+    // })
   }
 
   ionViewDidLoad() { }
   loginClicked(data) {
-    this.loginProvider.login({ email: data.email, password: data.password }).subscribe((res: any) => {
-      this.local.set('auth', res.token);
-      this.local.set('uid', res.user._id);
-      this.local.set('userInfo', JSON.stringify(res.user)).then(() => {
-        this.navCtrl.setRoot('Tabs', {}, { animate: true, direction: 'forward' });
-      });
-    }, error => {
-      // console.info('error', error);
-      if (error.status = 401) {
-        let toast = this.toastCtrl.create({
-          message: 'Authention fail!',
-          duration: 3000,
-          position: 'top'
+    this.loginToHaller({ email: data.email, password: data.password });
+    // this.loginToHaller({ email: data.email });
+  }
+
+  loginToHaller(data) {
+    let loader = this.loadingCtrl.create({
+      content: "Please wait...",
+      // duration: 3000,
+      dismissOnPageChange: true
+    });
+    loader.present();
+    this.authProvider.login(data).subscribe((res: any) => {
+      if (res.isBlocked) {
+        let prompt = this.alertCtrl.create({
+          title: 'Blocked',
+          subTitle: "Admin has blocked you from using this app, please visit the administrator.",
+          buttons: [
+            {
+              text: 'Ok',
+              handler: data => {
+                this.navCtrl.setRoot('Registration', {}, { animate: true, direction: 'back' })
+              }
+            }
+          ]
         });
-        toast.present();
+        prompt.present();
+      } else {
+        this.local.set('auth', res.token);
+        this.local.set('uid', res.user._id);
+        this.local.set('userInfo', JSON.stringify(res.user)).then(() => {
+          this.local.get('fcm-data').then((val) => {
+            if (val) {
+              let fcmData = JSON.parse(val);
+              let userData = res.user['notifications'];
+              userData.deviceToken = fcmData.deviceData.token;
+              userData.os = fcmData.deviceData.os;
+              this.ProfileProvider.updateUser(res.user._id, { 'notifications': userData })
+                .subscribe((re: any) => {
+                  loader.dismiss();
+                  this.gotoTabsPage();
+                }, error => {
+                  loader.dismiss();
+                  console.info('updateUser error', error);
+                });
+            } else {
+              loader.dismiss();
+              this.gotoTabsPage();
+            }
+          })
+        });
       }
+    }, (error: any) => {
+      loader.dismiss();
+      console.info('error', error);
+      let message = 'Please try later.';
+      if (error.status == 401 || error._body.indexOf('No such user exists') > -1 || error._body.indexOf("Facebook account is already in use.") > -1) {
+        message = 'Authention fail!';
+      }
+      let toast = this.toastCtrl.create({ message: message, duration: 3000, position: 'top' });
+      toast.present();
+      // let prompt = this.alertCtrl.create({
+      //   subTitle: ,
+      //   buttons: ['Ok']
+      // });
+      // prompt.present();
+
+    });
+  }
+
+  getFbLoginStatus() {
+    // this.logoutFacebook();
+    this.authProvider.checkFBLoginStatus().then((res: any) => {
+      console.info('getLoginStatus res', res);
+      if (res.status != 'connected') {
+        this.getFbLogin();
+      } else if (res.status == 'connected') {
+        this.fbAuthDetail = res.authResponse;
+        this.loginToHaller({ facebookId: this.fbAuthDetail.userID });
+      }
+    }).catch(error => {
+      console.info('getLoginStatus error', error);
     })
   }
 
+  getFbLogin() {
+    let loader = this.loadingCtrl.create({
+      content: "Please wait...",
+      // duration: 3000,
+      dismissOnPageChange: true
+    });
+    loader.present();
+    this.authProvider.loginToFB()
+      .then((res: any) => {
+        console.log('Logged into Facebook!', res);
+        if (res.status == 'connected') {
+          this.fbAuthDetail = res.authResponse;
+          loader.dismiss();
+          this.loginToHaller({ facebookId: this.fbAuthDetail.userID });
+        }
+      })
+      .catch(e => { console.log('Error logging into Facebook', e); loader.dismiss(); });
+  }
+
+  logoutFacebook() {
+    this.authProvider.logoutFromFB().then((response) => {
+      console.info('response', response);
+    });
+  }
+
+  gotoTabsPage() { this.navCtrl.setRoot(TabsPage, {}, { animate: true, direction: 'forward' }); }
   gotoLandingPage() { this.navCtrl.setRoot('Landing', {}, { animate: true, direction: 'forward' }); }
   gotoRegPage() { this.navCtrl.setRoot('Registration', {}, { animate: true, direction: 'forward' }); }
-
-  notifyNow() {
-    this.localNotifications.schedule({
-      id: 1,
-      title: 'Haller',
-      text: 'Single Local Notification',
-      data: { secret: 'key' },
-      // icon: 'http://example.com/icon.png',
-      led: '00ff00'
-    });   
-  }
-  // getFbLoginStatus() {
-  //   // this.logoutFacebook();
-  //   this.fb.getLoginStatus().then((res: any) => {
-  //     console.info('getLoginStatus res', res);
-  //     if (res.status != 'connected') {
-  //       this.getFbLogin();
-  //     } else if (res.status == 'connected') {
-  //       this.fbAuthDetail = res.authResponse;
-  //       this.getFbDetail();
-  //     }
-  //   }).catch(error => {
-  //     console.info('getLoginStatus error', error);
-  //   })
-  // }
-
-  // getFbLogin() {
-  //   this.fb.login(['public_profile', 'user_hometown', 'email'])
-  //     .then((res: FacebookLoginResponse) => {
-  //       console.log('Logged into Facebook!', res);
-  //       if (res.status == 'connected') {
-  //         this.fbAuthDetail = res.authResponse;
-  //         this.getFbDetail();
-  //       }
-  //     })
-  //     .catch(e => console.log('Error logging into Facebook', e));
-  // }
-
-  // getFbDetail() {
-  //   console.info('userID', this.fbAuthDetail['userID']);
-  //   // this.fb.api(this.fbAuthDetail['userID'] + '/?field=id,email,first_name,last_name', [])
-  //   this.fb.api(this.fbAuthDetail['userID'] + '/?fields=id,name,email,hometown,birthday,sports,likes{id,name}', ['user_likes', 'user_birthday'])
-  //     // this.fb.api(this.fbAuthDetail['userID'] + '/movies', [])
-  //     .then((res: any) => {
-  //       console.info('api res', res);
-  //     }).catch(e => {
-  //       console.info('api error', e);
-  //     });
-  // }
-
-  // logoutFacebook() {
-  //   this.fb.logout().then((response) => {
-  //     console.info('response', response);
-  //   });
-  // }
 }

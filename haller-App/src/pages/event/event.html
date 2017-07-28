@@ -36,7 +36,8 @@
   <ion-card *ngFor="let event of eventList">
     <ion-item>
       <ion-avatar item-left (click)="viewProfile(event.createdBy)">
-        <img [src]="(event.createdBy && event.createdBy.currentProfile) ? event.createdBy.currentProfile.secure_url : 'assets/img/default-user.png'">
+        <!-- <img [src]="(event.createdBy && event.createdBy.currentProfile) ? event.createdBy.currentProfile.secure_url : userAvatar"> -->
+        <img [src]="feedProvider.httpClient.getProfileImageToDisplay(event.createdBy)">
       </ion-avatar>
       <h2 (click)="viewProfile(event.createdBy)">{{(event.createdBy ? event.createdBy.firstName : 'No One' ) + ' ' + (event.createdBy ? event.createdBy.lastName : 'No
         One')}}
@@ -46,35 +47,36 @@
     </ion-item>
     <ion-card-content center text-center>
       <div (click)="gototEventDetail(event)" class="ev-detail">
-        <h2><b>{{event.title}}</b></h2>
+        <h2><b>{{event.title}}</b>&nbsp;
+          <ion-icon *ngIf="event.createdBy.isRA" style="color:green" name="md-checkmark-circle-outline"></ion-icon>
+        </h2>
         <h3>{{event.time | date: 'shortTime'}}&nbsp;{{event.date | date: 'MMMM d, yyyy '}}</h3>
         <p>{{event.location}}</p>
-        <p style="margin-top:10px">{{event.details}}</p>        
+        <p style="margin-top:10px">{{event.details}}</p>
       </div>
       <img *ngIf="event.cover.length > 0" (click)="viewFullImage(event.cover[event.cover.length - 1])" [src]="event.cover[event.cover.length - 1].secure_url">
       <p style="margin-top:10px"><b>{{event.going.length}} people are going</b></p>
-      <button style="max-width: 140px;width: 18vh;" *ngIf="!event._userGoing" (click)="joinEvent(event)" ion-button>Join</button>
-      <button style="max-width: 140px;width: 18vh;" *ngIf="event._userGoing" (click)="leaveEvent(event)" ion-button
-        outline>Joined</button>
+      <button class="ev-join" *ngIf="!event._userGoing" (click)="joinEvent(event)" ion-button>Join</button>
+      <button class="ev-join" *ngIf="event._userGoing" (click)="leaveEvent(event)" ion-button outline>Joined</button>
       <!-- (click)="confirmEventLeaveAction(event)"-->
     </ion-card-content>
     <ion-row>
       <ion-col *ngIf="event.liked.length > 0 || event.comments.length > 0">
-        <span style="float:left" *ngIf="event.liked.length > 0">{{event.liked.length +' Likes'}}</span>
+        <span style="float:left" *ngIf="event.liked.length > 0" (click)="openLikeModel(event.liked)">{{event.liked.length +' Likes'}}</span>
         <span style="float:right" *ngIf="event.comments.length > 0" (click)="gototEventDetail(event)">{{event.comments.length + ' Comments'}}</span>
       </ion-col>
     </ion-row>
     <ion-row class="event-actions">
       <ion-col center text-center>
         <button ion-button icon-left clear small color="{{event._userLiked ? 'primary':'newlight'}}" (click)="likeEvent(event)">
-          <ion-icon name="{{event._userLiked ? 'ios-thumbs-up' : 'ios-thumbs-up-outline'}}"></ion-icon>&nbsp;Likes</button>
+          <ion-icon name="{{event._userLiked ? 'ios-thumbs-up':'ios-thumbs-up-outline'}}"></ion-icon>&nbsp;Like</button>
       </ion-col>
       <ion-col center text-center>
-        <button ion-button icon-left clear small color="newlight" (click)="gototEventDetail(event)"><ion-icon name="ios-chatbubbles-outline"></ion-icon>&nbsp;Comments</button>
+        <button ion-button icon-left clear small color="newlight" (click)="gototEventDetail(event)"><ion-icon class="icon comment-icon"></ion-icon>&nbsp;Comment</button>
       </ion-col>
       <ion-col center text-center>
         <button ion-button icon-left clear small color="{{event._userStarred ? 'primary':'newlight'}}" (click)="starEvent(event)">
-          <ion-icon ios="{{event._userStarred ? 'ios-heart' : 'ios-heart-outline'}}" md="{{event._userStarred ? 'md-heart' : 'md-heart-outline'}}"></ion-icon>&nbsp;Save</button>
+          <ion-icon name="{{event._userStarred ? 'ios-heart':'ios-heart-outline'}}"></ion-icon>&nbsp;Save</button>
       </ion-col>
     </ion-row>
   </ion-card>

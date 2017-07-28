@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
+import { Facebook } from '@ionic-native/facebook';
 import { ProfileSettings } from './profile-settings';
-import { LoginProvider } from '../login/login.provider'
+import { AuthProvider } from '../../shared/providers/auth.provider';
 import { HttpClient } from '../../shared/providers/http-client';
-import { ProfileEditProvider } from "../profile-edit/profile-edit.provider";
+import { ProfileProvider } from "../../shared/providers/profile.provider";
 
 @NgModule({
   declarations: [
@@ -16,7 +17,7 @@ import { ProfileEditProvider } from "../profile-edit/profile-edit.provider";
     ProfileSettings
   ],
   providers:[
-    LoginProvider, HttpClient, ProfileEditProvider
+    AuthProvider, HttpClient, ProfileProvider, Facebook
   ]
 })
 export class ProfileSettingsModule {}

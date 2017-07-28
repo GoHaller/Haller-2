@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 
-import { FeedProvider } from '../feed/feed.provoder'
+import { FeedProvider } from '../../shared/providers/feed.provider';
 
 /**
  * Generated class for the FeedNew page.
@@ -31,11 +31,13 @@ export class FeedNew {
     authorResidence: '',
     isEvent: false
   };
+  private userAvatar = '';
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private feedProvider: FeedProvider,
+  constructor(public navCtrl: NavController, public navParams: NavParams, public feedProvider: FeedProvider,
     public loadingCtrl: LoadingController) {
     this.feed = this.navParams.get('feed') || this.feed;
     this.local = new Storage('localstorage');
+    this.userAvatar = feedProvider.httpClient.userAvatar;
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
       this.feedProvider.userId = this.userInfo['_id'];

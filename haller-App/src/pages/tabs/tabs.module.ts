@@ -1,16 +1,18 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
-import { Tabs } from './tabs';
+import { TabsPage } from './tabs';
+import { HttpClient } from '../../shared/providers/http-client';
 
 @NgModule({
   declarations: [
-    Tabs
+    TabsPage
   ],
   imports: [
-    IonicPageModule.forChild(Tabs),
+    IonicPageModule.forChild(TabsPage),
   ],
   exports: [
-    Tabs
-  ]
+    TabsPage
+  ],
+  providers: [HttpClient]
 })
-export class TabsModule {}
+export class TabsModule { }
