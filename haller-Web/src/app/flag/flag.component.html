@@ -139,7 +139,7 @@
                       <a href="javascript:void(0);" (click)="flagAction(cmnt.isHidden?1:0,posts[postIndex]._id,cmnt._id)">{{cmnt.isHidden?'Unhide':'Hide'}}</a>
                     </li>
                     <li>
-                         <a href="javascript:void(0);" (click)="deleteComment(posts[postIndex]._id,cmnt._id)">Delete Comment</a>
+                         <a href="javascript:void(0);" (click)="showSwalDelete(posts[postIndex]._id,cmnt._id)">Delete Comment</a>
                     </li>
                       <li>
                       <a href="javascript:void(0);" (click)="flagAction(2,posts[postIndex]._id,cmnt._id)">No action needed</a>

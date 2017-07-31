@@ -112,6 +112,27 @@ export class FlagComponent implements OnInit {
                      })
     }
   }
+  showSwalDelete(postId, commentId){
+             swal({
+                    title: '',
+                    text: "Are you sure want to delete this comment?",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonClass: 'btn btn-success',
+                    cancelButtonClass: 'btn btn-danger',
+                    confirmButtonText: 'Yes, delete it!',
+                    buttonsStyling: false
+                }).then(() => {               
+            this.deleteComment(postId, commentId) 
+            swal({         
+                  title: 'Deleted!',
+                  text: 'Comment has been deleted.',      
+                  type: 'success',  
+                  confirmButtonClass: "btn btn-success",
+                  buttonsStyling: false
+               })
+ });
+ }
   
   
 
