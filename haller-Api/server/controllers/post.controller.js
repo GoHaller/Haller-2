@@ -1150,7 +1150,7 @@ function adminDashboardCount(req, res, next) {
               var threeDayStaffCount = 0;
               var threeDayStaffJoiner =0;              
               for(var go in staffThreeDaysEvent){
-                  if(staffThreeDaysEvent[count].authorResidence == "University"){
+                  if(staffThreeDaysEvent[count].authorResidence == "University" && staffThreeDaysEvent[count].isEvent){
                     threeDayStaffJoiner = threeDayStaffJoiner + staffThreeDaysEvent[count].going.length;
                   threeDayStaffCount += 1;
                 }                  
@@ -1165,7 +1165,7 @@ function adminDashboardCount(req, res, next) {
                   var twoDayStaffCount = 0;
                   var twoDayStaffJoiner  = 0;             
                   for(var go in staffTwoDaysEvent){
-                      if(staffTwoDaysEvent[count].authorResidence == "University"){
+                      if(staffTwoDaysEvent[count].authorResidence == "University" && staffTwoDaysEvent[count].isEvent){
                          twoDayStaffJoiner = twoDayStaffJoiner + staffTwoDaysEvent[count].going.length;
                        twoDayStaffCount += 1;
                     }                  
@@ -1188,25 +1188,23 @@ function getJoinDetails(req, res, next) {
     var userId =[]; 
     Post.aggregate()
         .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
-        .exec().then(threeDays => {   
-          var count = 0;               
-          for(var go in threeDays){
-              if((threeDays[count].going).length>0){
-                var goingCount = 0;
-                for(var i in threeDays[count].going){   
-                var actedCount =0;                 
-                  for(var dataAct =0 ; i<threeDays[count].going.length;i++){ 
-                        userId.push(threeDays[count].going[actedCount].actedBy);
-                        actedCount += 1;
+        .exec().then(threeDays => { 
+          for(var i=0;i<threeDays.length;i++){
+                if(threeDays[i].going.length > 0 &&  threeDays[i].isEvent == true ){
+                  var eventJoinerData = threeDays[i].going;
+                  for(var j=0;j<eventJoinerData.length;j++){
+                    userId.push(eventJoinerData[j].actedBy);
                   }
-                }                
+                }
               }
-              count= count+1;
-          }
           userId = unique(userId);
           for(var i =0 ; i<userId.length;i++){
-            User.get(userId[i]).then(user =>{        
-                                      userName.push({"id":user._id,"firstName":user.firstName,"lastName":user.lastName});
+            User.get(userId[i]).then(user =>{
+                                      var url = "";
+                                      if(user.currentProfile){
+                                        url = user.currentProfile.url;
+                                      }   
+                                      userName.push({"id":user._id,"firstName":user.firstName,"lastName":user.lastName,"url":url});
                                     });
           }
           setTimeout(function () {
@@ -1226,17 +1224,21 @@ function getStaffJoinDetails(req, res, next) {
         .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
         .exec().then(staffJoiners => {  
               for(var i=0;i<staffJoiners.length;i++){
-                if(staffJoiners[i].authorResidence == "University" && staffJoiners[i].going.length>0){
+                if(staffJoiners[i].authorResidence == "University" && staffJoiners[i].going.length>0 && staffJoiners[i].isEvent){
                   var staffJoinerData = staffJoiners[i].going;
-                  for(var j=0;j<staffJoiners[i].going.length;j++){
+                  for(var j=0;j<staffJoiners.length;j++){
                     userId.push(staffJoinerData[j].actedBy);
                   }
                 }
               }
           userId = unique(userId);
           for(var i =0 ; i<userId.length;i++){
-            User.get(userId[i]).then(user =>{      
-                                      userName.push({"id":user._id,"firstName":user.firstName,"lastName":user.lastName});
+            User.get(userId[i]).then(user =>{
+                                      var url = "";
+                                      if(user.currentProfile){
+                                        url = user.currentProfile.url;
+                                      }
+                                      userName.push({"id":user._id,"firstName":user.firstName,"lastName":user.lastName,"url":url});
                                     });
           }
           setTimeout(function () {

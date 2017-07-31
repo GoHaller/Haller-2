@@ -12,16 +12,16 @@
                                 <thead>
                                     <tr>
                                       <th></th>
-                                      <th>Sr.</th>
+                                      <th>Profile Image</th>
                                       <th>Name</th>
                                       <th>Last Name</th>
                                     </tr>
                                 </thead>
-                                
                                 <tbody>
                                     <tr *ngFor="let item of users; let i = index">
                                         <td></td>
-                                        <td>{{i}}</td>
+                                        <td *ngIf="item.url"><img src={{item.url}} width="30" height="30" style="width:100px;height:auto;"/></td>
+                                        <td *ngIf="!item.url"><i class="material-icons" style="font-size:80px">person</i></td>
                                         <td>{{item.firstName}}</td>
                                         <td>{{item.lastName}}</td>
                                     </tr>
@@ -30,16 +30,11 @@
            <div class="text-center">
             <button class="btn btn-default" (click)="closeModal('EventJoinner');">Close</button>
             </div>
-
       </div>
-      
     </div>
   </div>
   <div class="modal-background"></div>
 </modal>
-
-
-
   <div class="container-fluid">
     <div class="row">
       <div class="col-lg-4 col-md-6 col-sm-6">

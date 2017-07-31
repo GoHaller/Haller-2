@@ -64,7 +64,14 @@ export class UsersComponent implements OnInit {
           }
         },
         { "data": "residence" },
-        { "data": "role" },
+        { "data": "role", "mRender": function (data, type, row) { 
+                   if (row.isRA) {
+                                  return "RA"
+                                  } else {
+                                          return "student"
+                                          }
+                                       }
+         },
         {
           "data": "action", "mRender": function (data, type, row) {
             if (row.isBlocked) {

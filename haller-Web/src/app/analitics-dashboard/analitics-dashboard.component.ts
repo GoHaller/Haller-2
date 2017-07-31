@@ -55,7 +55,6 @@ showStaffUserName(days){
 
   closeModal(id: string) {
     this.modalService.close(id);
-   
   }
 
   getDashBoardCount() {
@@ -72,7 +71,11 @@ showStaffUserName(days){
           if (!this.showCaseData['72']) this.showCaseData['72'] = {};
           if (three._id) {
             this.showCaseData['72'].event = three.count;
-            this.showCaseData['72'].going = three.goingCount;
+            for(var i =0;i<this.countData.threeDays.length;i++){
+                if(this.countData.threeDays[i]._id == true){
+                  this.showCaseData['72'].going = this.countData.threeDays[i].goingCount;
+                }
+            }
           } else {
             this.showCaseData['72'].feed = three.count;
           }
@@ -81,7 +84,12 @@ showStaffUserName(days){
           if (!this.showCaseData['24']) this.showCaseData['24'] = {};
           if (three._id) {
             this.showCaseData['24'].event = three.count;
-            this.showCaseData['24'].going = three.goingCount;
+
+            for(var i =0;i<this.countData.towDays.length;i++){
+                if(this.countData.threeDays[i]._id == true){
+                  this.showCaseData['24'].going = this.countData.towDays[i].goingCount;
+                }
+            }
           } else {
             this.showCaseData['24'].feed = three.count;
           }
@@ -90,5 +98,4 @@ showStaffUserName(days){
         console.info('error', error);
       })
   }
-
 }
