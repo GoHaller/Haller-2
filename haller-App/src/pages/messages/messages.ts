@@ -19,6 +19,8 @@ export class Messages {
   private local: Storage;
   public userInfo: Object = {};
   public messageList = [];
+  public botList = [];
+  public botView = false;
   private refresher = null;
   private searchText: String = '';
   private numbers;
@@ -62,6 +64,28 @@ export class Messages {
     this.navCtrl.push('Message', {}, { animate: true, direction: 'forward' });
   }
 
+  toggleBotView() {
+    if (this.botView) {
+      this.botView = false;
+    } else {
+      this.messagesProvider.getBots().subscribe((res: any) => {
+          this.botList = res;
+          this.botView = true;
+          if (this.refresher) {
+            this.refresher.complete();
+            this.refresher = null;
+          }
+          console.log(res);
+      }, error => {
+        if (this.refresher) {
+          this.refresher.complete();
+          this.refresher = null;
+        }
+        console.info('error', error);
+      });
+    }
+  }
+
   showConversation(msg) {
     new Promise((resolve, reject) => {
       this.navCtrl.push('Message', { conversationId: msg._id, resolve: resolve }, { animate: true, direction: 'forward' });
@@ -72,6 +96,11 @@ export class Messages {
       convo.messages = data['messages'];
     });
 
+  }
+
+  showBotConversation(bot) {
+    this.botView = false;
+    this.navCtrl.push('Message', { recipients: bot }, { animate: true, direction: 'forward' });
   }
 
   getMessageDateFormate(date) {

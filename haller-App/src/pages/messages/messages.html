@@ -31,7 +31,10 @@
     <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles" refreshingText="Refreshing...">
     </ion-refresher-content>
   </ion-refresher>
-  <ion-list class="msg-list">
+  <ion-avatar item-right (click)="toggleBotView()">
+    <img src="assets/img/user-group.png">
+  </ion-avatar>
+  <ion-list class="msg-list" *ngIf="!botView">
     <ion-list-header>Conversations</ion-list-header>
     <ion-item *ngFor="let msg of messageList | convosearch:['firstName','lastName',searchText]" [ngClass]="checkMsgIfReadByOther(msg.messages[msg.messages.length - 1]) ? '':'read-convo'">
       <ion-icon *ngIf="edit" (click)="presentEditActionSheet(msg)" item-left color="danger" name="ios-remove-circle-outline"></ion-icon>
@@ -53,6 +56,15 @@
       <ion-note item-right (click)="showConversation(msg)">
         {{ msg.messages[msg.messages.length - 1].createdAt| date: getMessageDateFormate(msg.messages[msg.messages.length - 1].createdAt)}}
       </ion-note>
+    </ion-item>
+  </ion-list>
+  <ion-list class="botlist-list" *ngIf="botView">
+    <ion-list-header>Bots</ion-list-header>
+    <ion-item *ngFor="let bot of botList" [ngClass]="bot">
+      <ion-avatar item-left (click)="">
+        <img src="assets/img/user-group.png">
+      </ion-avatar>
+      <h2 item-right (click)="showConversation(bot)">{{bot.description}}</h2>
     </ion-item>
   </ion-list>
 </ion-content>

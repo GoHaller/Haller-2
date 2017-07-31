@@ -42,6 +42,19 @@ const UserSchema = new mongoose.Schema({
     index: true,
     set: toLower
   },
+  isBot: {
+    type: Boolean,
+    default: false
+  },
+  botData: {
+    description: {
+      type: String,
+      default: ""
+    },
+    accessToken: {
+      type: String
+    }
+  },
   isRA: {
     type: Boolean,
     default: false
@@ -299,6 +312,19 @@ UserSchema.statics = {
       .sort({ createdAt: -1 })
       .exec();
   },
+
+  /**
+   * List users in descending order of 'createdAt' timestamp who are RA.
+   * @param {number} skip - Number of users to be skipped.
+   * @param {number} limit - Limit number of users to be returned.
+   * @returns {Promise<User[]>}
+   */
+  listBots() {
+    return this.find({ 'isBot': true })
+      .sort({ createdAt: -1 })
+      .exec();
+  },
+
   /**
    * List users in the current users residence in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of users to be skipped.

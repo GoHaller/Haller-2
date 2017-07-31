@@ -2,6 +2,7 @@ import _ from 'lodash';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import Conversation from '../models/conversation.model';
+import botController from './bot.controller';
 import FCMSender from '../helpers/FCMSender';
 import User from '../models/user.model';
 import APIError from '../helpers/APIError';
@@ -219,7 +220,34 @@ function update(req, res, next) { //eslint-disable-line
             if (req.body.message) {
               FCMSender.sendMsgNotification(req.body.message, convo2);
             }
-            return res.json(convo2);
+
+            if (req.message.recipient.isBot) {
+              var fromUser = User.findOne({ '_id': req.params.userId }).exec();
+
+              botController.sendText(req.params.conversationId, req.body.message.recipient, req.body.message.body, function(response, err) {
+                if (err == null || err == undefined) {
+                    console.info('Bot.sendText error', e);
+                    const error = new APIError('No conversation possible at the moment!', httpStatus.NOT_FOUND);
+                    return next(error);
+                }
+
+                const msg = new Message({
+                  body: response,
+                  recipient: fromUser,
+                  createdAt: new Date(),
+                  createdBy: req.body.message.recipient
+                });
+
+                savedConvo.messages.push(msg);
+                savedConvo.save().then((ssConvo) => {
+                    return res.json(ssConvo);
+                }).catch(e => {
+                    return res.json(convo2);
+                });
+              });
+            } else {
+              return res.json(convo2);
+            }
           }).catch(e => {
             console.info('Conversation.get error', e);
             const error = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);

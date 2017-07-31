@@ -52,6 +52,11 @@ export class MessagesProvider {
         // .catch(this.httpClient.extractError);
     }
 
+    getBots() {
+        return this.httpClient.get('/users/bots').map(this.httpClient.extractData)
+        // .catch(this.httpClient.extractError);
+    }
+
     updateMessage(convoId, messageId, body) {
         return this.httpClient.put('/conversations/' + convoId + '/messages/' + messageId, body).map(this.httpClient.extractData)
         // .catch(this.httpClient.extractError);

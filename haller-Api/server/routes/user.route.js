@@ -3,6 +3,7 @@ import expressJwt from 'express-jwt';
 import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user.controller';
+import botCtrl from '../controllers/bot.controller';
 
 import { load, getToken } from '../helpers/AuthorizationHelper';
 import config from '../../config/env';
@@ -17,6 +18,12 @@ router.route('/')
   .get(expressJwt({ secret: config.jwtSecret, getToken }), userCtrl.list)
   /** POST /api/users - Create new user */
   .post(validate(paramValidation.createUser), userCtrl.create);
+
+router.route('/bots')
+  /** GET /api/users/bots - Get list of bots */
+  .get(botCtrl.list)
+  /** POST /api/users/bots - Create new Bot */
+  .post(botCtrl.createBot);
 
 router.route('/interest/:key')
   .get(expressJwt({ secret: config.jwtSecret, getToken }), userCtrl.getInterestList)
