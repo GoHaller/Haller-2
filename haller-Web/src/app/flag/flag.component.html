@@ -27,7 +27,7 @@
         </div>
         <div class="row" *ngFor="let post of posts | paginate: {itemsPerPage: 2, currentPage:page, id: '1'}; let i = index">
           <div class="col-lg-10 col-sm-12">
-            <div class="card" *ngIf="(post.flagged.length < 3 || this.flagOfthree) && !post.deteled">
+            <div class="card" *ngIf="(post.flagged.length < 3 || this.flagOfthree)">
               <div class="card-header card-header-icon" data-background-color="blue">
                 <i *ngIf="!post.createdBy || !post.createdBy.currentProfile" class="material-icons">person</i>
                 <img width="100px" *ngIf="post.createdBy && post.createdBy.currentProfile" [src]="post.createdBy.currentProfile.secure_url"
@@ -36,6 +36,7 @@
               <div class="card-content" >
                 <h5 class="card-title">{{(post.createdBy?post.createdBy.firstName:'no-name')+' '+(post.createdBy?post.createdBy.lastName:'no-name')}}
                   <p class="category">{{post.createdAt | date:'short'}} <span class="pull-right btn-rose" *ngIf="post.isHidden">Hidden</span></p>
+                  <p class="category">{{post.createdAt | date:'short'}} <span class="pull-right btn-rose" *ngIf="post.deteled">Deleted</span></p>
                 </h5>
               </div>
               <div class="card-footer">
@@ -106,7 +107,7 @@
         <div class="row comment-list" *ngIf="posts[postIndex]"  >
           <div class="card" *ngFor="let cmnt of posts[postIndex].comments" >
           
-            <div *ngIf="!cmnt.isHidden">
+            <div>
             <div class="card-header card-header-icon" data-background-color="blue" >
               <i *ngIf="!cmnt.createdBy || !cmnt.createdBy.currentProfile" class="material-icons">person</i>
               <img *ngIf="cmnt.createdBy && cmnt.createdBy.currentProfile" [src]="cmnt.createdBy.currentProfile.secure_url" />
@@ -114,6 +115,7 @@
             <div class="card-content">
               <h5 class="card-title">{{(cmnt.createdBy?cmnt.createdBy.firstName:'no-name')+' '+(cmnt.createdBy?cmnt.createdBy.lastName:'no-name')}}
                 <p class="category">{{cmnt.createdAt | date:'short'}}<span class="pull-right" *ngIf="cmnt.isHidden">Hidden</span></p>
+                <p class="category">{{cmnt.createdAt | date:'short'}}<span class="pull-right" *ngIf="cmnt.isHidden">Deleted</span></p>
               </h5>
             </div>
             <div class="card-footer">

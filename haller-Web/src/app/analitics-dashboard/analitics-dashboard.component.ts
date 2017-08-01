@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit ,NgZone,ChangeDetectorRef} from '@angular/core';
 import { PostService } from '../../services/post.services';
 import { ModalService } from '../../services/modal.service';
 import {Ng2PaginationModule} from 'ng2-pagination';
 import { EventJoinComponent } from "../modal/eventJoin.component";
+declare var $: any;
 @Component({
   selector: 'app-analitics-dashboard',
   templateUrl: './analitics-dashboard.component.html',
@@ -17,14 +18,15 @@ export class AnaliticsDashboardComponent implements OnInit {
   public showNameList:boolean=false;
   public users:any= [];
   public eventType: string = 'none';
-
+  public staffEventTable:any;
   public staffCount:any = [];
   public staffJoinerCount:any =[];
  
   public id;
 
 
-  constructor(private postService: PostService, private modalService: ModalService) { }
+  constructor(private postService: PostService, private modalService: ModalService,private zone:NgZone,private cdrf:ChangeDetectorRef) {
+   }
 
   ngOnInit() {
     this.getDashBoardCount();
@@ -35,6 +37,7 @@ showEventUserName(days){
   this.postService.getDashBoardEventJoinners(days).subscribe((res: any) => {
        this.users =res.userName;
        this.eventType = "Event Joiners";
+       this.modifyTable();
        this.modalService.open("EventJoinner"); 
       }, error => {
         console.info('error', error);
@@ -46,6 +49,7 @@ showStaffUserName(days){
     this.postService.getDashBoardStaffEventJoinners(days).subscribe((res: any) => {
        this.users = res.userName;
        this.eventType = "Staff Event Joiners";
+       this.modifyTable();
        this.modalService.open("EventJoinner");  
       }, error => {
         console.info('error', error);
@@ -98,4 +102,26 @@ showStaffUserName(days){
         console.info('error', error);
       })
   }
+
+modifyTable()
+{  
+  if (this.staffEventTable) 
+  {   
+     this.staffEventTable.clear();
+     this.staffEventTable.destroy();  
+  } 
+  this.zone.run(() => {
+  this.cdrf.detectChanges();
+  this.staffEventTable = $('#staffEventTable').DataTable({
+  responsive: true, 
+  "ordering": false, 
+  "info": false, 
+  "searching": false, 
+  "lengthChange": false,
+  "pageLength": 2,
+  "dom": '<"top"i>rt<"bottom"p><"clear">'
+   });  
+ }); 
+}
+
 }

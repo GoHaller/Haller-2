@@ -30,6 +30,8 @@
               <div class="card-content">
                 <h5 class="card-title">{{(post.createdBy?post.createdBy.firstName:'no-name')+' '+(post.createdBy?post.createdBy.lastName:'no-name')}}
                   <p class="category">{{post.createdAt | date:'short'}}</p>
+                   <p class="category">{{post.createdAt | date:'short'}} <span class="pull-right btn-rose" *ngIf="post.isHidden">Hidden</span></p>
+                  <p class="category">{{post.createdAt | date:'short'}} <span class="pull-right btn-rose" *ngIf="post.deteled">Deleted</span></p>
                 </h5>
               </div>
               <div class="card-footer">
