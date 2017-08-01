@@ -34,9 +34,9 @@ export class EventJoinComponent implements OnInit {
     // close modal on background click
     this.element.on('click', function (e: any) {
       var target = $(e.target);
-      if (!target.closest('.modal-body').length) {
-        modal.close();
-      }
+    //  if (!target.closest('.modal-body').length) {
+    //    modal.close();
+     // }
     });
 
     // add self (this modal instance) to the modal service so it's accessible from controllers

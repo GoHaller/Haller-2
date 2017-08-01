@@ -643,7 +643,7 @@ function allUsersByFilter(req, res, next) {
           { residence: { $regex: '^' + search, $options: 'i' } },
           { role: { $regex: '^' + search, $options: 'i' } }]
       }, { _id: { $ne: req.params.userId } }]
-    }).select({ "currentProfile": 1, "firstName": 1, "lastName": 1, "residence": 1, "role": 1, "isBlocked": 1 })
+    }).select({ "currentProfile": 1, "firstName": 1, "isRA":1,"lastName": 1, "residence": 1, "role": 1, "isBlocked": 1 })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

@@ -125,6 +125,55 @@ export class FlagComponent implements OnInit {
         }
     }
 
+    showSwalDelete(postId, commentId) {
+        swal({
+            title: '',
+            text: "Are you sure want to delete this comment?",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonClass: 'btn btn-success',
+            cancelButtonClass: 'btn btn-danger',
+            confirmButtonText: 'Yes, delete it!',
+            buttonsStyling: false
+        }).then(() => {
+            this.deleteComment(postId, commentId)
+            swal({
+                title: 'Deleted!',
+                text: 'Comment has been deleted.',
+                type: 'success',
+                confirmButtonClass: "btn btn-success",
+                buttonsStyling: false
+            })
+        });
+    }
 
+    likePost(feed) {
+        this.postService.likeFeed(feed, localStorage.getItem('uid'))
+            .subscribe((res: any) => {
+                let index = this.posts.indexOf(feed);
+                this.posts[index] = res;
+            }, error => {
+                console.log('likeFeed error', error);
+            });
+    }
 
+    likeComment(comment) {
+        let userId = localStorage.getItem('uid');
+        let flagObj = comment.liked.filter(like => { return (like.actedBy._id == userId) || (like.actedBy === userId); })[0];
+        if (flagObj) {
+            this.postService.deleteLikeComment(this.posts[this.postIndex]['_id'], comment['_id'], flagObj['_id'])
+                .subscribe((res: any) => {
+                    this.posts[this.postIndex] = this.postService.processFeed(res);
+                }, error => {
+                    console.log('deleteLikeComment error', error);
+                });
+        } else {
+            this.postService.likeComment(this.posts[this.postIndex]['_id'], comment['_id'], { actedBy: userId, actionType: 'like' })
+                .subscribe((res: any) => {
+                    this.posts[this.postIndex] = this.postService.processFeed(res);
+                }, error => {
+                    console.log('likeComment error', error);
+                });
+        }
+    }
 }

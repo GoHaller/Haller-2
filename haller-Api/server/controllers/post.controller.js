@@ -1151,7 +1151,7 @@ function adminDashboardCount(req, res, next) {
               var threeDayStaffCount = 0;
               var threeDayStaffJoiner = 0;
               for (var go in staffThreeDaysEvent) {
-                if (staffThreeDaysEvent[count].authorResidence == "University") {
+                if (staffThreeDaysEvent[count].authorResidence == "University" && staffThreeDaysEvent[count].isEvent) {
                   threeDayStaffJoiner = threeDayStaffJoiner + staffThreeDaysEvent[count].going.length;
                   threeDayStaffCount += 1;
                 }
@@ -1166,7 +1166,7 @@ function adminDashboardCount(req, res, next) {
                   var twoDayStaffCount = 0;
                   var twoDayStaffJoiner = 0;
                   for (var go in staffTwoDaysEvent) {
-                    if (staffTwoDaysEvent[count].authorResidence == "University") {
+                    if (staffTwoDaysEvent[count].authorResidence == "University" && staffTwoDaysEvent[count].isEvent) {
                       twoDayStaffJoiner = twoDayStaffJoiner + staffTwoDaysEvent[count].going.length;
                       twoDayStaffCount += 1;
                     }
@@ -1179,7 +1179,6 @@ function adminDashboardCount(req, res, next) {
         });
     });
 }
-
 
 function getJoinDetails(req, res, next) {
   var days = parseInt(req.params.days);
@@ -1245,6 +1244,7 @@ function getStaffJoinDetails(req, res, next) {
         res.json({ userName });
       }, 1000)
     });
+
 }
 
 function deletePost(req, res, next) {
