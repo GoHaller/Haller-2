@@ -457,4 +457,12 @@ export default {
       detail: Joi.string()
     }
   },
+  userStatus: {
+    params: {
+      userId: Joi.string().hex().required()
+    },
+    body: {
+      sataus: Joi.boolean().required()
+    }
+  }
 };

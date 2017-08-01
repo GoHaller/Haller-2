@@ -87,9 +87,12 @@
     <ion-item class="org-list no-bootom-border">
       <button *ngFor="let interest of userInfo.interests" color="primary" (click)="removeInterestFromUserList(interest)" icon-right
         ion-button small outline><span class="tag-text">{{interest.name}}</span><ion-icon color="dark" name="close"></ion-icon></button>
-      <button color="primary" *ngIf="!showInterestForm" (click)="showInterestForm = true" icon-right ion-button small>Add<ion-icon name="add"></ion-icon></button>
+      <button *ngFor="let interest of getFbLikesObject(userInfo)" color="primary" ion-button small outline><span class="tag-text">{{interest.name}}</span></button>
     </ion-item>
-    <ion-item *ngIf="showInterestForm">
+    <ion-item *ngIf="!userInfo.facebook">
+      <button color="primary" (click)="getFbLogin()" icon-right ion-button small>Connect to Facebook</button>
+    </ion-item>
+    <!-- <ion-item *ngIf="showInterestForm">
       <ion-input (input)="searchInterest($event)" [(ngModel)]="userInterest" placeholder="Add here"></ion-input>
       <button ion-button clear item-right (click)="addInterestToUserListManual()">Add</button>
     </ion-item>
@@ -100,7 +103,7 @@
           <ion-icon item-right name="add"></ion-icon>
         </ion-item>
       </ion-list>
-    </ion-item>
+    </ion-item> -->
     <!--Interests End-->
   </ion-list>
 </ion-content>

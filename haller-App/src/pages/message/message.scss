@@ -37,9 +37,9 @@ page-message {
         }
     }
 
-    ion-row.conversation{ 
-        
-        ion-col{ 
+    ion-row.conversation{
+
+        ion-col{
             .user-image{
                 border-radius: 100px;
                 width: 45px;
@@ -69,15 +69,15 @@ page-message {
         }
         &.me{
             .msg-container{
-                float: right;  
+                float: right;
                 .msg-time{
                     float: left;
                 }
-            }          
+            }
         }
         &.them{
             .msg-container{
-                float: left;            
+                float: left;
                 .msg-time{
                     float: right;
                 }
@@ -124,4 +124,10 @@ page-message {
             box-shadow: none;
         }
     }
+      .badge{
+        font-size:15px;
+        height: 1.8em;
+        padding-left:10px;
+        padding-right:10px;
+      }
 }

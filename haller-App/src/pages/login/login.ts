@@ -30,8 +30,8 @@ export class Login {
     private ProfileProvider: ProfileProvider, private formBuilder: FormBuilder, public toastCtrl: ToastController,
     statusBar: StatusBar, splashScreen: SplashScreen, private loadingCtrl: LoadingController, public alertCtrl: AlertController) {
     this.authForm = this.formBuilder.group({
-      email: ['', Validators.compose([Validators.maxLength(30), Validators.required])],
-      password: ['', Validators.compose([Validators.maxLength(30), Validators.required])]
+      email: ['m196f845@ku.edu', Validators.compose([Validators.maxLength(30), Validators.required])],
+      password: ['MahdiHaller', Validators.compose([Validators.maxLength(30), Validators.required])]
     });
     this.local = new Storage('localstorage');
     statusBar.styleDefault();

@@ -40,14 +40,14 @@
       <ion-note>{{feed.createdAt | date: getDateFormatr(feed.createdAt)}}</ion-note>
       <button ion-button icon-only item-right clear small color="newlight" (click)="presentFeedActionSheet(feed)"><ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon></button>
     </ion-item>
-    <img *ngIf="feed.cover.length > 0" (click)="viewFullImage(feed.cover[feed.cover.length - 1])" [src]="feed.cover[feed.cover.length - 1].secure_url">
+    <img *ngIf="feed.cover.length > 0" (click)="gototFeedDetail(feed)" [src]="feed.cover[feed.cover.length - 1].secure_url">
     <ion-card-content *ngIf="feed.details" (click)="gototFeedDetail(feed)">
       <p>{{feed.details}}</p>
     </ion-card-content>
     <ion-row class="action-count">
       <ion-col *ngIf="feed.liked.length > 0 || feed.comments.length > 0">
-        <span style="float:left" *ngIf="feed.liked.length > 0" (click)="openLikeModel(feed.liked)">{{feed.liked.length +' Likes'}}</span>
-        <span style="float:right" *ngIf="feed.comments.length > 0" (click)="gototFeedDetail(feed)">{{feed.comments.length + ' Comments'}}</span>
+        <span style="float:left" *ngIf="feed.liked.length > 0" (click)="openLikeModel(feed.liked,null)">{{feed.liked.length +' Likes'}}</span>
+        <span style="float:right" *ngIf="feed.comments.length > 0" (click)="openLikeModel(null,feed.comments)">{{feed.comments.length + ' Comments'}}</span>
       </ion-col>
     </ion-row>
     <ion-row class="feed-actions">

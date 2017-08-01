@@ -54,7 +54,7 @@
     <ion-row class="action-count">
       <ion-col *ngIf="(feed.liked && feed.liked.length > 0) || (feed.comments && feed.comments.length > 0)">
         <span style="float:left" *ngIf="feed.liked.length > 0" (click)="openLikeModel(feed.liked)">{{feed.liked.length +' Likes'}}</span>
-        <span style="float:right" *ngIf="feed.comments.length > 0">{{feed.comments.length + ' Comments'}}</span>
+        <span style="float:right" *ngIf="feed.comments.length > 0" (click)="openLikeModel(feed.comments)">{{feed.comments.length + ' Comments'}}</span>
       </ion-col>
     </ion-row>
 

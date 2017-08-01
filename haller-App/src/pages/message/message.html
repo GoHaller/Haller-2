@@ -26,23 +26,24 @@
       <span *ngIf="recipients.length == 0">New Message</span>
     </ion-title>
     <ion-buttons right>
-      <button ion-button (click)="showUserList()" *ngIf="isNewConvo">Enter Recipients</button>
+      <button ion-button (click)="showUserList()" *ngIf="isNewConvo">Find</button>
     </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content #content>
   <ion-card *ngIf="isNewConvo" class="new-msg-card">
-    <ion-grid>
+    <ion-grid *ngIf="recipients.length > 0">
       <ion-row>
         <ion-col col-12>
-          <ion-input #searchParti class="new-msg" (click)="showUserList()" [ngModel]="searchInputText" type="text" placeholder="Enter Recipients"
-            disabled="disable"></ion-input>
+          <!-- <ion-input *ngIf="recipients.length > 0" #searchParti class="new-msg" (click)="showUserList()" [ngModel]="searchInputText"
+            type="text" placeholder="Enter Recipients" disabled="disable"></ion-input> -->
+          <ion-badge class="badge" ion-button round small *ngFor="let x of recipients">{{x.firstName + ' ' + x.lastName}}</ion-badge>
         </ion-col>
       </ion-row>
     </ion-grid>
-    <!--(keyup)="findParticipants($event)"-->
-    <!--<ion-list class="seaarch-parti-list">
+    <!-- (keyup)="findParticipants($event)" -->
+    <!-- <ion-list class="seaarch-parti-list">
       <ng-template ngFor let-user [ngForOf]="userList | participantsearch:['firstName','lastName',searchText]">
         <ion-item *ngIf="user._id !== userInfo._id" (click)="selectRecipient(user,searchParti)">
           <ion-avatar item-left>
@@ -51,7 +52,7 @@
           <h2>{{(user.firstName || '') + ' ' + (user.lastName || '')}}</h2>
         </ion-item>
       </ng-template>
-    </ion-list>-->
+    </ion-list> -->
   </ion-card>
 
   <ion-grid *ngIf="conversation && conversation.messages">

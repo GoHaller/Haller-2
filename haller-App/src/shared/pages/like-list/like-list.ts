@@ -13,15 +13,29 @@ import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angul
   templateUrl: 'like-list.html',
 })
 export class LikeListPage {
-  public likes = [];
+  public lists = [];
   public userAvatar = '';
   constructor(public navCtrl: NavController, public navParams: NavParams, public viewCtrl: ViewController, ) {
-    this.likes = navParams.get('likes');
+    this.lists = navParams.get('likes');
+    if (navParams.get('comments'))
+      this.lists = navParams.get('comments');
     this.userAvatar = navParams.get('userAvatar');
   }
 
   ionViewDidLoad() {
     //console.log('ionViewDidLoad LikeListPage');
+  }
+
+  getImage(item) {
+    if (item.actedBy)
+    { return item.actedBy.currentProfile ? item.actedBy.currentProfile.secure_url : this.userAvatar }
+    else if (item.createdBy) {
+      return item.createdBy.currentProfile ? item.createdBy.currentProfile.secure_url : this.userAvatar
+    }
+  }
+
+  getNames(item) {
+    return item.actedBy ? (item.actedBy.firstName + ' ' + item.actedBy.lastName) : (item.createdBy.firstName + ' ' + item.createdBy.lastName);
   }
 
   close() {

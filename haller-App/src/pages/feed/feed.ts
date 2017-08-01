@@ -234,11 +234,12 @@ export class Feed {
     this.getFeeds();
   }
 
-  openLikeModel(likes) {
-    let modal = this.modalCtrl.create('LikeListPage', { likes: likes, userAvatar: this.userAvatar });
+  openLikeModel(likes, comments) {
+    let modal = this.modalCtrl.create('LikeListPage', { likes: likes, comments: comments, userAvatar: this.userAvatar });
     modal.onDidDismiss(data => {
       console.info('data', data);
     });
     modal.present();
   }
+
 }

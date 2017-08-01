@@ -1074,7 +1074,8 @@ function adminGetFlagedPost(req, res, next) {
   } else if (section == 'feed') {
     q['isEvent'] = false;
   }
-  Post.findByCustomQuery({ q: q })
+  const { limit = 50, skip = 0 } = req.query;
+  Post.findByCustomQuery({ q: q, skip: skip, limit: limit })
     .then(posts => {
       res.json(posts);
     }).catch((e) => {
@@ -1142,119 +1143,119 @@ function adminDashboardCount(req, res, next) {
         .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
         .group({ _id: '$isEvent', count: { $sum: 1 }, goingCount: { $sum: { $size: "$going" } } })
         .exec().then(towDays => {
-          d.setDate(d.getDate() -1 );
+          d.setDate(d.getDate() - 1);
           Post.aggregate()
-          .match({ createdAt: { $gt: d } },  { _id: 1, going: 1 })               
-          .exec().then(staffThreeDaysEvent => {
-              var count = 0; 
+            .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+            .exec().then(staffThreeDaysEvent => {
+              var count = 0;
               var threeDayStaffCount = 0;
-              var threeDayStaffJoiner =0;              
-              for(var go in staffThreeDaysEvent){
-                  if(staffThreeDaysEvent[count].authorResidence == "University"){
-                    threeDayStaffJoiner = threeDayStaffJoiner + staffThreeDaysEvent[count].going.length;
+              var threeDayStaffJoiner = 0;
+              for (var go in staffThreeDaysEvent) {
+                if (staffThreeDaysEvent[count].authorResidence == "University") {
+                  threeDayStaffJoiner = threeDayStaffJoiner + staffThreeDaysEvent[count].going.length;
                   threeDayStaffCount += 1;
-                }                  
-                  count= count+1;
+                }
+                count = count + 1;
               }
 
-              d.setDate(d.getDate() +1 );
+              d.setDate(d.getDate() + 1);
               Post.aggregate()
-              .match({ createdAt: { $gt: d }  }, { _id: 1, going: 1 })               
-              .exec().then(staffTwoDaysEvent => {
-                  var count = 0; 
+                .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+                .exec().then(staffTwoDaysEvent => {
+                  var count = 0;
                   var twoDayStaffCount = 0;
-                  var twoDayStaffJoiner  = 0;             
-                  for(var go in staffTwoDaysEvent){
-                      if(staffTwoDaysEvent[count].authorResidence == "University"){
-                         twoDayStaffJoiner = twoDayStaffJoiner + staffTwoDaysEvent[count].going.length;
-                       twoDayStaffCount += 1;
-                    }                  
-                      count= count+1;
-                  }          
-              res.json({ threeDays, towDays ,threeDayStaffCount,threeDayStaffJoiner,twoDayStaffCount,twoDayStaffJoiner });    
-            });                  
-        });
+                  var twoDayStaffJoiner = 0;
+                  for (var go in staffTwoDaysEvent) {
+                    if (staffTwoDaysEvent[count].authorResidence == "University") {
+                      twoDayStaffJoiner = twoDayStaffJoiner + staffTwoDaysEvent[count].going.length;
+                      twoDayStaffCount += 1;
+                    }
+                    count = count + 1;
+                  }
+                  res.json({ threeDays, towDays, threeDayStaffCount, threeDayStaffJoiner, twoDayStaffCount, twoDayStaffJoiner });
+                });
+            });
 
         });
     });
 }
 
 
-function getJoinDetails(req, res, next) { 
-    var days = parseInt(req.params.days);
-    var d = new Date();
-    d.setDate(d.getDate() - days); 
-    var userName = [];
-    var userId =[]; 
-    Post.aggregate()
-        .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
-        .exec().then(threeDays => {   
-          var count = 0;               
-          for(var go in threeDays){
-              if((threeDays[count].going).length>0){
-                var goingCount = 0;
-                for(var i in threeDays[count].going){   
-                var actedCount =0;                 
-                  for(var dataAct =0 ; i<threeDays[count].going.length;i++){ 
-                        userId.push(threeDays[count].going[actedCount].actedBy);
-                        actedCount += 1;
-                  }
-                }                
-              }
-              count= count+1;
+function getJoinDetails(req, res, next) {
+  var days = parseInt(req.params.days);
+  var d = new Date();
+  d.setDate(d.getDate() - days);
+  var userName = [];
+  var userId = [];
+  Post.aggregate()
+    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+    .exec().then(threeDays => {
+      var count = 0;
+      for (var go in threeDays) {
+        if ((threeDays[count].going).length > 0) {
+          var goingCount = 0;
+          for (var i in threeDays[count].going) {
+            var actedCount = 0;
+            for (var dataAct = 0; i < threeDays[count].going.length; i++) {
+              userId.push(threeDays[count].going[actedCount].actedBy);
+              actedCount += 1;
+            }
           }
-          userId = unique(userId);
-          for(var i =0 ; i<userId.length;i++){
-            User.get(userId[i]).then(user =>{        
-                                      userName.push({"id":user._id,"firstName":user.firstName,"lastName":user.lastName});
-                                    });
-          }
-          setTimeout(function () {
-              userName = unique(userName);
-              res.json({ userName  });
-          }, 1000)
-          });
+        }
+        count = count + 1;
+      }
+      userId = unique(userId);
+      for (var i = 0; i < userId.length; i++) {
+        User.get(userId[i]).then(user => {
+          userName.push({ "id": user._id, "firstName": user.firstName, "lastName": user.lastName });
+        });
+      }
+      setTimeout(function () {
+        userName = unique(userName);
+        res.json({ userName });
+      }, 1000)
+    });
 }
 
-function getStaffJoinDetails(req, res, next) { 
-    var days = parseInt(req.params.days);
-    var d = new Date();
-    d.setDate(d.getDate() - days); 
-    var userName = [];
-    var userId =[]; 
-    Post.aggregate()
-        .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
-        .exec().then(staffJoiners => {  
-              for(var i=0;i<staffJoiners.length;i++){
-                if(staffJoiners[i].authorResidence == "University" && staffJoiners[i].going.length>0){
-                  var staffJoinerData = staffJoiners[i].going;
-                  for(var j=0;j<staffJoiners[i].going.length;j++){
-                    userId.push(staffJoinerData[j].actedBy);
-                  }
-                }
-              }
-          userId = unique(userId);
-          for(var i =0 ; i<userId.length;i++){
-            User.get(userId[i]).then(user =>{      
-                                      userName.push({"id":user._id,"firstName":user.firstName,"lastName":user.lastName});
-                                    });
+function getStaffJoinDetails(req, res, next) {
+  var days = parseInt(req.params.days);
+  var d = new Date();
+  d.setDate(d.getDate() - days);
+  var userName = [];
+  var userId = [];
+  Post.aggregate()
+    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+    .exec().then(staffJoiners => {
+      for (var i = 0; i < staffJoiners.length; i++) {
+        if (staffJoiners[i].authorResidence == "University" && staffJoiners[i].going.length > 0) {
+          var staffJoinerData = staffJoiners[i].going;
+          for (var j = 0; j < staffJoiners[i].going.length; j++) {
+            userId.push(staffJoinerData[j].actedBy);
           }
-          setTimeout(function () {
-              //userName = unique(userName);
-              res.json({ userName  });
-          }, 1000)          
-          });
+        }
+      }
+      userId = unique(userId);
+      for (var i = 0; i < userId.length; i++) {
+        User.get(userId[i]).then(user => {
+          userName.push({ "id": user._id, "firstName": user.firstName, "lastName": user.lastName });
+        });
+      }
+      setTimeout(function () {
+        //userName = unique(userName);
+        res.json({ userName });
+      }, 1000)
+    });
 }
 
 function deletePost(req, res, next) {
-   Post.get(req.params.postId)
+  Post.get(req.params.postId)
     .then((post) => {
       post.deteled = true;
-      for(var i =0;i<post.comments.length;i++){
+      for (var i = 0; i < post.comments.length; i++) {
         post.comments[i].isHidden = true;
-      }      
+      }
       post.save()
-        .then((doc) => {         
+        .then((doc) => {
           return res.json(doc);
         })
         .catch((e) => {
@@ -1265,15 +1266,15 @@ function deletePost(req, res, next) {
 }
 
 function deleteComment(req, res, next) {
-   Post.get(req.params.postId)
+  Post.get(req.params.postId)
     .then((post) => {
       post.comments.id(req.params.commentId).isHidden = true;
       post.save()
 
-      .then((doc) => {         
+        .then((doc) => {
           return res.json(doc);
         })
-        
+
         .catch((e) => {
           console.log(e); //eslint-disable-line
           next(e);

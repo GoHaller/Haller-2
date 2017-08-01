@@ -44,6 +44,7 @@ export class ProfileEdit {
       hometown: ['', Validators.compose([Validators.maxLength(30)])]
     });
 
+
     this.local.get('userInfo').then(val => {
       this.userInfo = JSON.parse(val);
       this.userInfo['pronouns'] = this.userInfo['genderPronouns'].join(', ');
@@ -262,6 +263,10 @@ export class ProfileEdit {
       // console.info('data', data);
     });
     modal.present();
+  }
+
+  getFbLikesObject(user) {
+    return user.facebook && user.facebook.likes ? user.facebook.likes.data : [];
   }
 
 }

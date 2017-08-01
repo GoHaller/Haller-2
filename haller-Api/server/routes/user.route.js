@@ -17,11 +17,12 @@ router.route('/admin/:userId/list')
     getToken
   }), userCtrl.allUsersByFilter);
 
+
 router.route('/admin/change-user-sataus')
   .post(expressJwt({
     secret: config.jwtSecret,
     getToken
-  }), userCtrl.toggleUserStatus);
+  }), validate(paramValidation.userStatus), userCtrl.toggleUserStatus);
 
 
 //App APIS

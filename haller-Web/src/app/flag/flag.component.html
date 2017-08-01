@@ -1,163 +1,161 @@
 <div class="main-content">
-  <div class="container-fluid">
+    <div class="container-fluid">
 
-    <div class="row post-list">
-      <!--Post Section Start-->
-      <div class="col-lg-8 col-md-6 col-sm-8">
-        <div class="row">
-          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-            <select class="selectpicker" [(ngModel)]="section" (ngModelChange)="getFeeds()" data-style="btn btn-primary btn-round" title=""
-              data-size="4">
+        <div class="row post-list">
+            <!--Post Section Start-->
+            <div class="col-lg-8 col-md-6 col-sm-8">
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
+                        <select class="selectpicker" [(ngModel)]="section" (ngModelChange)="getFeeds()" data-style="btn btn-primary btn-round" title=""
+                            data-size="4">
               <!-- <option disabled>Choose residence</option> -->
               <option value="Feed" [attr.selected]="section == 'Feed'">Feed</option>
               <option value="Event" [attr.selected]="section == 'Event'">Event</option>
               <option value="Comment" [attr.selected]="section == 'Comment'">Comment</option>
           </select>
-          </div>
-          <div class="col-lg-3 col-md-3"></div>
-          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-            <select class="selectpicker" [(ngModel)]="sort" (ngModelChange)="getFeeds()" data-style="btn btn-primary btn-round" title=""
-              data-size="4">
+                    </div>
+                    <div class="col-lg-3 col-md-3"></div>
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
+                        <select class="selectpicker" [(ngModel)]="sort" (ngModelChange)="getFeeds()" data-style="btn btn-primary btn-round" title=""
+                            data-size="4">
               <!-- <option disabled>Choose residence</option> -->
               <option value="0" [attr.selected]="sort == 0">All Flagged</option>
               <option value="1" [attr.selected]="sort == 1">With 3 or more flags</option>
               <option value="2" [attr.selected]="sort == 2">No further action needed</option>
           </select>
-          </div>
-        </div>
-        <div class="row" *ngFor="let post of posts | paginate: {itemsPerPage: 2, currentPage:page, id: '1'}; let i = index">
-          <div class="col-lg-10 col-sm-12">
-            <div class="card" *ngIf="(post.flagged.length < 3 || this.flagOfthree) && !post.deteled">
-              <div class="card-header card-header-icon" data-background-color="blue">
-                <i *ngIf="!post.createdBy || !post.createdBy.currentProfile" class="material-icons">person</i>
-                <img width="100px" *ngIf="post.createdBy && post.createdBy.currentProfile" [src]="post.createdBy.currentProfile.secure_url"
-                />
-              </div>
-              <div class="card-content" >
-                <h5 class="card-title">{{(post.createdBy?post.createdBy.firstName:'no-name')+' '+(post.createdBy?post.createdBy.lastName:'no-name')}}
-                  <p class="category">{{post.createdAt | date:'short'}} <span class="pull-right btn-rose" *ngIf="post.isHidden">Hidden</span></p>
-                </h5>
-              </div>
-              <div class="card-footer">
-                <h3 class="text-center" *ngIf="post.isEvent"><b>{{post.title}}</b>&nbsp;
-                  <i *ngIf="post.createdBy.isRA" style="color:green" class="material-icons">check_circle</i>
-                </h3>
-                <p *ngIf="post.isEvent" class="text-center"><b>{{post.time | date: 'shortTime'}}&nbsp;{{post.date | date: 'MMMM d, yyyy '}}</b></p>
-                <p *ngIf="post.isEvent" class="text-center">{{post.location}}</p>
-                <p [ngClass]="post.isEvent?'text-center':''">{{post.details}}</p>
-                <p class="comment-image" *ngIf="post.cover.length > 0">
-                  <img [src]="post.cover[post.cover.length - 1].secure_url" />
-                </p>
-              </div>
-              <div class="card-footer action">
-                <div class="stats">
-                  <button class="btn btn-info btn-simple">{{post.liked.length}}&nbsp;Like</button>
-                  <button class="btn btn-info btn-simple" (click)="selectPost(i)">{{post.comments.length}}&nbsp;Comment</button>
-                  <button class="btn btn-rose btn-simple">{{post.flagged.length}}&nbsp;has flagged</button>
-                  <div class="dropdown pull-right">
-                    <button type="button" class="btn btn-small btn-simple btn-info dropdown-toggle" data-toggle="dropdown">
+                    </div>
+                </div>
+                <div class="row" *ngFor="let post of posts | paginate: {itemsPerPage: 2, currentPage:page, id: '1'}; let i = index">
+                    <div class="col-lg-10 col-sm-12">
+                        <div class="card" *ngIf="(post.flagged.length < 3 || this.flagOfthree) && !post.deteled">
+                            <div class="card-header card-header-icon" data-background-color="blue">
+                                <i *ngIf="!post.createdBy || !post.createdBy.currentProfile" class="material-icons">person</i>
+                                <img width="100px" *ngIf="post.createdBy && post.createdBy.currentProfile" [src]="post.createdBy.currentProfile.secure_url"
+                                />
+                            </div>
+                            <div class="card-content">
+                                <h5 class="card-title">{{(post.createdBy?post.createdBy.firstName:'no-name')+' '+(post.createdBy?post.createdBy.lastName:'no-name')}}
+                                    <p class="category">{{post.createdAt | date:'short'}} <span class="pull-right btn-rose" *ngIf="post.isHidden">Hidden</span></p>
+                                </h5>
+                            </div>
+                            <div class="card-footer">
+                                <h3 class="text-center" *ngIf="post.isEvent"><b>{{post.title}}</b>&nbsp;
+                                    <i *ngIf="post.createdBy.isRA" style="color:green" class="material-icons">check_circle</i>
+                                </h3>
+                                <p *ngIf="post.isEvent" class="text-center"><b>{{post.time | date: 'shortTime'}}&nbsp;{{post.date | date: 'MMMM d, yyyy '}}</b></p>
+                                <p *ngIf="post.isEvent" class="text-center">{{post.location}}</p>
+                                <p [ngClass]="post.isEvent?'text-center':''">{{post.details}}</p>
+                                <p class="comment-image" *ngIf="post.cover.length > 0">
+                                    <img [src]="post.cover[post.cover.length - 1].secure_url" />
+                                </p>
+                            </div>
+                            <div class="card-footer action">
+                                <div class="stats">
+                                    <button class="btn btn-info btn-simple">{{post.liked.length}}&nbsp;Like</button>
+                                    <button class="btn btn-info btn-simple" (click)="selectPost(i)">{{post.comments.length}}&nbsp;Comment</button>
+                                    <button class="btn btn-rose btn-simple">{{post.flagged.length}}&nbsp;has flagged</button>
+                                    <div class="dropdown pull-right">
+                                        <button type="button" class="btn btn-small btn-simple btn-info dropdown-toggle" data-toggle="dropdown">
                                         <i class="material-icons">build</i>
                                         <span class="caret"></span>
                                     </button>
-                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                      <li>
-                        <a href="javascript:void(0);" (click)="flagAction(post.isHidden?1:0,post._id)">{{post.isHidden?'Unhide':'Hide'}}</a>
-                      </li>
-                      <li>
-                      <a href="javascript:void(0);" (click)="showSwal(post._id)">Delete Post</a>
-                    </li>
-                      <li>
-                        <a href="javascript:void(0);" (click)="flagAction(2,post._id)">No action needed</a>
-                      </li>
-                    </ul>
-                  </div>
+                                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                            <li>
+                                                <a href="javascript:void(0);" (click)="flagAction(post.isHidden?1:0,post._id)">{{post.isHidden?'Unhide':'Hide'}}</a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript:void(0);" (click)="showSwal(post._id)">Delete Post</a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript:void(0);" (click)="flagAction(2,post._id)">No action needed</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <!--Post Section End-->
-      <!--Comment Section Start-->
-      <div class="col-lg-4 col-md-6 col-sm-4 comment-section">
-<!--         ================={{posts[postIndex]}}===============-->
-         <div class="row" *ngIf="posts[postIndex]">
-          <div class="card" style="margin-bottom: 0px;">
-            <div class="card-header card-header-icon" data-background-color="blue">
-              <i *ngIf="!posts[postIndex].createdBy || !posts[postIndex].createdBy.currentProfile" class="material-icons">person</i>
-              <img width="100px" *ngIf="posts[postIndex].createdBy && posts[postIndex].createdBy.currentProfile" [src]="posts[postIndex].createdBy.currentProfile.secure_url"
-              />
-            </div>
-            <div class="card-content">
-              <h5 class="card-title">{{(posts[postIndex].createdBy?posts[postIndex].createdBy.firstName:'no-name')+' '+(posts[postIndex].createdBy?posts[postIndex].createdBy.lastName:'no-name')}}
-                <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden">Hidden</span></p>
-              </h5>
-            </div>
-            <div class="card-footer post-detail">
-              {{posts[postIndex].details}}
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-12" style="margin: 11px 0px;">
-            <legend class="margin-top-10">Comments</legend>
-          </div>
-        </div>
-        <div class="row comment-list" *ngIf="posts[postIndex]"  >
-          <div class="card" *ngFor="let cmnt of posts[postIndex].comments" >
-          
-            <div *ngIf="!cmnt.isHidden">
-            <div class="card-header card-header-icon" data-background-color="blue" >
-              <i *ngIf="!cmnt.createdBy || !cmnt.createdBy.currentProfile" class="material-icons">person</i>
-              <img *ngIf="cmnt.createdBy && cmnt.createdBy.currentProfile" [src]="cmnt.createdBy.currentProfile.secure_url" />
-            </div>
-            <div class="card-content">
-              <h5 class="card-title">{{(cmnt.createdBy?cmnt.createdBy.firstName:'no-name')+' '+(cmnt.createdBy?cmnt.createdBy.lastName:'no-name')}}
-                <p class="category">{{cmnt.createdAt | date:'short'}}<span class="pull-right" *ngIf="cmnt.isHidden">Hidden</span></p>
-              </h5>
-            </div>
-            <div class="card-footer">
-              {{cmnt.body}}
-              <p class="comment-image" *ngIf="cmnt.giphy && cmnt.giphy.gif">
-                <img [src]="cmnt.giphy.gif.url" />
-              </p>
-              <p class="comment-image" *ngIf="cmnt.image && cmnt.image.secure_url">
-                <img [src]="cmnt.image.secure_url" />
-              </p>
-            </div>
-            <div class="card-footer action">
-              <div class="stats">
-                <button class="btn btn-info btn-simple" (click)="likeComment(cmnt)">{{cmnt.liked.length}}&nbsp;Like</button>
-                <button class="btn btn-rose btn-simple">{{cmnt.flagged.length}}&nbsp;has flagged</button>
-                <div class="dropdown pull-right">
-                  <button type="button" class="btn btn-small btn-simple btn-info dropdown-toggle" data-toggle="dropdown">
+            <!--Post Section End-->
+            <!--Comment Section Start-->
+            <div class="col-lg-4 col-md-6 col-sm-4 comment-section">
+                <!--         ================={{posts[postIndex]}}===============-->
+                <div class="row" *ngIf="posts[postIndex]">
+                    <div class="card" style="margin-bottom: 0px;">
+                        <div class="card-header card-header-icon" data-background-color="blue">
+                            <i *ngIf="!posts[postIndex].createdBy || !posts[postIndex].createdBy.currentProfile" class="material-icons">person</i>
+                            <img width="100px" *ngIf="posts[postIndex].createdBy && posts[postIndex].createdBy.currentProfile" [src]="posts[postIndex].createdBy.currentProfile.secure_url"
+                            />
+                        </div>
+                        <div class="card-content">
+                            <h5 class="card-title">{{(posts[postIndex].createdBy?posts[postIndex].createdBy.firstName:'no-name')+' '+(posts[postIndex].createdBy?posts[postIndex].createdBy.lastName:'no-name')}}
+                                <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden">Hidden</span></p>
+                            </h5>
+                        </div>
+                        <div class="card-footer post-detail">
+                            {{posts[postIndex].details}}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12" style="margin: 11px 0px;">
+                        <legend class="margin-top-10">Comments</legend>
+                    </div>
+                </div>
+                <div class="row comment-list" *ngIf="posts[postIndex]">
+                    <div class="card" *ngFor="let cmnt of posts[postIndex].comments">
+
+                        <div *ngIf="!cmnt.isHidden">
+                            <div class="card-header card-header-icon" data-background-color="blue">
+                                <i *ngIf="!cmnt.createdBy || !cmnt.createdBy.currentProfile" class="material-icons">person</i>
+                                <img *ngIf="cmnt.createdBy && cmnt.createdBy.currentProfile" [src]="cmnt.createdBy.currentProfile.secure_url" />
+                            </div>
+                            <div class="card-content">
+                                <h5 class="card-title">{{(cmnt.createdBy?cmnt.createdBy.firstName:'no-name')+' '+(cmnt.createdBy?cmnt.createdBy.lastName:'no-name')}}
+                                    <p class="category">{{cmnt.createdAt | date:'short'}}<span class="pull-right" *ngIf="cmnt.isHidden">Hidden</span></p>
+                                </h5>
+                            </div>
+                            <div class="card-footer">
+                                {{cmnt.body}}
+                                <p class="comment-image" *ngIf="cmnt.giphy && cmnt.giphy.gif">
+                                    <img [src]="cmnt.giphy.gif.url" />
+                                </p>
+                                <p class="comment-image" *ngIf="cmnt.image && cmnt.image.secure_url">
+                                    <img [src]="cmnt.image.secure_url" />
+                                </p>
+                            </div>
+                            <div class="card-footer action">
+                                <div class="stats">
+                                    <button class="btn btn-info btn-simple" (click)="likeComment(cmnt)">{{cmnt.liked.length}}&nbsp;Like</button>
+                                    <button class="btn btn-rose btn-simple">{{cmnt.flagged.length}}&nbsp;has flagged</button>
+                                    <div class="dropdown pull-right">
+                                        <button type="button" class="btn btn-small btn-simple btn-info dropdown-toggle" data-toggle="dropdown">
                                         <i class="material-icons">build</i>
                                         <span class="caret"></span>
                                     </button>
-                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    <li>
-                      <a href="javascript:void(0);" (click)="flagAction(cmnt.isHidden?1:0,posts[postIndex]._id,cmnt._id)">{{cmnt.isHidden?'Unhide':'Hide'}}</a>
-                    </li>
-                    <li>
-                         <a href="javascript:void(0);" (click)="deleteComment(posts[postIndex]._id,cmnt._id)">Delete Comment</a>
-                    </li>
-                      <li>
-                      <a href="javascript:void(0);" (click)="flagAction(2,posts[postIndex]._id,cmnt._id)">No action needed</a>
-                    </li>
-                  </ul>
+                                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                            <li>
+                                                <a href="javascript:void(0);" (click)="flagAction(cmnt.isHidden?1:0,posts[postIndex]._id,cmnt._id)">{{cmnt.isHidden?'Unhide':'Hide'}}</a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript:void(0);" (click)="deleteComment(posts[postIndex]._id,cmnt._id)">Delete Comment</a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript:void(0);" (click)="flagAction(2,posts[postIndex]._id,cmnt._id)">No action needed</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--card close-->
                 </div>
-              </div>
             </div>
-          </div>
-          </div><!--card close-->
+            <!--Comment Section End-->
         </div>
-      </div>
-      <!--Comment Section End-->
     </div>
-  </div>
 </div>
-<pagination-controls (pageChange)="page = $event" id="1"
-                      maxSize="5"
-                      directionLinks="true"
-                      autoHide="true">
-                </pagination-controls>
+<!-- <pagination-controls (pageChange)="page = $event" id="1" maxSize="5" directionLinks="true" autoHide="true">
+</pagination-controls> -->

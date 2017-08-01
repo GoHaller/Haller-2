@@ -42,9 +42,12 @@ export class ProfileSettings {
   ionViewDidEnter() {
     this.local.get('userInfo').then(val => {
       this.userInfo = JSON.parse(val);
+
+      //console.log("userinfo", this.userInfo);
       this.notifications = this.userInfo['notifications'].enabled;
       // this.facebookBtnShow = this.userInfo['facebook'] && this.userInfo['facebook'].id && this.userInfo['password'] ? true : false;
       this.uid = this.userInfo['_id'];
+      console.log("userinfo", this.userInfo);
     })
   }
 
@@ -182,6 +185,7 @@ export class ProfileSettings {
           .subscribe((res: any) => {
             this.local.set('userInfo', JSON.stringify(this.userInfo)).then(() => {
               this.userInfo = res;
+
               loader.dismiss();
               let alert = this.alertCtrl.create({
                 subTitle: 'Your facebook account successfully connected',

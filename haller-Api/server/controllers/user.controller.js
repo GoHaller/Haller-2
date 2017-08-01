@@ -656,9 +656,10 @@ function allUsersByFilter(req, res, next) {
             "recordsFiltered": userCount,
             "data": Users
           });
+        } else {
+          const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+          return Promise.reject(err);
         }
-        const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
-        return Promise.reject(err);
       }).catch((e) => {//eslint-disable-line
         return next(e);
       });
