@@ -1180,71 +1180,73 @@ function adminDashboardCount(req, res, next) {
     });
 }
 
-function getJoinDetails(req, res, next) {
-  var days = parseInt(req.params.days);
-  var d = new Date();
-  d.setDate(d.getDate() - days);
-  var userName = [];
-  var userId = [];
-  Post.aggregate()
-    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
-    .exec().then(threeDays => {
-      var count = 0;
-      for (var go in threeDays) {
-        if ((threeDays[count].going).length > 0) {
-          var goingCount = 0;
-          for (var i in threeDays[count].going) {
-            var actedCount = 0;
-            for (var dataAct = 0; i < threeDays[count].going.length; i++) {
-              userId.push(threeDays[count].going[actedCount].actedBy);
-              actedCount += 1;
-            }
+
+function getJoinDetails(req, res, next) { 
+    var days = parseInt(req.params.days);
+    var d = new Date();
+    d.setDate(d.getDate() - days); 
+    var userName = [];
+    var userId =[]; 
+    Post.aggregate()
+        .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+        .exec().then(threeDays => { 
+          for(var i=0;i<threeDays.length;i++){
+                if(threeDays[i].going.length > 0 &&  threeDays[i].isEvent == true ){
+                  var eventJoinerData = threeDays[i].going;
+                  for(var j=0;j<eventJoinerData.length;j++){
+                    userId.push(eventJoinerData[j].actedBy);
+                  }
+                }
+              }
+          userId = unique(userId);
+          for(var i =0 ; i<userId.length;i++){
+            User.get(userId[i]).then(user =>{
+                                      var url = "";
+                                      if(user.currentProfile){
+                                        url = user.currentProfile.url;
+                                      }   
+                                      userName.push({"id":user._id,"firstName":user.firstName,"lastName":user.lastName,"url":url});
+                                    });
           }
-        }
-        count = count + 1;
-      }
-      userId = unique(userId);
-      for (var i = 0; i < userId.length; i++) {
-        User.get(userId[i]).then(user => {
-          userName.push({ "id": user._id, "firstName": user.firstName, "lastName": user.lastName });
-        });
-      }
-      setTimeout(function () {
-        userName = unique(userName);
-        res.json({ userName });
-      }, 1000)
-    });
+          setTimeout(function () {
+              userName = unique(userName);
+              res.json({ userName  });
+          }, 1000)
+          });
 }
 
-function getStaffJoinDetails(req, res, next) {
-  var days = parseInt(req.params.days);
-  var d = new Date();
-  d.setDate(d.getDate() - days);
-  var userName = [];
-  var userId = [];
-  Post.aggregate()
-    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
-    .exec().then(staffJoiners => {
-      for (var i = 0; i < staffJoiners.length; i++) {
-        if (staffJoiners[i].authorResidence == "University" && staffJoiners[i].going.length > 0) {
-          var staffJoinerData = staffJoiners[i].going;
-          for (var j = 0; j < staffJoiners[i].going.length; j++) {
-            userId.push(staffJoinerData[j].actedBy);
+function getStaffJoinDetails(req, res, next) { 
+    var days = parseInt(req.params.days);
+    var d = new Date();
+    d.setDate(d.getDate() - days); 
+    var userName = [];
+    var userId =[]; 
+    Post.aggregate()
+        .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+        .exec().then(staffJoiners => {  
+              for(var i=0;i<staffJoiners.length;i++){
+                if(staffJoiners[i].authorResidence == "University" && staffJoiners[i].going.length>0 && staffJoiners[i].isEvent){
+                  var staffJoinerData = staffJoiners[i].going;
+                  for(var j=0;j<staffJoiners.length;j++){
+                    userId.push(staffJoinerData[j].actedBy);
+                  }
+                }
+              }
+          userId = unique(userId);
+          for(var i =0 ; i<userId.length;i++){
+            User.get(userId[i]).then(user =>{
+                                      var url = "";
+                                      if(user.currentProfile){
+                                        url = user.currentProfile.url;
+                                      }
+                                      userName.push({"id":user._id,"firstName":user.firstName,"lastName":user.lastName,"url":url});
+                                    });
           }
-        }
-      }
-      userId = unique(userId);
-      for (var i = 0; i < userId.length; i++) {
-        User.get(userId[i]).then(user => {
-          userName.push({ "id": user._id, "firstName": user.firstName, "lastName": user.lastName });
-        });
-      }
-      setTimeout(function () {
-        //userName = unique(userName);
-        res.json({ userName });
-      }, 1000)
-    });
-
+          setTimeout(function () {
+              //userName = unique(userName);
+              res.json({ userName  });
+          }, 1000)          
+          });
 }
 
 function deletePost(req, res, next) {
