@@ -1223,11 +1223,11 @@ function getStaffJoinDetails(req, res, next) {
     var userId =[]; 
     Post.aggregate()
         .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
-        .exec().then(staffJoiners => {  
+        .exec().then(staffJoiners => {
               for(var i=0;i<staffJoiners.length;i++){
                 if(staffJoiners[i].authorResidence == "University" && staffJoiners[i].going.length>0 && staffJoiners[i].isEvent){
                   var staffJoinerData = staffJoiners[i].going;
-                  for(var j=0;j<staffJoiners.length;j++){
+                  for(var j=0;j<staffJoinerData.length;j++){
                     userId.push(staffJoinerData[j].actedBy);
                   }
                 }
@@ -1250,19 +1250,20 @@ function getStaffJoinDetails(req, res, next) {
 }
 
 function deletePost(req, res, next) {
-  Post.get(req.params.postId)
+   Post.get(req.params.postId)
     .then((post) => {
+      post.flagged = [0];
       post.deteled = true;
       for (var i = 0; i < post.comments.length; i++) {
         post.comments[i].isHidden = true;
-      }
+        post.comments[i].deleted = true;
+      }      
       post.save()
         .then((doc) => {
           return res.json(doc);
         })
         .catch((e) => {
-          console.log(e); //eslint-disable-line
-          next(e);
+          return res.json("error");
         });
     });
 }
@@ -1271,15 +1272,13 @@ function deleteComment(req, res, next) {
   Post.get(req.params.postId)
     .then((post) => {
       post.comments.id(req.params.commentId).isHidden = true;
+      post.comments.id(req.params.commentId).deleted = true;
       post.save()
-
         .then((doc) => {
           return res.json(doc);
         })
-
         .catch((e) => {
-          console.log(e); //eslint-disable-line
-          next(e);
+          return res.json("error");
         });
     });
 }
