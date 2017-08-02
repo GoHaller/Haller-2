@@ -52,12 +52,14 @@ function create(req, res, next) {
         .then((savedPost) => {
           savedPost.populate(postsMap, (er, doc) => {
             if (er) {
+              console.log('post create err', err)
               return next(er);
+            } else {
+              var act = { _id: mongoose.Types.ObjectId(), post: savedPost._id, activityType: 1, createdBy: savedPost.createdBy._id };
+              createActivityLog(act, function () {
+                return res.json(doc);
+              });
             }
-            var act = { _id: mongoose.Types.ObjectId(), post: savedPost._id, activityType: 1, createdBy: savedPost.createdBy._id };
-            createActivityLog(act, function () {
-              return res.json(doc);
-            });
           });
         })
         .catch((err) => {
@@ -282,7 +284,10 @@ function listByFeed(req, res, next) {
         limit: Number.parseInt(limit, 10),
         skip: Number.parseInt(skip, 10),
         isEvent: event,
-        blockedMe: blockedMe
+        blockedMe: blockedMe,
+        deleted: false,
+        isHidden: false,
+        'flagged.3': { $exists: false }
       }
       Post.listByFeed(q)
         .then(users => { res.json(users) })
@@ -320,7 +325,7 @@ function listByUser(req, res, next) {
 function remove(req, res, next) {
   Post.get(req.params.postId)
     .then((post) => {
-      post.deteled = true;
+      post.deleted = true;
       post.save()
         .then((doc) => {
           // var act = { _id: mongoose.Types.ObjectId(), post: doc._id, activityType: 3, createdBy: doc.createdBy._id };
@@ -1157,7 +1162,6 @@ function adminDashboardCount(req, res, next) {
                 }
                 count = count + 1;
               }
-
               d.setDate(d.getDate() + 1);
               Post.aggregate()
                 .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
@@ -1181,78 +1185,78 @@ function adminDashboardCount(req, res, next) {
 }
 
 
-function getJoinDetails(req, res, next) { 
-    var days = parseInt(req.params.days);
-    var d = new Date();
-    d.setDate(d.getDate() - days); 
-    var userName = [];
-    var userId =[]; 
-    Post.aggregate()
-        .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
-        .exec().then(threeDays => { 
-          for(var i=0;i<threeDays.length;i++){
-                if(threeDays[i].going.length > 0 &&  threeDays[i].isEvent == true ){
-                  var eventJoinerData = threeDays[i].going;
-                  for(var j=0;j<eventJoinerData.length;j++){
-                    userId.push(eventJoinerData[j].actedBy);
-                  }
-                }
-              }
-          userId = unique(userId);
-          for(var i =0 ; i<userId.length;i++){
-            User.get(userId[i]).then(user =>{
-                                      var url = "";
-                                      if(user.currentProfile){
-                                        url = user.currentProfile.url;
-                                      }   
-                                      userName.push({"id":user._id,"firstName":user.firstName,"lastName":user.lastName,"url":url});
-                                    });
+function getJoinDetails(req, res, next) {
+  var days = parseInt(req.params.days);
+  var d = new Date();
+  d.setDate(d.getDate() - days);
+  var userName = [];
+  var userId = [];
+  Post.aggregate()
+    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+    .exec().then(threeDays => {
+      for (var i = 0; i < threeDays.length; i++) {
+        if (threeDays[i].going.length > 0 && threeDays[i].isEvent == true) {
+          var eventJoinerData = threeDays[i].going;
+          for (var j = 0; j < eventJoinerData.length; j++) {
+            userId.push(eventJoinerData[j].actedBy);
           }
-          setTimeout(function () {
-              userName = unique(userName);
-              res.json({ userName  });
-          }, 1000)
-          });
+        }
+      }
+      userId = unique(userId);
+      for (var i = 0; i < userId.length; i++) {
+        User.get(userId[i]).then(user => {
+          var url = "";
+          if (user.currentProfile) {
+            url = user.currentProfile.url;
+          }
+          userName.push({ "id": user._id, "firstName": user.firstName, "lastName": user.lastName, "url": url });
+        });
+      }
+      setTimeout(function () {
+        userName = unique(userName);
+        res.json({ userName });
+      }, 1000)
+    });
 }
 
-function getStaffJoinDetails(req, res, next) { 
-    var days = parseInt(req.params.days);
-    var d = new Date();
-    d.setDate(d.getDate() - days); 
-    var userName = [];
-    var userId =[]; 
-    Post.aggregate()
-        .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
-        .exec().then(staffJoiners => {  
-              for(var i=0;i<staffJoiners.length;i++){
-                if(staffJoiners[i].authorResidence == "University" && staffJoiners[i].going.length>0 && staffJoiners[i].isEvent){
-                  var staffJoinerData = staffJoiners[i].going;
-                  for(var j=0;j<staffJoiners.length;j++){
-                    userId.push(staffJoinerData[j].actedBy);
-                  }
-                }
-              }
-          userId = unique(userId);
-          for(var i =0 ; i<userId.length;i++){
-            User.get(userId[i]).then(user =>{
-                                      var url = "";
-                                      if(user.currentProfile){
-                                        url = user.currentProfile.url;
-                                      }
-                                      userName.push({"id":user._id,"firstName":user.firstName,"lastName":user.lastName,"url":url});
-                                    });
+function getStaffJoinDetails(req, res, next) {
+  var days = parseInt(req.params.days);
+  var d = new Date();
+  d.setDate(d.getDate() - days);
+  var userName = [];
+  var userId = [];
+  Post.aggregate()
+    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+    .exec().then(staffJoiners => {
+      for (var i = 0; i < staffJoiners.length; i++) {
+        if (staffJoiners[i].authorResidence == "University" && staffJoiners[i].going.length > 0 && staffJoiners[i].isEvent) {
+          var staffJoinerData = staffJoiners[i].going;
+          for (var j = 0; j < staffJoiners.length; j++) {
+            userId.push(staffJoinerData[j].actedBy);
           }
-          setTimeout(function () {
-              //userName = unique(userName);
-              res.json({ userName  });
-          }, 1000)          
-          });
+        }
+      }
+      userId = unique(userId);
+      for (var i = 0; i < userId.length; i++) {
+        User.get(userId[i]).then(user => {
+          var url = "";
+          if (user.currentProfile) {
+            url = user.currentProfile.url;
+          }
+          userName.push({ "id": user._id, "firstName": user.firstName, "lastName": user.lastName, "url": url });
+        });
+      }
+      setTimeout(function () {
+        //userName = unique(userName);
+        res.json({ userName });
+      }, 1000)
+    });
 }
 
 function deletePost(req, res, next) {
   Post.get(req.params.postId)
     .then((post) => {
-      post.deteled = true;
+      post.deleted = true;
       for (var i = 0; i < post.comments.length; i++) {
         post.comments[i].isHidden = true;
       }

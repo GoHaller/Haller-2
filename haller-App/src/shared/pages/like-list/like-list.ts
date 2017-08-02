@@ -15,27 +15,33 @@ import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angul
 export class LikeListPage {
   public lists = [];
   public userAvatar = '';
+  public isLikes: Boolean = false;
   constructor(public navCtrl: NavController, public navParams: NavParams, public viewCtrl: ViewController, ) {
-    this.lists = navParams.get('likes');
+    let getLists = navParams.get('likes');
     if (navParams.get('comments'))
-      this.lists = navParams.get('comments');
+      getLists = navParams.get('comments');
     this.userAvatar = navParams.get('userAvatar');
+
+    if (getLists[0].actedBy) this.isLikes = true;
+    else this.isLikes = false;
+
+    getLists.forEach(element => {
+      if (element.createdBy) {
+        let index = this.lists.findIndex(x => x['_id'] == element.createdBy['_id'])
+        if (index == -1) {
+          this.lists.push(element.createdBy);
+        }
+      } else if (element.actedBy) {
+        let index = this.lists.findIndex(x => x['_id'] == element.actedBy['_id'])
+        if (index == -1) {
+          this.lists.push(element.actedBy);
+        }
+      }
+    });
   }
 
   ionViewDidLoad() {
     //console.log('ionViewDidLoad LikeListPage');
-  }
-
-  getImage(item) {
-    if (item.actedBy)
-    { return item.actedBy.currentProfile ? item.actedBy.currentProfile.secure_url : this.userAvatar }
-    else if (item.createdBy) {
-      return item.createdBy.currentProfile ? item.createdBy.currentProfile.secure_url : this.userAvatar
-    }
-  }
-
-  getNames(item) {
-    return item.actedBy ? (item.actedBy.firstName + ' ' + item.actedBy.lastName) : (item.createdBy.firstName + ' ' + item.createdBy.lastName);
   }
 
   close() {

@@ -21,7 +21,6 @@ export class EventNew {
     title: '',
     date: '',
     time: '',
-    details: '',
     location: '',
     residentsFeed: true,
     discoveryFeed: false,
@@ -135,6 +134,10 @@ export class EventNew {
   }
   takePictureFromCamera() {
     this.feedProvider.cloudinaryProvider.pictureFromCamera();
+  }
+
+  onPageWillLeave() {
+    this.removeImage();
   }
 
 }

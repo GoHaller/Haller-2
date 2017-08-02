@@ -100,7 +100,7 @@ export class ProfileSettings {
 
   switchNotificationSetting() {
     if (this.notifications != this.userInfo['notifications'].enabled) {
-      this.upadteUserInfo(this.userInfo['_id'], { notifications: { enabled: this.notifications } });
+      this.upadteUserInfo(this.userInfo['_id'], { 'notifications.enabled': this.notifications });
     }
   }
 

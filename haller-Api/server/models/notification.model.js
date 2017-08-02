@@ -128,7 +128,7 @@ NotificationSchema.statics = {
   list({ userId, skip = 0, limit = 50, university = false } = {}) {
     if (userId.toString().match(/^[0-9a-fA-F]{24}$/).length > 0) {
       try {
-        var q = { 'recipients.user': userId };
+        var q = { 'recipients.user': userId, type: { $in: [10, 4, 17] } };
         if (university == 'true') q = { type: 20 };
         return this.find(q)
           .populate(populateMap())

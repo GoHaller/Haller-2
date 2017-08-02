@@ -7,7 +7,7 @@
 <ion-header>
 
   <ion-navbar color="primary">
-    <ion-title>{{lists[0].actedBy?'Likes':'Comments'}}</ion-title>
+    <ion-title>{{isLikes?'Likes':'Comments'}}&nbsp;by</ion-title>
     <ion-buttons left>
       <button ion-button (click)="close()">Back</button>
     </ion-buttons>
@@ -15,14 +15,13 @@
 
 </ion-header>
 
-
 <ion-content>
   <ion-list class="likes-list">
     <ion-item *ngFor="let item of lists">
       <ion-avatar item-left>
-        <img [src]="getImage(item)">
+        <img [src]="item.currentProfile ? item.currentProfile.secure_url : this.userAvatar">
       </ion-avatar>
-      {{getNames(item)}}
+      {{item.firstName + ' ' + item.lastName}}
     </ion-item>
   </ion-list>
 </ion-content>

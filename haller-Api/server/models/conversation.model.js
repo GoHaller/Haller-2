@@ -167,7 +167,7 @@ ConversationSchema.statics = {
         //   q = { $and: [{ participants: userId }, { participants: recipient }, deletedFor], participants: { $size: 2 } };
         // }
         let blockMe = { participants: { $nin: blocked } };
-        let q = { $and: [{ participants: { $in: [userId] } }, blockMe] };
+        let q = { $and: [{ participants: { $in: [userId] } }, blockMe] };//, { $where: "this.participants.length > 1" }] };
         if (recipient) {
           q = { $and: [{ participants: userId }, { participants: recipient }, blockMe], participants: { $size: 2 } };
         }
@@ -180,9 +180,6 @@ ConversationSchema.statics = {
           .then((conversation) => {
             if (conversation) {
               return conversation;
-              // processConversation(conversation, function (processedConvo) {
-              //   return processedConvo;
-              // });
             } else {
               return [];
             }

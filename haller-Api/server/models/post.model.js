@@ -192,7 +192,7 @@ const PostSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
   },
-  deteled: {
+  deleted: {
     type: Boolean,
     default: false,
     required: true
@@ -302,7 +302,7 @@ PostSchema.statics = {
    * @returns {Promise<User[]>}
    */
   listByResidence({ residence, skip = 0, limit = 50, blockedMe = [], deteled = false } = {}) {
-    return this.find({ authorResidence: residence, createdBy: { $nin: blockedMe }, $or: [{ deteled: { $exists: false } }, { deteled: deteled }] })
+    return this.find({ authorResidence: residence, createdBy: { $nin: blockedMe }, $or: [{ deteled: { $exists: false } }, { deteled: deteled }, { isHidden: false }, { 'flagged.3': { $exists: false } }] })
       .populate(populateMap())
       .sort({ createdAt: -1 })
       .skip(skip)

@@ -76,20 +76,23 @@
             <!-- <img [src]="(comment.createdBy && comment.createdBy.currentProfile) ? comment.createdBy.currentProfile.secure_url : userAvatar"> -->
             <img [src]="feedProvider.httpClient.getProfileImageToDisplay(comment.createdBy)">
           </ion-avatar>
-          <button ion-button icon-only style="float:right" clear small color="newlight" (click)="presentCommentOption(comment)"><ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon></button>
+          <button *ngIf="!comment.isHidden" ion-button icon-only style="float:right" clear small color="newlight" (click)="presentCommentOption(comment)"><ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon></button>
           <h2>{{(comment.createdBy ? comment.createdBy.firstName : 'No One' ) + ' ' + (comment.createdBy ? comment.createdBy.lastName
             : 'No One')}}
           </h2>
           <ion-note>{{comment.createdAt | date: getCommentDateFormatr(comment.createdAt)}}</ion-note>
-          <p>{{comment.body}}</p>
-          <img (click)="viewFullImage(comment.image)" class="comment-image" *ngIf="comment.image" [src]="comment.image.secure_url"
+          <p *ngIf="!comment.isHidden">{{comment.body}}</p>
+          <p *ngIf="comment.isHidden" style="margin-bottom:5px">
+            <ion-note color="danger">This comment has been removed by Administrator.</ion-note>
+          </p>
+          <img (click)="viewFullImage(comment.image)" class="comment-image" *ngIf="comment.image && !comment.isHidden" [src]="comment.image.secure_url"
           />
-          <img class="comment-image" *ngIf="comment.giphy" [src]="comment.giphy.gif.url" />
-          <div *ngIf="comment.giphy" class="powered-giphy">
+          <img class="comment-image" *ngIf="comment.giphy && !comment.isHidden" [src]="comment.giphy.gif.url" />
+          <div *ngIf="comment.giphy && !comment.isHidden" class="powered-giphy">
             <ion-note>GIPHY</ion-note>
           </div>
         </ion-item>
-        <ion-item class="comment-action">
+        <ion-item class="comment-action" *ngIf="!comment.isHidden">
           <button (click)="likeComment(comment)" item-left ion-button icon-left color="{{isCommentLiked(comment) ? 'primary':'newlight'}}"
             clear small>
             &nbsp;Like

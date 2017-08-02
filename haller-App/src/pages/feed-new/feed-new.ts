@@ -26,7 +26,6 @@ export class FeedNew {
     discoveryFeed: false,
     title: 'Haller',
     cover: [],
-    details: '',
     createdBy: '',
     authorResidence: '',
     isEvent: false
@@ -101,20 +100,7 @@ export class FeedNew {
       })
   }
 
-  newPostContentChange(event) {
-    let ele = event.target;
-    console.info('ele.rows', ele.rows);
-    console.info('ele.cols', ele.cols);
-    console.info('ele.selectionStart', ele.selectionStart);
-    console.info('ele.clientHeight', ele.clientHeight);
-    console.info('ele.scrollHeight', ele.scrollHeight);
-    console.log('===========================================');
-    // let pos = ele.selectionStart,
-    //   before = ele.value.substr(0, pos),
-    //   lines = before.split(/\r?\n/);
-    // console.info('lines', lines);
-    // if (ele.clientHeight < ele.scrollHeight) ele.rows = 2;
-    // else if (ele.value.length == 0) ele.rows = 1;
+  onPageWillLeave() {
+    this.removeImage();
   }
-
 }

@@ -316,7 +316,7 @@ UserSchema.statics = {
    * @returns {Promise<User[]>}
    */
   listByResidence({ residence, skip = 0, limit = 50, blocked = [] } = {}) {
-    return this.find({ residence: residence, _id: { $nin: blocked } })
+    return this.find({ $and: [{ residence: residence, _id: { $nin: blocked } }, { $or: [{ isBlocked: { $exists: false } }, { isBlocked: { $ne: true } }] }] })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

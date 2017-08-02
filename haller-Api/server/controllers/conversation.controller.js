@@ -11,39 +11,43 @@ const activityType = 19;
 function processConversationList(conversations, userId, callback) {
   for (var i = 0; i < conversations.length; i++) {
     var conversation = conversations[i];
-    var deletedFor = null;
-    if (conversation.deletedFor) {
-      for (var d = 0; d < conversation.deletedFor.length; d++) {
-        if (conversation.deletedFor[d].user == userId) {
-          deletedFor = conversation.deletedFor[d];
+    if (conversation.participants.length > 1) {
+      var deletedFor = null;
+      if (conversation.deletedFor) {
+        for (var d = 0; d < conversation.deletedFor.length; d++) {
+          if (conversation.deletedFor[d].user == userId) {
+            deletedFor = conversation.deletedFor[d];
+          }
         }
       }
-    }
-    if (deletedFor) {
-      for (var m = 0; m < conversation.messages.length; m++) {
-        if (new Date(conversation.messages[m].createdAt).getTime() < new Date(deletedFor.at).getTime()) {
-          conversation.messages.splice(m, 1);
-          m--;
+      if (deletedFor) {
+        for (var m = 0; m < conversation.messages.length; m++) {
+          if (new Date(conversation.messages[m].createdAt).getTime() < new Date(deletedFor.at).getTime()) {
+            conversation.messages.splice(m, 1);
+            m--;
+          }
         }
       }
-    }
-    deletedFor = null;
-    if (conversation.leftUser) {
-      for (var d = 0; d < conversation.leftUser.length; d++) {
-        if (conversation.leftUser[d].user == userId) {
-          deletedFor = conversation.leftUser[d];
+      deletedFor = null;
+      if (conversation.leftUser) {
+        for (var d = 0; d < conversation.leftUser.length; d++) {
+          if (conversation.leftUser[d].user == userId) {
+            deletedFor = conversation.leftUser[d];
+          }
         }
       }
-    }
-    if (deletedFor && conversation.messages) {
-      for (var m = 0; m < conversation.messages.length; m++) {
-        if (new Date(conversation.messages[m].createdAt).getTime() > new Date(deletedFor.at).getTime()) {
-          conversation.messages.splice(m, 1);
-          m--;
+      if (deletedFor && conversation.messages) {
+        for (var m = 0; m < conversation.messages.length; m++) {
+          if (new Date(conversation.messages[m].createdAt).getTime() > new Date(deletedFor.at).getTime()) {
+            conversation.messages.splice(m, 1);
+            m--;
+          }
         }
       }
+      if (conversation.messages.length == 0) { conversations.splice(i, 1); i-- }
+    } else {
+      conversations.splice(i, 1); i--;
     }
-    if (conversation.messages.length == 0) { conversations.splice(i, 1); i-- }
   }
   callback(conversations);
 }
@@ -115,8 +119,10 @@ function list(req, res, next) {
     .then(usersWhoBlockedMe => {
       User.findOne({ '_id': req.params.userId }, { 'blocked.user': 1 }).exec()
         .then(bu => {
-          for (var i = 0; i < bu.blocked.length; i++) {
-            usersWhoBlockedMe.push({ _id: bu.blocked[i].user });
+          if (bu.blocked) {
+            for (var i = 0; i < bu.blocked.length; i++) {
+              usersWhoBlockedMe.push({ _id: bu.blocked[i].user });
+            }
           }
           Conversation.list({ userId: req.params.userId, recipient, skip: 0, limit: 50, blocked: usersWhoBlockedMe })
             .then((convos) => {

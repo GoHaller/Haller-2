@@ -111,7 +111,8 @@ export class TabsPage {
         this.checkIfUserIsBlockedByAdmin(res);
       }, error => {
         console.info('userInfo error', error);
-        if (error._body.indexOf('No such user exists') > -1 || error._body.indexOf("Facebook account is already in use.") > -1) {
+        // if (error._body.indexOf('No such user exists') > -1 || error._body.indexOf("Facebook account is already in use.") > -1) {
+        if (error._body.indexOf('No such user exists') > -1) {
           this.checkIfUserIsBlockedByAdmin(null);
         }
       })
