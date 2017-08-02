@@ -35,8 +35,9 @@
                             <div class="card-content">
                                 <h5 class="card-title">{{(post.createdBy?post.createdBy.firstName:'no-name')+' '+(post.createdBy?post.createdBy.lastName:'no-name')}}
                                     <p class="category">{{post.createdAt | date:'short'}}
-                                        <span class="pull-right btn-rose" *ngIf="post.isHidden">Hidden</span>
-                                        <span class="pull-right btn-rose" *ngIf="post.deleted">Deleted</span></p>
+                                        <span class="pull-right btn-rose" *ngIf="post.isHidden &&  !post.deteled">Hidden</span>
+
+                                        <span class="pull-right btn-rose" *ngIf="post.deteled">Deleted</span></p>
                                 </h5>
                             </div>
                             <div class="card-footer">
@@ -65,7 +66,7 @@
                                                 <a href="javascript:void(0);" (click)="flagAction(post.isHidden?1:0,post._id)">{{post.isHidden?'Unhide':'Hide'}}</a>
                                             </li>
                                             <li>
-                                                <a href="javascript:void(0);" (click)="showSwal(post._id)">Delete Post</a>
+                                                <a href="javascript:void(0);" (click)="deletePost(post._id)">Delete Post</a>
                                             </li>
                                             <li>
                                                 <a href="javascript:void(0);" (click)="flagAction(2,post._id)">No action needed</a>
@@ -90,7 +91,8 @@
                         </div>
                         <div class="card-content">
                             <h5 class="card-title">{{(posts[postIndex].createdBy?posts[postIndex].createdBy.firstName:'no-name')+' '+(posts[postIndex].createdBy?posts[postIndex].createdBy.lastName:'no-name')}}
-                                <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden">Hidden</span></p>
+                                <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden && !posts[postIndex].deteled">Hidden</span></p>
+                                 <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].deteled">Deleted</span></p>
                             </h5>
                         </div>
                         <div class="card-footer post-detail">
@@ -114,8 +116,8 @@
                             <div class="card-content">
                                 <h5 class="card-title">{{(cmnt.createdBy?cmnt.createdBy.firstName:'no-name')+' '+(cmnt.createdBy?cmnt.createdBy.lastName:'no-name')}}
                                     <p class="category">{{cmnt.createdAt | date:'short'}}
-                                        <span class="pull-right" *ngIf="cmnt.isHidden">Hidden</span>
-                                        <span class="pull-right" *ngIf="cmnt.isHidden">Deleted</span></p>
+                                        <span class="pull-right" *ngIf="cmnt.isHidden && !cmnt.deleted">Hidden</span>
+                                        <span class="pull-right" *ngIf="cmnt.deleted">Deleted</span></p>
                                 </h5>
                             </div>
                             <div class="card-footer">
@@ -131,7 +133,7 @@
                                 <div class="stats">
                                     <button class="btn btn-info btn-simple" (click)="likeComment(cmnt)">{{cmnt.liked.length}}&nbsp;Like</button>
                                     <button class="btn btn-rose btn-simple">{{cmnt.flagged.length}}&nbsp;has flagged</button>
-                                    <div class="dropdown pull-right">
+                                    <div class="dropdown pull-right " style="z-index:7">
                                         <button type="button" class="btn btn-small btn-simple btn-info dropdown-toggle" data-toggle="dropdown">
                                 <i class="material-icons">build</i>
                                 <span class="caret"></span>
@@ -140,7 +142,7 @@
                                         <a href="javascript:void(0);" (click)="flagAction(cmnt.isHidden?1:0,posts[postIndex]._id,cmnt._id)">{{cmnt.isHidden?'Unhide':'Hide'}}</a>
                                     </li>
                                     <li>
-                                        <a href="javascript:void(0);" (click)="showSwalDelete(posts[postIndex]._id,cmnt._id)">Delete Comment</a>
+                                        <a href="javascript:void(0);" (click)="deleteComment(posts[postIndex]._id,cmnt._id)">Delete Comment</a>
                                     </li>
                                     <li>
                                         <a href="javascript:void(0);" (click)="flagAction(2,posts[postIndex]._id,cmnt._id)">No action needed</a>

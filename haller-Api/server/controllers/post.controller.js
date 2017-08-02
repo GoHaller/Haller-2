@@ -1231,10 +1231,20 @@ function getStaffJoinDetails(req, res, next) {
       for (var i = 0; i < staffJoiners.length; i++) {
         if (staffJoiners[i].authorResidence == "University" && staffJoiners[i].going.length > 0 && staffJoiners[i].isEvent) {
           var staffJoinerData = staffJoiners[i].going;
-          for (var j = 0; j < staffJoiners.length; j++) {
+          for (var j = 0; j < staffJoinerData.length; j++) {
             userId.push(staffJoinerData[j].actedBy);
           }
         }
+      }
+      userId = unique(userId);
+      for (var i = 0; i < userId.length; i++) {
+        User.get(userId[i]).then(user => {
+          var url = "";
+          if (user.currentProfile) {
+            url = user.currentProfile.url;
+          }
+          userName.push({ "id": user._id, "firstName": user.firstName, "lastName": user.lastName, "url": url });
+        });
       }
       userId = unique(userId);
       for (var i = 0; i < userId.length; i++) {
@@ -1256,17 +1266,18 @@ function getStaffJoinDetails(req, res, next) {
 function deletePost(req, res, next) {
   Post.get(req.params.postId)
     .then((post) => {
+      post.flagged = [0];
       post.deleted = true;
       for (var i = 0; i < post.comments.length; i++) {
         post.comments[i].isHidden = true;
+        post.comments[i].deleted = true;
       }
       post.save()
         .then((doc) => {
           return res.json(doc);
         })
         .catch((e) => {
-          console.log(e); //eslint-disable-line
-          next(e);
+          return res.json("error");
         });
     });
 }
@@ -1275,15 +1286,13 @@ function deleteComment(req, res, next) {
   Post.get(req.params.postId)
     .then((post) => {
       post.comments.id(req.params.commentId).isHidden = true;
+      post.comments.id(req.params.commentId).deleted = true;
       post.save()
-
         .then((doc) => {
           return res.json(doc);
         })
-
         .catch((e) => {
-          console.log(e); //eslint-disable-line
-          next(e);
+          return res.json("error");
         });
     });
 }

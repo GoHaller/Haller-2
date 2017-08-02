@@ -16,6 +16,7 @@ export class FlagComponent implements OnInit {
     public postIndex: number = 0;
     public posts = [];
     public postid = '';
+    public success='';
     public flagOfthree = false;
     public noFurtureAction = false;
 
@@ -84,45 +85,81 @@ export class FlagComponent implements OnInit {
     }
 
     deletePost(postid: any) {
-        this.postService.deletePostApi(postid).subscribe((res: any) => {
-            console.log("got fronted response");
-
-        }, error => {
-            console.info('error', error);
-        })
-    }
-    selectPost(index) {
-        this.postIndex = index;
-    }
-    showSwal(postid: any) {
         swal({
-            title: '',
-            text: "Are you sure want to delete this post?",
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonClass: 'btn btn-success',
-            cancelButtonClass: 'btn btn-danger',
-            confirmButtonText: 'Yes, delete it!',
-            buttonsStyling: false
+               title: '',
+               text: "Are you sure want to delete this post?",
+               type: 'warning',
+               showCancelButton: true,
+               confirmButtonClass: 'btn btn-success',
+               cancelButtonClass: 'btn btn-danger',
+               confirmButtonText: 'Yes, delete it!',
+               buttonsStyling: false
         }).then(() => {
-            this.deletePost(postid)
-            swal({
+        this.postService.deletePostApi(postid).subscribe((res: any) => {
+            this.success=res;
+            console.log("this ",this.success);
+            if(this.success=="error"){
+                 swal({
+                title: 'Error!',
+                text: 'Error while deleting post.',
+                type: 'error',
+                confirmButtonClass: "btn btn-success",
+                buttonsStyling: false
+                     })
+            }else{
+                 swal({
                 title: 'Deleted!',
                 text: 'Post has been deleted.',
                 type: 'success',
                 confirmButtonClass: "btn btn-success",
                 buttonsStyling: false
             })
+            }
         });
+        }, error => {
+            console.info('error', error);
+        })
     }
+    
     deleteComment(postId, commentId) {
-        if (postId && commentId) {
-            this.postService.deleteCommentApi(postId, commentId).subscribe((res: any) => {
-                console.log("got fronted response");
-            }, error => {
-                console.info('error', error);
+        swal({
+               title: '',
+               text: "Are you sure want to delete this Comment?",
+               type: 'warning',
+               showCancelButton: true,
+               confirmButtonClass: 'btn btn-success',
+               cancelButtonClass: 'btn btn-danger',
+               confirmButtonText: 'Yes, delete it!',
+               buttonsStyling: false
+        }).then(() => {
+        this.postService.deleteCommentApi(postId, commentId).subscribe((res: any) => {
+        this.success=res;
+            console.log("this ",this.success);
+            if(this.success=="error"){
+                 swal({
+                title: 'Error!',
+                text: 'Error while deleting post.',
+                type: 'error',
+                confirmButtonClass: "btn btn-success",
+                buttonsStyling: false
+                     })
+            }else{
+                 swal({
+                title: 'Deleted!',
+                text: 'Comment has been deleted.',
+                type: 'success',
+                confirmButtonClass: "btn btn-success",
+                buttonsStyling: false
             })
-        }
+            }
+        });
+        }, error => {
+            console.info('error', error);
+        })
+    }
+
+    selectPost(index) {
+        this.postIndex = index;
     }
 
     showSwalDelete(postId, commentId) {

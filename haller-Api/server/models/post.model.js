@@ -79,6 +79,10 @@ const Comment = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
   actionStatus: {
     type: Number,
     default: 0
