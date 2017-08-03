@@ -22,7 +22,7 @@ router.route('/admin/change-user-sataus')
   .post(expressJwt({
     secret: config.jwtSecret,
     getToken
-  }), validate(paramValidation.userStatus), userCtrl.toggleUserStatus);
+  }), userCtrl.toggleUserStatus);
 
 
 //App APIS

@@ -35,9 +35,9 @@
                             <div class="card-content">
                                 <h5 class="card-title">{{(post.createdBy?post.createdBy.firstName:'no-name')+' '+(post.createdBy?post.createdBy.lastName:'no-name')}}
                                     <p class="category">{{post.createdAt | date:'short'}}
-                                        <span class="pull-right btn-rose" *ngIf="post.isHidden &&  !post.deteled">Hidden</span>
+                                        <span class="pull-right btn-rose" *ngIf="post.isHidden &&  !post.deleted">Hidden</span>
 
-                                        <span class="pull-right btn-rose" *ngIf="post.deteled">Deleted</span></p>
+                                        <span class="pull-right btn-rose" *ngIf="post.deleted">Deleted</span></p>
                                 </h5>
                             </div>
                             <div class="card-footer">
@@ -91,8 +91,8 @@
                         </div>
                         <div class="card-content">
                             <h5 class="card-title">{{(posts[postIndex].createdBy?posts[postIndex].createdBy.firstName:'no-name')+' '+(posts[postIndex].createdBy?posts[postIndex].createdBy.lastName:'no-name')}}
-                                <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden && !posts[postIndex].deteled">Hidden</span></p>
-                                 <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].deteled">Deleted</span></p>
+                                <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden && !posts[postIndex].deleted">Hidden</span></p>
+                                 <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].deleted">Deleted</span></p>
                             </h5>
                         </div>
                         <div class="card-footer post-detail">
