@@ -79,6 +79,20 @@ export class TabsPage {
     this.splashScreen.hide();
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
+      this.local.get('fcm-data').then((val) => {
+        if (val) {
+          let fcmData = JSON.parse(val);
+          let userData = this.userInfo['notifications'];
+          userData.deviceToken = fcmData.deviceData.token;
+          userData.os = fcmData.deviceData.os;
+          // userData.enabled = true;
+          this.httpClient.put('/users/' + this.userInfo['_id'], { 'notifications': userData }).map(this.httpClient.extractData)
+            .subscribe((re: any) => {
+            }, error => {
+              console.info('updateUser error', error);
+            });
+        }
+      })
       this.local.get('last-notification-showed').then((notificationVal) => {
         if (notificationVal) {
           this.firstNotification = JSON.parse(notificationVal);

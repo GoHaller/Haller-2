@@ -46,8 +46,8 @@ export class MyApp {
       return;
     }
     const options: PushOptions = {
-      android: { senderID: "203386924222", icon: 'icon', sound: true },
-      ios: { senderID: "203386924222", alert: true, badge: false, sound: true },
+      android: { senderID: "228084760849", icon: 'icon', sound: true },
+      ios: { senderID: "228084760849", alert: true, badge: false, sound: true },
       windows: {}
     };
     //categories: { 'view': { yes: { callback: 'this.iosNotificationClick', title: "View", foreground: true, destructive: false } } }

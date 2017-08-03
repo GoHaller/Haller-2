@@ -3,6 +3,7 @@ var FCM = require('fcm-push');
 // var serverKey = 'AAAAL1rOLL4:APA91bFz-xlHqG64o8fw6UKJzvEUWMyF77Ut6jwnZpu3nMDvGJEezmc1_jzoJ35_iXyBLVdAAs4fBXKAnb65D6tZIUYZ54K1nl5RmMguicYf6IQZ_dCu5CN2ZhCd8eNDgS2cBEtKQnCa';
 // var serverKey = 'AIzaSyCAXcB-CMYvpndUZJpi4_yTECtwq-mc3wo';
 var serverKey = 'AAAANRrpQRE:APA91bGjf75IcnOQIueh6KKXRecfRVfTTZPKqU4Na2AyEKaWzwx92vlFpo3WmYyCZGN-L-iNR93JlQy5yEsS_5dPDpV_F7Ry05FXfNKqE78zAh5vIGyE9CJ8rdIkeWWVPIYmjFd5qpxm';
+// var serverKey = 'AIzaSyDaT3C_HnOb-kPjfGAhO0RrCitx6KMjDG4';
 var fcm = new FCM(serverKey);
 
 // var paylods = {
@@ -17,6 +18,7 @@ var fcm = new FCM(serverKey);
 //         icon: 'icon'
 //     }
 // };
+
 const send = (token, message, os) => {
   message.message = message.body;
   var paylods = {
@@ -33,6 +35,7 @@ const send = (token, message, os) => {
     paylods.content_available = true;
     paylods.priority = 'high';
   }
+  console.log('paylods', paylods);
   return fcm.send(paylods);
 }
 

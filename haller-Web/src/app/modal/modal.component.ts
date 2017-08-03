@@ -5,60 +5,59 @@ import { ModalService } from '../../services/modal.service';
 declare var $: any;
 
 @Component({
-  moduleId: module.id.toString(),
-  selector: 'modal',
-  template: '<ng-content></ng-content>',
+    selector: 'modal',
+    template: '<ng-content></ng-content>',
 })
 export class ModalComponent implements OnInit {
 
-  @Input() id: string;
-  private element: any;
+    @Input() id: string;
+    private element: any;
 
-  constructor(private el: ElementRef, private modalService: ModalService) {
-    this.element = $(el.nativeElement);
-  }
-
-  ngOnInit() {
-    let modal = this;
-
-    // ensure id attribute exists
-    if (!this.id) {
-      console.error('modal must have an id');
-      return;
+    constructor(private el: ElementRef, private modalService: ModalService) {
+        this.element = $(el.nativeElement);
     }
-    // console.info('this.id', this.id);
 
-    // move element to bottom of page (just before </body>) so it can be displayed above everything else
-    this.element.appendTo('body');
+    ngOnInit() {
+        let modal = this;
 
-    // close modal on background click
-    this.element.on('click', function (e: any) {
-      var target = $(e.target);
-      if (!target.closest('.modal-body').length) {
-        modal.close();
-      }
-    });
+        // ensure id attribute exists
+        if (!this.id) {
+            console.error('modal must have an id');
+            return;
+        }
+        // console.info('this.id', this.id);
 
-    // add self (this modal instance) to the modal service so it's accessible from controllers
-    this.modalService.add(this);
-  }
+        // move element to bottom of page (just before </body>) so it can be displayed above everything else
+        this.element.appendTo('body');
 
-  // remove self from modal service when directive is destroyed
-  ngOnDestroy(): void {
-    this.modalService.remove(this.id);
-    this.element.remove();
-  }
+        // close modal on background click
+        this.element.on('click', function (e: any) {
+            var target = $(e.target);
+            if (!target.closest('.modal-body').length) {
+                modal.close();
+            }
+        });
 
-  // open modal
-  open(): void {
-    this.element.show();
-    $('body').addClass('modal-open');
-  }
+        // add self (this modal instance) to the modal service so it's accessible from controllers
+        this.modalService.add(this);
+    }
 
-  // close modal
-  close(): void {
-    this.element.hide();
-    $('body').removeClass('modal-open');
-  }
+    // remove self from modal service when directive is destroyed
+    ngOnDestroy(): void {
+        this.modalService.remove(this.id);
+        this.element.remove();
+    }
+
+    // open modal
+    open(): void {
+        this.element.show();
+        $('body').addClass('modal-open');
+    }
+
+    // close modal
+    close(): void {
+        this.element.hide();
+        $('body').removeClass('modal-open');
+    }
 
 }

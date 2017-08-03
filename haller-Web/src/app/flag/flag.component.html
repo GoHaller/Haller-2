@@ -5,8 +5,8 @@
             <div class="col-lg-8 col-md-6 col-sm-8">
                 <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-                        <select class="selectpicker" [(ngModel)]="section" (ngModelChange)="getFeeds()" data-style="btn btn-primary btn-round" title=""
-                            data-size="4">
+                        <select class="selectpicker" [(ngModel)]="section" (ngModelChange)="changeSegment()" data-style="btn btn-primary btn-round"
+                            title="" data-size="4">
                             <!-- <option disabled>Choose residence</option> -->
                             <option value="Feed" [attr.selected]="section == 'Feed'">Feed</option>
                             <option value="Event" [attr.selected]="section == 'Event'">Event</option>
@@ -15,8 +15,8 @@
                     </div>
                     <div class="col-lg-3 col-md-3"></div>
                     <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-                        <select class="selectpicker" [(ngModel)]="sort" (ngModelChange)="getFeeds()" data-style="btn btn-primary btn-round" title=""
-                            data-size="4">
+                        <select class="selectpicker" [(ngModel)]="sort" (ngModelChange)="changeSegment()" data-style="btn btn-primary btn-round"
+                            title="" data-size="4">
                             <!-- <option disabled>Choose residence</option> -->
                             <option value="0" [attr.selected]="sort == 0">All Flagged</option>
                             <option value="1" [attr.selected]="sort == 1">With 3 or more flags</option>
@@ -24,7 +24,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="row" *ngFor="let post of posts | paginate: {itemsPerPage: 2, currentPage:page, id: '1'}; let i = index">
+                <div class="row" *ngFor="let post of posts; let i = index">
                     <div class="col-lg-10 col-sm-12">
                         <div class="card">
                             <div class="card-header card-header-icon" data-background-color="blue">
@@ -92,7 +92,7 @@
                         <div class="card-content">
                             <h5 class="card-title">{{(posts[postIndex].createdBy?posts[postIndex].createdBy.firstName:'no-name')+' '+(posts[postIndex].createdBy?posts[postIndex].createdBy.lastName:'no-name')}}
                                 <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden && !posts[postIndex].deteled">Hidden</span></p>
-                                 <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].deteled">Deleted</span></p>
+                                <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].deteled">Deleted</span></p>
                             </h5>
                         </div>
                         <div class="card-footer post-detail">

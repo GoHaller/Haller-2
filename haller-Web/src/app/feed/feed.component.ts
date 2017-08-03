@@ -219,4 +219,9 @@ export class FeedComponent implements OnInit {
         }
     }
 
+    changeSegment() {
+        this.posts = [];
+        this.getFeeds();
+    }
+
 }
