@@ -93,6 +93,27 @@ function create(req, res, next) {
   }
 }
 
+function createUniversityNotification(req, res, next) {
+  var notiObje = { _id: mongoose.Types.ObjectId(), type: 20 };
+  notiObje.body = { title: req.body.title || 'Haller University says',
+                    message: req.body.message || 'Hello friends, this is lorem ippsem.',
+                  };
+
+  notiObje.createdBy = req.body.createdBy;  
+  var notification = new Notification(notiObje);
+  notification.save().then(savedNoti => {
+    Notification.get(savedNoti._id)
+      .then(noti => {
+        sendUniversityNotification(noti);
+        res.json(noti);
+        // console.info('university savedNoti', savedNoti);
+      }).catch(e => {
+        console.info('university savedNoti error', e);
+        next(e);
+      });
+  });
+}
+
 /**
  * Update existing post
  * @property {string} title - The title of the event/discover post
@@ -1018,22 +1039,6 @@ function createNotification(actObj) {
   })
 }
 
-function createUniversityNotification(req, res, next) {
-  var notiObje = { _id: mongoose.Types.ObjectId(), type: 20 };
-  notiObje.body = { title: req.body.title || 'Haller University says', message: req.body.message || 'Hello friends, this is lorem ippsem.' };
-  var notification = new Notification(notiObje);
-  notification.save().then(savedNoti => {
-    Notification.get(savedNoti._id)
-      .then(noti => {
-        sendUniversityNotification(noti);
-        res.json(noti);
-        // console.info('university savedNoti', savedNoti);
-      }).catch(e => {
-        console.info('university savedNoti error', e);
-        next(e);
-      });
-  });
-}
 
 function sendUniversityNotification(notification) {
   User.list({ limit: 10, skip: 0 })

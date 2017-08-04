@@ -18,10 +18,14 @@ export class FeedComponent implements OnInit {
     public isEvent: boolean = false;
     public post: any = {};
     public comment: any = {};
+    public notification:any={};
+    public title:any;
+    public message:any;
     public detail: any;
     public posts = [];
     public postIndex: number = 0;
     public residence: any = { home: 'Oliver' };
+    public isNotification: boolean = true;
 
     skip = 0;
     limit = 10;
@@ -110,29 +114,71 @@ export class FeedComponent implements OnInit {
     getFeeds() {
         this.postService.getFeedByResidence(this.residence.home, this.isEvent, this.limit, this.skip).subscribe((res: any) => {
             if (res) { this.posts = this.posts.concat(res); this.beingRefresh = false; }
+            
+            if(this.residence.home=="University")
+            {
+              this.isNotification = false;
+            }else{
+                this.isNotification = true;
+            }
         }, error => {
             console.log('getFeedByResidence error', error);
         })
     }
-
+    
+    isEmptyObject(obj) { 
+        return (obj && (Object.keys(obj).length === 0));
+    }
+    showNotification(){
+        this.modalService.open("notification"); 
+    }
+    
     addPost(model, isValid, id) {
         if (isValid) {
             this.modalService.close(id);
-            this.detail = model.details;
+            this.detail  = model.details;
+            this.title   = model.title;
+            this.message = model.message;
             if (this.file && this.file.size) {
                 this.postService.cloudinaryUpload(this.file['result'], 'profile-covers')
                     .subscribe((res: any) => {
                         // console.info('cloudinaryUpload res', res);
                         if (id == 'new-feed-form') { this.createPostToApi(res); }
                         else if (id == 'new-feed-comment-form') { this.createCommentApi(res); }
+                        else if(id == 'notification'){this.createNotificationApi(res);}
                     }, error => {
                         console.log('cloudinaryUpload error', error);
                     });
             } else {
                 if (id == 'new-feed-form') { this.createPostToApi(null); }
                 else if (id == 'new-feed-comment-form') { this.createCommentApi(null); }
+                else if (id == 'notification') { this.createNotificationApi(null); }
             }
         }
+    }
+
+    createNotificationApi(cloudinaryResponse = null) {
+        let notificationObj = {
+            createdBy: localStorage.getItem('uid'),
+            title   : this.title,
+            message : this.message,
+            createdAt: new Date()
+        };
+        if (cloudinaryResponse) {            
+            cloudinaryResponse.createdBy = localStorage.getItem('uid');
+            cloudinaryResponse.version = cloudinaryResponse.version.toString();
+            notificationObj['file'] = cloudinaryResponse;
+        }else{
+            notificationObj['file'] = "";
+        }
+        this.postService.createNotification(notificationObj)
+            .subscribe((res: any) => {
+                console.log('createNotification res', res);
+                this.file = null;
+                this.posts[this.postIndex] = res;
+            }, error => {
+                console.log('createNotification error', error);
+            })
     }
 
     createPostToApi(cloudinaryResponse = null) {

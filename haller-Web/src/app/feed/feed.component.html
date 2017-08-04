@@ -1,4 +1,54 @@
 <div class="main-content">
+
+
+
+<modal id="notification">
+    <div class="modal">
+        <div class="modal-body col-md-4 col-md-offset-4">
+            <div class="card">
+                <form #frmNotification="ngForm" novalidate>
+                    <div class="card-header card-header-icon" data-background-color="blue">
+                        <i class="material-icons">notification</i>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title">Push Notification</h4>
+                        <div class="form-group label-floating">
+                            <textarea type="text" class="form-control" placeholder="title...." name="title" [(ngModel)]="notification.title" #title="ngModel"></textarea>
+                        </div>
+                        <div class="form-group label-floating">
+                            <textarea type="text" class="form-control" placeholder="Notification...." name="message" [(ngModel)]="notification.message" #message="ngModel"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                                <div class="fileinput-new thumbnail">
+                                    <img src="../../assets/img/image_placeholder.jpg" alt="...">
+                                </div>
+                                <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                                <div>
+                                    <span class="btn btn-rose btn-simple btn-file">
+                  <span class="fileinput-new">Add Image or Pdf</span>
+                                    <span class="fileinput-exists">Change</span>
+                                    <input type="file" [(ngModel)]="notification.image" (change)="handleInputFile($event)" name="notificationimage" />
+                                    </span>
+                                    <a href="#pablo" class="btn btn-danger btn-simple fileinput-exists" (click)="removeImage()" data-dismiss="fileinput">Remove</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" (click)="addPost(frmNotification.value, frmNotification.valid,'notification')" class="btn btn-info btn-fill btn-wd"
+                                [disabled]="!((frmNotification.value.title && frmNotification.value.message) || notification.image)">Create</button>
+                            <button class="btn btn-default" (click)="closeModal('notification');">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-background"></div>
+</modal>
+
+
+
     <div class="container-fluid">
 
         <div class="row post-list">
@@ -14,9 +64,15 @@
                         </select>
                     </div>
                     <div class="col-lg-4 col-md-4"></div>
-                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-                        <button class="btn btn-info btn-simple" (click)="openModal('new-feed-form')">Create {{isEvent?'Event':'Feed'}}</button>
-                    </div>
+                   
+                        
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
+                            <button class="btn btn-info btn-simple" (click)="openModal('new-feed-form')">Create {{isEvent?'Event':'Feed'}}</button>
+                            <div *ngIf="!isNotification">
+                            <button class="btn btn-info btn-simple"(click)="showNotification()">Notification</button></div>
+                        </div>
+                        
+                 
                 </div>
                 <div class="row" *ngFor="let post of posts; let i = index">
                     <div class="col-lg-10 col-sm-12">
@@ -35,7 +91,10 @@
                             </div>
                             <div class="card-footer">
                                 <h3 class="text-center" *ngIf="post.isEvent"><b>{{post.title}}</b>&nbsp;
-                                    <i *ngIf="post.createdBy.isRA" style="color:green" class="material-icons">check_circle</i>
+                                   <div *ngIf="isEmptyObject(post.createdBy)">
+                                          <i *ngIf="post.createdBy.isRA" style="color:green" class="material-icons">check_circle</i>
+                                     </div>
+
                                 </h3>
                                 <p *ngIf="post.isEvent" class="text-center"><b>{{post.time | date: 'shortTime'}}&nbsp;{{post.date | date: 'MMMM d, yyyy '}}</b></p>
                                 <p *ngIf="post.isEvent" class="text-center">{{post.location}}</p>
