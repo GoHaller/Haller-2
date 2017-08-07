@@ -253,6 +253,21 @@ PostSchema.statics = {
     const err = new APIError('Invalid postId!', httpStatus.BAD_REQUEST);
     return Promise.reject(err);
   },
+  /**
+   * Get all Posts
+   * @returns {Promise<Post, APIError>}
+   */
+   getAll() {
+    return this.find()
+      .populate(populateMap())
+      .exec()
+      .then((post) => {
+        if (post) {
+          return post;
+        }
+        else return null;
+      });
+  },
 
   /**
    * List users in descending order of 'createdAt' timestamp.

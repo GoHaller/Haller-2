@@ -68,6 +68,12 @@ export class PostService {
         return this.http.post(environment.ApiBaseUrl + 'posts/' + postId + '/comments', commentObj, { headers: this.headers }).map(this.extractData)
     }
 
+    createNotification(notificationObj: any) {
+        this.createAuthorizationHeader();
+        
+        return this.http.post(environment.ApiBaseUrl +'posts/' +'university/notification', notificationObj, { headers: this.headers }).map(this.extractData)
+    }
+
     likeFeed(feed, userId) {
         feed = this.processFeed(feed);
         if (feed._userLiked) {

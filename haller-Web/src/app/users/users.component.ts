@@ -64,6 +64,30 @@ export class UsersComponent implements OnInit {
           }
         },
         { "data": "residence" },
+        { "data": "graduationYear","mRender": function (data, type, row) { 
+                   var todayYear = new Date();
+                   var year = todayYear.getFullYear()+1;
+                   if (year == row.graduationYear) {
+                                  return "Senior"
+                                  } else if((year+1)==row.graduationYear){
+                                          return "Junior"
+                                          }
+                                    else if((year+2)==row.graduationYear) {
+                                          return "Sophomores"
+                                    }
+                                    else if((year+3)==row.graduationYear) {
+                                          return "FreshMan"
+                                    }
+                                    else{
+                                         return "Not Specifield"
+                                    }     
+                                  }
+         },
+         { "data": "postcount"},
+         { "data": "eventcount"},
+         { "data": "commentavg"},
+         { "data": "covercount"},
+       
         { "data": "role", "mRender": function (data, type, row) { 
                    if (row.isRA) {
                                   return "RA"
