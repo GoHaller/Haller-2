@@ -15,7 +15,7 @@ page-event {
             margin-right: 0px;
             margin-top: 0px;
             width: 100%;
-            padding: 0px 0px 0px 0px;
+            padding: 0px;
             .event-actions{
                 border-top: 1px solid #f4f4f4;
             }
@@ -36,9 +36,9 @@ page-event {
                 padding: 0px 0px 0px 16px;
             }
             box-shadow: none;
-            ion-row{
-                margin: 0px 16px 0px 16px;
-            }
+            // ion-row{
+            //     margin: 0px 16px 0px 16px;
+            // }
         }
     }
 }

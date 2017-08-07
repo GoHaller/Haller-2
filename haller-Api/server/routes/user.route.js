@@ -194,6 +194,12 @@ router.route('/organization/:name')
     getToken
   }), validate(paramValidation.getOrganization), userCtrl.getOrganization);
 
+router.route('/bot/:email')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.getBotUser);
+
 
 export default router;
 // : (req) => {

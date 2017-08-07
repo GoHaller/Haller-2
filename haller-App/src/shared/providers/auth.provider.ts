@@ -67,4 +67,9 @@ export class AuthProvider {
     // this.fb.api(this.fbAuthDetail['userID'] + '/movies', [])
     return this.fb.api(fbUserID + '/?fields=id,name,picture.type(large),email,hometown,birthday,location,likes', [])
   }
+
+  getUniversityData() {
+    return this.httpClient.get('/users/university/5985d5d53bf71dd7b17db2be')
+      .map(this.httpClient.extractData);
+  }
 }

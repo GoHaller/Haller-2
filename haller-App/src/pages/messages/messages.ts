@@ -21,13 +21,13 @@ export class Messages {
   public messageList = [];
   private refresher = null;
   private searchText: String = '';
-  private userAvatar = '';
+  // private userAvatar = '';
   private groupAvatar = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public convoProvider: ConvoProvider,
     public actionSheetCtrl: ActionSheetController, private event: Events, private zone: NgZone) {
     this.local = new Storage('localstorage');
-    this.userAvatar = convoProvider.httpClient.userAvatar;
+    // this.userAvatar = convoProvider.httpClient.userAvatar;
     this.groupAvatar = convoProvider.httpClient.groupAvatar;
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
@@ -143,6 +143,10 @@ export class Messages {
       });
       return groupName.join(', ');
     }
+  }
+
+  gotoBotCherry() {
+    this.navCtrl.push('ChatBot', {}, { animate: true, direction: 'forward' });
   }
 }
 

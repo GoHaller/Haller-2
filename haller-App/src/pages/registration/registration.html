@@ -1,6 +1,6 @@
 <ion-content class="app-background">
   <div class="reg-div">
-    <button ion-button clear color="light" style="position: absolute;top: 0;" *ngIf="(currentTab > 2 && currentTab < 5)" (click)="swipeBack()">Back</button>
+    <button ion-button clear color="light" style="position: absolute;top: 0;" *ngIf="(currentTab > 1 && currentTab < 5)" (click)="swipeBack()">Back</button>
     <h3 class="color-white text-center" style="margin-top: 15vh">Haller</h3>
     <ion-slides>
 
@@ -39,8 +39,9 @@
           </ion-item>
         </ion-list>
         <ion-list *ngIf="showResidenceOption" style="position:absolute;z-index:5;width:100%;">
-          <ion-item (click)="selectResidence('Oliver')">Oliver</ion-item>
-          <ion-item (click)="selectResidence('Scholarship Halls')">Scholarship Halls</ion-item>
+          <!-- <ion-item (click)="selectResidence('Oliver')">Oliver</ion-item>
+          <ion-item (click)="selectResidence('Scholarship Halls')">Scholarship Halls</ion-item> -->
+          <ion-item *ngFor="let hall of universityData.halls" (click)="selectResidence(hall)">{{hall}}</ion-item>
         </ion-list>
         <button class="auth-btn" style="margin-top:32px" ion-button color="light" [disabled]="!residence" (click)="swipeTo(3)">Next</button>
       </ion-slide>

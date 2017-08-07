@@ -339,9 +339,11 @@ UserSchema.statics = {
     return emailVerification.sendIsRAVerificationEmail(this.email);
   },
 
-  userWhoBlockedMe(id) {
+  userWhoBlockedMe(id, includeBot = false) {
     // return this.find({ 'blocked.user': { $in: [id] } }, { id: true }).exec();
-    return this.find({ $or: [{ 'blocked.user': { $in: [id] } }, { 'deleted': true }] }, { _id: 1 }).exec();
+    var orq = [{ 'blocked.user': { $in: [id] } }, { 'deleted': true }, { 'role': 'admin' }];
+    if (!includeBot) orq.push({ 'role': 'bot' })
+    return this.find({ $or: orq }, { _id: 1 }).exec();
   },
   getBlockedUsers(id) {
     try {

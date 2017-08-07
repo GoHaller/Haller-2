@@ -1,6 +1,7 @@
 page-feed-detail {
     .feed-actions{
         // border-bottom: 1px solid #f4f4f4;
+        // margin: 0px 16px 0px 16px;
     }
     .list > .item-block:first-child {
         border-top: 2px solid #f4f4f4;
@@ -18,8 +19,11 @@ page-feed-detail {
         width: 20vh;
         border-radius: 2px;
     }
-    .comment-list{        
-        padding: 0px 16px 0px 16px;
+    .comment-list{
+        padding: 0PX;
+        .row{        
+            padding: 0px 16px 0px 16px;
+        }
         .row.border-top{
             border-top: 2px solid #f4f4f4;
         }

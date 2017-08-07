@@ -643,7 +643,7 @@ function allUsersByFilter(req, res, next) {
           { residence: { $regex: '^' + search, $options: 'i' } },
           { role: { $regex: '^' + search, $options: 'i' } }]
       }, { _id: { $ne: req.params.userId } }]
-    }).select({ "currentProfile": 1, "firstName": 1, "isRA":1,"lastName": 1, "residence": 1, "role": 1, "isBlocked": 1 })
+    }).select({ "currentProfile": 1, "firstName": 1, "isRA": 1, "lastName": 1, "residence": 1, "role": 1, "isBlocked": 1 })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -680,6 +680,19 @@ function toggleUserStatus(req, res, next) {
   });;
 }
 
+function getBotUser(req, res, next) {
+  if (req.params.email) {
+    var email = 'dev.bot@' + req.params.email.split('@')[1];
+    User.findOne({ email: email, role: 'bot' })
+      .then(user => res.json(user))
+      .error(e => next(e))
+      .catch((e) => {
+        console.log(e); //eslint-disable-line
+        next(e);
+      });
+  }
+}
+
 export default {
   get,
   getById,
@@ -706,5 +719,6 @@ export default {
   sendNotification,
   getAllOrganization,
   allUsersByFilter,
-  toggleUserStatus
+  toggleUserStatus,
+  getBotUser
 };

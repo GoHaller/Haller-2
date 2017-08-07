@@ -8,6 +8,7 @@ page-feed, page-feed-detail {
     }
     .item ion-avatar[item-left], .item ion-thumbnail[item-left]{
         margin-right: 0px;
+        
     }
     .content {
         ion-card{
@@ -21,12 +22,13 @@ page-feed, page-feed-detail {
             }
             .feed-actions{
                 border-top: 2px solid #f4f4f4;
-                margin: 0px 16px 0px 16px;
+                // margin: 0px 16px 0px 16px;
             }
             .action-count{
                 padding: 0px 11px 0px 11px;                
             }
             .card-content{
+                padding-bottom: 5px;
                 // padding-left: 0px;
                 // padding-right: 0px;
             }

@@ -18,7 +18,7 @@
       </ion-segment-button>
     </ion-segment>
     <ion-buttons right>
-      <button (click)="gotoFeedNew()" *ngIf="allowUserToPost()" ion-button>New Post</button>
+      <button (click)="gotoFeedNew()" *ngIf="allowUserToPost()" ion-button>Create</button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -46,22 +46,24 @@
     </ion-card-content>
     <ion-row class="action-count">
       <ion-col *ngIf="feed.liked.length > 0 || feed.comments.length > 0">
-        <span style="float:left" *ngIf="feed.liked.length > 0" (click)="openLikeModel(feed.liked,null)">{{feed.liked.length +' Likes'}}</span>
-        <span style="float:right" *ngIf="feed.comments.length > 0" (click)="openLikeModel(null,feed.comments)">{{feed.comments.length + ' Comments'}}</span>
+        <button style="float:left" ion-button color="dark" clear small (click)="openLikeModel(feed.liked,null)">{{feed.liked.length +' Likes'}}</button>
+        <button style="float:right" ion-button color="dark" clear small (click)="openLikeModel(null,feed.comments)">{{feed.comments.length + ' Comments'}}</button>
+        <!-- <span style="float:left" *ngIf="feed.liked.length > 0" (click)="openLikeModel(feed.liked,null)">{{feed.liked.length +' Likes'}}</span> -->
+        <!-- <span style="float:right" *ngIf="feed.comments.length > 0" (click)="openLikeModel(null,feed.comments)">{{feed.comments.length + ' Comments'}}</span> -->
       </ion-col>
     </ion-row>
     <ion-row class="feed-actions">
-      <ion-col center text-center class="have-badge">
+      <ion-col col-4 center text-center class="have-badge">
         <button ion-button icon-left clear small color="{{feed._userLiked ? 'primary':'newlight'}}" (click)="likeFeed(feed)">
           <ion-icon name="{{feed._userLiked ? 'ios-thumbs-up':'ios-thumbs-up-outline'}}"></ion-icon>&nbsp;Like
         </button>
       </ion-col>
-      <ion-col center text-center class="have-badge">
+      <ion-col col-4 center text-center class="have-badge">
         <button ion-button icon-left clear small color="newlight" (click)="gototFeedDetail(feed)">
           <ion-icon class="icon comment-icon"></ion-icon>&nbsp;Comment
         </button>
       </ion-col>
-      <ion-col center text-center>
+      <ion-col col-4 center text-center>
         <button ion-button icon-left clear small color="{{feed._userStarred ? 'primary':'newlight'}}" (click)="starFeed(feed)">
           <ion-icon name="{{feed._userStarred ? 'ios-heart':'ios-heart-outline'}}"></ion-icon>&nbsp;Save</button>
       </ion-col>

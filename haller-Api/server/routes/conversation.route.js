@@ -65,6 +65,18 @@ router.route('/:conversationId/users/:userId')
     getToken
   }), validate(paramValidation.updateConversation), conversationCtrl.update)
 
+router.route('/bot')
+  .post(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), conversationCtrl.createBotConversation)
+
+router.route('/:conversationId/bot')
+  .put(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), conversationCtrl.askToBot)
+
 router.route('/users/:userId')
   /** GET /api/conversations/users/:userId - Get list of conversations by participant Id*/
   .get(expressJwt({

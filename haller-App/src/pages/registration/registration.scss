@@ -1,4 +1,7 @@
 page-registration {
+    .swiper-container{
+        overflow: visible;
+    }
     .auth-btn, .auth-btn-width{
         min-width: 45vh;
         border-radius: 0px;

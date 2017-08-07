@@ -30,11 +30,25 @@
 
         <img class="profile-image" (click)="viewFullImage(profileProvider.httpClient.getProfileImageToDisplay(userInfo))" [src]="profileProvider.httpClient.getProfileImageToDisplay(userInfo)"
         />
-        <ion-row align-items-center class="mini-detail">
-          <ion-col class="r-b-1"><b>{{userInfo.major || 'Major'}}</b></ion-col>
-          <ion-col class="r-b-1"><b>{{userInfo.hometown || 'Hometown'}}</b></ion-col>
-          <ion-col><b>Class of {{userInfo.graduationYear || ''}}</b></ion-col>
-        </ion-row>
+         <!-- <table class="mini-detail-table">
+          <tr>
+            <td class="rb"><b>{{userInfo.major || 'Major'}}</b></td>
+            <td class="rb"><b>{{userInfo.hometown || 'Hometown'}}</b></td>
+            <td><b>Class of {{userInfo.graduationYear || ''}}</b></td>
+          </tr>
+        </table>  -->
+          <ion-row align-items-center class="mini-detail">
+          <ion-col col-4 class="r-b-1"><b>{{userInfo.major || 'Major'}}</b></ion-col>
+          <ion-col col-4 class="r-b-1"><b>{{userInfo.hometown || 'Hometown'}}</b></ion-col>
+          <ion-col col-4><b>{{userInfo.graduationYear || 'Class'}}</b></ion-col>
+        </ion-row>   
+        <!-- <ion-row align-items-center class="mini-detail">
+          <ion-col>
+            <b style="padding:0px 10px">{{userInfo.major || 'Major'}}</b><b>|</b>
+            <b style="padding:0px 10px">{{userInfo.hometown || 'Hometown'}}</b><b>|</b>
+            <b style="padding:0px 10px">Class of {{userInfo.graduationYear || ''}}</b>
+          </ion-col>
+        </ion-row> -->
       </div>
       <ion-card-title><b>About</b></ion-card-title>
       <p>{{userInfo.bio || 'About'}}</p>
@@ -45,7 +59,7 @@
       <ion-card-title><b>Interests</b></ion-card-title>
       <p>
         <button *ngFor="let interest of userInfo.interests" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{interest.name}}</span></button>
-         <button *ngFor="let interest of getFbLikesObject(userInfo)" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{interest.name}}</span></button>
+        <button *ngFor="let interest of getFbLikesObject(userInfo)" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{interest.name}}</span></button>
       </p>
       <ion-card-title><b>Pronouns</b></ion-card-title>
       <p>{{userInfo.genderPronouns.join(', ') || ''}}</p>

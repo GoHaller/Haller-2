@@ -38,9 +38,12 @@ export class EventNew {
     this.event = this.navParams.get('event') || this.event;
     this.local = new Storage('localstorage');
 
+    var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    var localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0,-1);
+
     this.eventForm = this.formBuilder.group({
       title: [this.event['title'] || '', Validators.compose([Validators.maxLength(30), Validators.required])],
-      date: [this.event['date'] || '', Validators.compose([Validators.required])],
+      date: [this.event['date'] || localISOTime, Validators.compose([Validators.required])],
       location: [this.event['location'] || '', Validators.compose([Validators.maxLength(30), Validators.required])],
       details: [this.event['details'] || '', Validators.compose([Validators.required])]
     });
@@ -53,7 +56,7 @@ export class EventNew {
       if (!this.event['_id']) {
         this.event['createdBy'] = this.userInfo['_id'];
         this.event['authorResidence'] = this.userInfo['residence'];
-        this.event['date'] = new Date().toJSON();
+        this.event['date'] = new Date().toISOString();
         this.headerText = 'Create New Event';
       } else {
         this.saveButtonText = 'Done';

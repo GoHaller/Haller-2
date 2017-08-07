@@ -5,6 +5,7 @@ import Conversation from '../models/conversation.model';
 import FCMSender from '../helpers/FCMSender';
 import User from '../models/user.model';
 import APIError from '../helpers/APIError';
+import devBot from '../controllers/bot.controller';
 
 const activityType = 19;
 
@@ -115,7 +116,7 @@ function list(req, res, next) {
   if (req.query && req.query.recipient) {
     recipient = req.query.recipient;
   }
-  User.userWhoBlockedMe(req.params.userId)
+  User.userWhoBlockedMe(req.params.userId, req.query.bot || false)
     .then(usersWhoBlockedMe => {
       User.findOne({ '_id': req.params.userId }, { 'blocked.user': 1 }).exec()
         .then(bu => {
@@ -258,6 +259,134 @@ function update(req, res, next) { //eslint-disable-line
         }
       });
     });
+  } else {
+    const err = new APIError('Invalid Request - missing conversationId route param', httpStatus.BAD_REQUEST);
+    return next(err);
+  }
+}
+
+
+/*
+  Create Conversation
+*  @param {ObjectId} createdBy - Id of the person creating the conversation
+*  @param {ObjectId[]} participants - Array of participant ids (allows group chat)
+*  @param {Message[]} messages - Array containing one messages
+*  @param {string} messages.$.body - body of the message
+*  @param {string} messages.$.image - url to image for message
+*  @param {string} messages.$.createdBy - userId of message creator
+*  @param {date} messages.$.createdAt - userId of message creator
+*  @param {string} messages.$.recipient - userId of message recipient
+*  @param {string} accessToken - bot access token
+*/
+function createBotConversation(req, res, next) { //eslint-disable-line
+  let message = req.body.messages[0];
+  devBot.sendText(req.body.accessToken, message['body'], (error, response) => {
+    console.log('devBot.sendText error', error)
+    let messagesObj = {
+      createdBy: message.recipient,
+      createdAt: new Date(),
+      recipient: message.createdBy,
+    }
+    if (error) {
+      messagesObj['body'] = 'Sorry sir! Cherry need a doctor right now.';
+    }
+    else {
+      messagesObj['botBody'] = response
+    }
+    req.body.messages.push(messagesObj);
+
+    const convo = new Conversation(_.extend(req.body, {
+      _id: mongoose.Types.ObjectId(), //eslint-disable-line
+      createdAt: new Date()
+    }));
+    convo.save().then((savedConvo) => {
+      savedConvo.populate([{
+        path: 'createdBy',
+        model: 'User'
+      }, {
+        path: 'messages.createdBy',
+        model: 'User',
+      }, {
+        path: 'messages.recipient',
+        model: 'User',
+      }, {
+        path: 'participants',
+        model: 'User'
+      }], (err, doc) => {
+        if (err) {
+          return next(err);
+        } else if (doc) {
+          return res.json(doc);
+        }
+        const error = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);
+        return next(error);
+      });
+    });
+  });
+}
+
+/*
+  Update Conversation
+*  @param {ObjectId} participant - participant id to add to the chat
+*  @param {Message} message - message to add
+*  @param {string} message.body - body of the message
+*  @param {string} message.image - url to image for message
+*  @param {string} message.giphy - url to image for message
+*  @param {string} message.createdBy - userId of message creator
+*  @param {date} message.createdAt - userId of message creator
+*  @param {string} message.recipient - userId of message recipient
+*  @param {string} accessToken - bot access token
+*/
+function askToBot(req, res, next) {
+  if (req.params.conversationId) {
+    Conversation.get(req.params.conversationId, null).then((convo) => {
+      const savedConvo = convo;
+      if (req.body.message) {
+        savedConvo.messages.push(req.body.message);
+        savedConvo.updatedAt = new Date();
+      }
+      devBot.sendText(req.body.accessToken, req.body.message['body'], (error, response) => {
+        let messagesObj = {
+          createdBy: req.body.message.recipient,
+          createdAt: new Date(),
+          recipient: req.body.message.createdBy,
+        }
+        if (error) {
+          messagesObj['body'] = 'Sorry sir! Cherry need a doctor right now.';
+        }
+        else {
+          messagesObj['botBody'] = response
+        }
+        savedConvo.messages.push(messagesObj);
+        savedConvo.updatedAt = new Date();
+        savedConvo.save().then((sConvo) => {
+          sConvo.populate([{
+            path: 'createdBy',
+            model: 'User'
+          }, {
+            path: 'messages.createdBy',
+            model: 'User',
+          }, {
+            path: 'messages.recipient',
+            model: 'User',
+          }, {
+            path: 'participants',
+            model: 'User'
+          }], (err, doc) => {
+            if (err) {
+              return next(err);
+            } else if (doc) {
+              return res.json(doc);
+            }
+          });
+          // return res.json(sConvo);
+        }).catch(e => {
+          console.info('Conversation.get error', e);
+          const error = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);
+          return next(error);
+        });;
+      })
+    })
   } else {
     const err = new APIError('Invalid Request - missing conversationId route param', httpStatus.BAD_REQUEST);
     return next(err);
@@ -419,4 +548,4 @@ function createNotification(actObj) {
     console.info('Post.get error', e);
   })
 }
-export default { get, list, create, update, updateMessage, remove, removeMessage, leaveConversation };
+export default { get, list, create, update, updateMessage, remove, removeMessage, leaveConversation, createBotConversation, askToBot };

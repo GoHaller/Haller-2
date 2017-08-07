@@ -53,17 +53,19 @@
 
     <ion-row class="action-count">
       <ion-col *ngIf="(feed.liked && feed.liked.length > 0) || (feed.comments && feed.comments.length > 0)">
-        <span style="float:left" *ngIf="feed.liked.length > 0" (click)="openLikeModel(feed.liked)">{{feed.liked.length +' Likes'}}</span>
-        <span style="float:right" *ngIf="feed.comments.length > 0" (click)="openLikeModel(feed.comments)">{{feed.comments.length + ' Comments'}}</span>
+        <button style="float:left" ion-button color="dark" clear small (click)="openLikeModel(feed.liked,null)">{{feed.liked.length +' Likes'}}</button>
+        <button style="float:right" ion-button color="dark" clear small (click)="openLikeModel(null,feed.comments)">{{feed.comments.length + ' Comments'}}</button>
+        <!-- <span style="float:left" *ngIf="feed.liked.length > 0" (click)="openLikeModel(feed.liked)">{{feed.liked.length +' Likes'}}</span>
+        <span style="float:right" *ngIf="feed.comments.length > 0" (click)="openLikeModel(feed.comments)">{{feed.comments.length + ' Comments'}}</span> -->
       </ion-col>
     </ion-row>
 
     <ion-row class="feed-actions" *ngIf="feed">
-      <ion-col center text-center>
+      <ion-col col-6 center text-center>
         <button ion-button icon-left clear small color="{{feed._userLiked ? 'primary':'newlight'}}" (click)="likeFeed(feed)">
           <ion-icon name="{{feed._userLiked ? 'ios-thumbs-up':'ios-thumbs-up-outline'}}"></ion-icon>&nbsp;Like</button>
       </ion-col>
-      <ion-col center text-center>
+      <ion-col col-6 center text-center>
         <button ion-button icon-left clear small color="{{feed._userStarred ? 'primary':'newlight'}}" (click)="starFeed(feed)">
           <ion-icon name="{{feed._userStarred ? 'ios-heart':'ios-heart-outline'}}"></ion-icon>&nbsp;Save</button>
       </ion-col>

@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, ModalController, LoadingController, Events } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ModalController, LoadingController, Events, ToastController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
-import { Validators, FormBuilder } from '@angular/forms';
+import { Validators, FormBuilder, ValidatorFn, FormControl } from '@angular/forms';
 import { ProfileProvider } from "../../shared/providers/profile.provider";
 import { ImageFullComponent } from '../../shared/pages/image.full';
 import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
+import { AuthProvider } from "../../shared/providers/auth.provider";
 
 /**
  * Generated class for the ProfileEdit page.
@@ -18,7 +19,6 @@ import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
   templateUrl: 'profile-edit.html',
 })
 export class ProfileEdit {
-
   private local: Storage;
   public userInfo: Object = {};
   public orgList = [];
@@ -30,10 +30,27 @@ export class ProfileEdit {
   public showInterestForm: Boolean = false;
   public orgSearchText: String = '';
   public userAvatar = '';
+  public fbAuthDetail: any = {};
+  private loaderObj: any = {};
+
+  min(min: number): ValidatorFn {
+    return (control: FormControl): { [key: string]: boolean } | null => {
+
+      let val: number = control.value;
+
+      if (control.pristine || control.pristine) {
+        return null;
+      }
+      if (val >= min) {
+        return null;
+      }
+      return { 'min': true };
+    }
+  }
 
   constructor(private navCtrl: NavController, private navParams: NavParams, public profileProvider: ProfileProvider,
     private formBuilder: FormBuilder, private modalCtrl: ModalController, private cloudinaryProvider: CloudinaryProvider,
-    public loadingCtrl: LoadingController, private event: Events) {
+    public loadingCtrl: LoadingController, private event: Events, private authProvider: AuthProvider, public toastCtrl: ToastController) {
     this.local = new Storage('localstorage');
     this.userAvatar = profileProvider.httpClient.userAvatar;
     this.userForm = this.formBuilder.group({
@@ -41,6 +58,7 @@ export class ProfileEdit {
       lastName: ['', Validators.compose([Validators.maxLength(50), Validators.required])],
       pronouns: ['', Validators.compose([Validators.maxLength(30)])],
       major: ['', Validators.compose([Validators.maxLength(30)])],
+      graduationYear: ['', Validators.compose([Validators.maxLength(4), Validators.minLength(4), this.min(2017)])],
       hometown: ['', Validators.compose([Validators.maxLength(30)])]
     });
 
@@ -53,10 +71,13 @@ export class ProfileEdit {
         lastName: [this.userInfo['lastName'] || '', Validators.compose([Validators.maxLength(50), Validators.required])],
         pronouns: [this.userInfo['genderPronouns'].join(', ') || '', Validators.compose([Validators.maxLength(30)])],
         major: [this.userInfo['major'] || '', Validators.compose([Validators.maxLength(30)])],
+        graduationYear: [this.userInfo['graduationYear'] || '', Validators.compose([Validators.maxLength(4), Validators.minLength(4), this.min(2017)])],
         hometown: [this.userInfo['hometown'] || '', Validators.compose([Validators.maxLength(30)])]
       });
     })
   }
+
+
 
   ionViewDidLoad() { }
 
@@ -263,6 +284,55 @@ export class ProfileEdit {
       // console.info('data', data);
     });
     modal.present();
+  }
+
+  getFbLogin() {
+    this.loaderObj = this.loadingCtrl.create({
+      content: "Please wait...",
+      // duration: 3000,
+      dismissOnPageChange: true
+    });
+    this.loaderObj.present();
+    this.authProvider.loginToFB()
+      .then((res: any) => {
+        // console.log('Logged into Facebook!', res);
+        if (res.status == 'connected') {
+          this.fbAuthDetail = res.authResponse;
+          this.getFbDetail();
+        }
+      })
+      .catch(e => { console.log('Error logging into Facebook', e); this.loaderObj.dismiss(); });
+  }
+
+  getFbDetail() {
+    this.authProvider.getFBUserDetail(this.fbAuthDetail['userID'])
+      .then((res: any) => {
+        if (res) {
+          this.userInfo['facebook'] = res;
+          this.loaderObj.dismiss();
+          this.profileProvider.updateUser(this.userInfo['_id'], { facebook: res })
+            .subscribe((res: any) => {
+              // console.info('updateUser res', res);
+              this.userInfo = res;
+              this.userInfo['pronouns'] = this.userInfo['genderPronouns'].join(', ');
+              this.local.set('userInfo', JSON.stringify(res)).then(() => {
+                this.event.publish('user-updated');
+                this.goBack();
+              });
+            }, error => {
+              console.info('updateUser error', error);
+              let message = 'Please try later.';
+              if (error.status == 401 && error._body.indexOf("Facebook account is already in use.") > -1) {
+                message = 'Facebook account is already in use.';
+              }
+              let toast = this.toastCtrl.create({ message: message, duration: 3000, position: 'top' });
+              toast.present();
+            });
+        }
+      }).catch(e => {
+        console.info('fb api error', e);
+        this.loaderObj.dismiss();
+      });
   }
 
   getFbLikesObject(user) {

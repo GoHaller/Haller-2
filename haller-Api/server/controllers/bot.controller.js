@@ -8,28 +8,32 @@ const apiai = require('apiai');
 
 // const config = require('../../config/env');
 const bcrypt = require('bcryptjs');
-
+const accessToken = 'b9a1ce6b0a764de6801ecda3960539ba';
 /**
  * @param conversationId
  * @param message
  * @param callback
  * @returns {*}
  */
-function sendText(conversationId, botUser, message, callback) {
-  var bot = apiai(botUser.botData.accessToken);
+// function sendText(conversationId, botUser, message, callback) {
+// var bot = apiai(botUser.botData.accessToken);
+function sendText(conversationId, message, callback) {
+  var bot = apiai(accessToken);
+  // console.log('message', message);
+
   var request = bot.textRequest(message, { sessionId: conversationId });
 
   request.on('response', (response) => {
-    console.log(response);
-    callback(response);
-    return response;
+    // console.log('response', response);
+    callback(null, response);
   });
 
   request.on('error', (error) => {
-    console.log(error);
-    callback(null, error);
-    return error;
+    console.log('error', error);
+    callback(error, null);
   });
+
+  request.end();
 }
 
 function createBot(req, res, next) {

@@ -49,12 +49,30 @@ page-profile {
             margin-top:30px
         }
 
+        .mini-detail-table{
+            text-align: center;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            td{
+                padding: 0px 10px;
+            }
+            .rb{
+                border-right: solid 1px #222;
+            }
+        }
+
         .mini-detail{
             margin: 15px 0px;
+            ion-col:first-child{
+                text-align: right
+            }
             ion-col{
-                text-align: center;
-                padding: 0px;
+                // text-align: center;
+                padding: 0px 10px;
                 color: #222;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             .r-b-1{
                 border-right: solid 1px #222;

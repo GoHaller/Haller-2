@@ -25,6 +25,9 @@ const MessageSchema = new mongoose.Schema({
     type: String,
     set: cleanHtml
   },
+  botBody: {
+    type: mongoose.Schema.Types.Mixed,
+  },
   recipient: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',

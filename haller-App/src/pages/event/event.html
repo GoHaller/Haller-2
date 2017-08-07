@@ -19,7 +19,7 @@
       </ion-segment-button>
     </ion-segment>
     <ion-buttons right>
-      <button (click)="gotoEventNew()" *ngIf="allowUserToPost()" ion-button>New Event</button>
+      <button (click)="gotoEventNew()" *ngIf="allowUserToPost()" ion-button>Create</button>
     </ion-buttons>
   </ion-toolbar>
 
@@ -62,19 +62,21 @@
     </ion-card-content>
     <ion-row>
       <ion-col *ngIf="event.liked.length > 0 || event.comments.length > 0">
-        <span style="float:left" *ngIf="event.liked.length > 0" (click)="openLikeModel(event.liked,null)">{{event.liked.length +' Likes'}}</span>
-        <span style="float:right" *ngIf="event.comments.length > 0" (click)="openLikeModel(null,event.comments)">{{event.comments.length + ' Comments'}}</span>
+        <button style="float:left" ion-button color="dark" clear small (click)="openLikeModel(event.liked,null)">{{event.liked.length +' Likes'}}</button>
+        <button style="float:right" ion-button color="dark" clear small (click)="openLikeModel(null,event.comments)">{{event.comments.length + ' Comments'}}</button>
+        <!-- <span style="float:left" *ngIf="event.liked.length > 0" (click)="openLikeModel(event.liked,null)">{{event.liked.length +' Likes'}}</span>
+        <span style="float:right" *ngIf="event.comments.length > 0" (click)="openLikeModel(null,event.comments)">{{event.comments.length + ' Comments'}}</span> -->
       </ion-col>
     </ion-row>
     <ion-row class="event-actions">
-      <ion-col center text-center>
+      <ion-col col-4 center text-center>
         <button ion-button icon-left clear small color="{{event._userLiked ? 'primary':'newlight'}}" (click)="likeEvent(event)">
           <ion-icon name="{{event._userLiked ? 'ios-thumbs-up':'ios-thumbs-up-outline'}}"></ion-icon>&nbsp;Like</button>
       </ion-col>
-      <ion-col center text-center>
+      <ion-col col-4 center text-center>
         <button ion-button icon-left clear small color="newlight" (click)="gototEventDetail(event)"><ion-icon class="icon comment-icon"></ion-icon>&nbsp;Comment</button>
       </ion-col>
-      <ion-col center text-center>
+      <ion-col col-4 center text-center>
         <button ion-button icon-left clear small color="{{event._userStarred ? 'primary':'newlight'}}" (click)="starEvent(event)">
           <ion-icon name="{{event._userStarred ? 'ios-heart':'ios-heart-outline'}}"></ion-icon>&nbsp;Save</button>
       </ion-col>

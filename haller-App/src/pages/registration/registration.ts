@@ -39,6 +39,7 @@ export class Registration {
   private years = [];
   private email: string = '';
   public loaderObj: any = null;
+  public universityData: any = { halls: ['Scholarship Halls', 'Oliver', 'Ellsworth Hall', 'Oswald Hall', 'Self Hall', 'New Hall'] };
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private authProvider: AuthProvider,
     private profileProvider: ProfileProvider, private formBuilder: FormBuilder, public toastCtrl: ToastController,
@@ -56,9 +57,6 @@ export class Registration {
     });
     let yr = new Date().getFullYear() + 1;
     this.years = [yr, yr + 1, yr + 2, yr + 3, yr + 4, yr + 5, yr + 6];
-    // hometown: ['', Validators.compose([Validators.maxLength(50)])],
-    // pronouns: ['', Validators.compose([Validators.maxLength(30)])],
-    // major: ['', Validators.compose([Validators.maxLength(30)])],
     statusBar.styleDefault();
     splashScreen.hide();
   }
@@ -78,6 +76,14 @@ export class Registration {
       this.fcmData = JSON.parse(val);
     });
     this.slides.lockSwipes(true);
+    this.authProvider.getUniversityData()
+      .subscribe((res: any) => {
+        if (res.halls) {
+          this.universityData = res;
+        }
+      }, error => {
+        console.log('getUniversityData error', error);
+      })
   }
 
   swipeBack() {

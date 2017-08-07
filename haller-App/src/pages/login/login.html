@@ -1,25 +1,25 @@
 <ion-content class="app-background">
   <div>
-    <ion-slides>
-      <ion-slide>
-        <h3 class="color-white" style="margin-top: 15vh">Haller</h3>
-        <h5 class="color-white">&nbsp;</h5>
-        <form [formGroup]="authForm" (ngSubmit)="loginClicked(authForm.value)">
-          <ion-list>
-            <ion-item>
-              <ion-input type="text" placeholder="KU Email" formControlName="email"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-input type="password" placeholder="Password" formControlName="password"></ion-input>
-            </ion-item>
-          </ion-list>
-          <button class="auth-btn" [disabled]="!authForm.valid" ion-button color="light">Log in</button>
-        </form>
-        <hr/>
-        <button ion-button block (click)="getFbLogin()" clear color="light" style="margin-top:10px">Login with FACEBOOK</button>
-        <button ion-button block (click)="gotoRegPage()" clear color="light" style="margin-top:10px">Don’t have an account? Sign Up</button>
-      </ion-slide>
-    </ion-slides>
+    <!-- <ion-slides>
+      <ion-slide> -->
+    <h3 class="color-white text-center" style="margin-top: 15vh">Haller</h3>
+    <h5 class="color-white">&nbsp;</h5>
+    <form [formGroup]="authForm" class="text-center" (ngSubmit)="loginClicked(authForm.value)">
+      <ion-list>
+        <ion-item>
+          <ion-input type="text" placeholder="KU Email" formControlName="email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input type="password" placeholder="Password" formControlName="password"></ion-input>
+        </ion-item>
+      </ion-list>
+      <button class="auth-btn" [disabled]="!authForm.valid" ion-button color="light">Log in</button>
+    </form>
+    <hr/>
+    <button ion-button block (click)="getFbLogin()" clear color="light" style="margin-top:10px">Login with FACEBOOK</button>
+    <button ion-button block (click)="gotoRegPage()" clear color="light" style="margin-top:10px">Don’t have an account? Sign Up</button>
+    <!-- </ion-slide>
+    </ion-slides> -->
   </div>
   <button ion-button block clear color="light" style="margin-top:10vh">Help</button>
 </ion-content>
