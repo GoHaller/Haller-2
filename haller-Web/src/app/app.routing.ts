@@ -32,7 +32,10 @@ export const AppRoutes: Routes = [
             }, {
                 path: 'users',
                 loadChildren: './users/users.module#UsersModule'
-            }, {
+            },{
+                path: 'notification',
+                loadChildren: './notification/notification.module#NotificationModule'
+            },{
                 path: 'components',
                 loadChildren: './components/components.module#ComponentsModule'
             }, {

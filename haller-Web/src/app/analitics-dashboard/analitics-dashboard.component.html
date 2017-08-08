@@ -160,6 +160,28 @@
           </div>
         </div>
       </div>
+      
+                        <select class="selectpicker col-sm-4" (change)="postAnalytics($event.target.value)" data-style="btn btn-primary btn-round"
+                            title="" data-size="4">
+
+                            <option value="7" [attr.selected]="days == '7days'">Last 7 days</option>
+                            <option value="30" [attr.selected]="days == 'monthly'">Monthly</option>
+                            <option value="10" 
+                             [attr.selected]="days == 'TotalCount'">Total Count</option>
+                        </select>
+      
+      <div class="col-md-8">
+                <div class="card card-chart">
+                    <div class="card-header" data-background-color="blue">
+                        <div id="simpleBarChart" class="ct-chart"></div>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title"> Event/Feed Analytics</h4>
+                          <h5 class="card-title">X-axis : Number of Event/Feed Created</h5>
+                          <h5 class="card-title">Y-axis : Event/Feed </h5>
+                    </div>
+                </div>
+            </div>
     </div>
   </div>
 </div>

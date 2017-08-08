@@ -1,0 +1,7 @@
+.restrictbody{
+  display:inline-block;   
+  width:70px;  
+  white-space: nowrap;   
+  overflow:hidden !important;    
+  text-overflow: ellipsis;
+}

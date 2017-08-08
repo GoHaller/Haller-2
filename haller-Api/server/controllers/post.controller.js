@@ -1049,16 +1049,43 @@ function sendUniversityNotification(notification) {
 
 //Admin APIS
 function adminListByResidence(req, res, next) {
-  const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
-  Post.listByResidenceForAdmin({ residence: req.params.residence, limit, skip, event, sortBy, asc })
-    .then(posts => {
-      // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
-      res.json(posts)
-    })
-    .catch((e) => {
-      console.log(e); //eslint-disable-line
-      next(e);
-    });
+
+      const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
+            Post.listByResidenceForAdmin({ residence: req.params.residence, limit, skip, event, sortBy, asc })
+              .then(posts => {
+                // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
+                res.json(posts)
+              })
+              .catch((e) => {
+                console.log(e); //eslint-disable-line
+                next(e);
+              });
+
+
+  // User.get(req.params.userId)
+  //   .then(user => {
+  //       if(user.role != "admin" && user.role != "student"){
+  //         const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
+  //           Post.listByResidenceForAdmin({  residence: req.params.residence, limit, skip, event, sortBy, asc })
+  //             .then(posts => {
+  //               console.log("---------posts.length------",posts.length)
+  //               // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
+  //               res.json(posts)
+  //             })
+  //             .catch((e) => {
+  //               console.log(e); //eslint-disable-line
+  //               next(e);
+  //             });
+  //       }else if(user.role != "admin"){          
+        
+
+  //       }
+
+  //   })
+  //   .error(e => next(e))
+  //   .catch((e) => {
+  //     next(e);
+  //   });
 }
 
 /*
@@ -1301,6 +1328,128 @@ function deleteComment(req, res, next) {
         });
     });
 }
+function getNotifications(req, res, next){
+  User.get(req.params.userId)
+    .then(user => {
+        var allNotification = [];
+
+        if(user.role != "admin" && user.role != "student"){
+          Notification.getUsersNotification(req.params.userId)
+          .then(notification =>{
+            for(var i = 0; i < notification.length ; i++){
+              if(notification[i].body.title && notification[i].body.title  ) {
+                allNotification.push(notification[i]);
+              }
+            }
+            return res.json({ allNotification});
+          });
+
+        }else if(user.role == "admin"){
+          Notification.getAllUsersNotification()
+          .then(notification =>{
+            for(var i = 0; i < notification.length ; i++){
+              if(notification[i].body.title && notification[i].body.title && notification[i].createdBy ){
+                allNotification.push(notification[i]);
+              }
+            }
+            var admin = {"admin":"admin"}
+            return res.json({ allNotification,admin});
+          });
+        }
+    })
+    .error(e => next(e))
+    .catch((e) => {
+      next(e);
+    });
+}
+
+function getseveandaysAnalytics(req, res, next)
+{  
+  
+  var d = new Date();
+  d.setDate(d.getDate() - 7);
+  Post.aggregate()
+    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+    .exec().then(sevanDays => {
+        var eventCount = 0;
+        var feedCount = 0; 
+        for(var i =0; i<sevanDays.length;i++){
+          if(sevanDays[i].isEvent){
+            eventCount += 1;
+          }
+          if(!sevanDays[i].isEvent){
+            feedCount +=1
+          }
+        }
+        res.json({"eventcount" :eventCount,"feedcount": feedCount});
+
+    });
+}
+
+function getmonthlyAnalytics(req, res, next)
+{  
+  console.log("======30 days api=============");
+  var d = new Date();
+  d.setDate(d.getDate() - 30);
+  Post.aggregate()
+    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
+    .exec().then(sevanDays => {
+        var eventCount = 0;
+        var feedCount = 0; 
+        for(var i =0; i<sevanDays.length;i++){
+          if(sevanDays[i].isEvent){
+            eventCount += 1;
+          }
+          if(!sevanDays[i].isEvent){
+            feedCount +=1
+          }
+        }
+        res.json({"eventcount" :eventCount,"feedcount": feedCount});
+
+    });  
+}
+
+function getTotalEventPostCount(req, res, next)
+{  
+  var countobj={};
+  Post.getAll().then(post => {
+    var eventCount = 0;
+    var feedCount = 0;
+    for(var i=0; i<post.length;i++){
+        if(post[i].isEvent){
+          eventCount += 1;
+        }
+        if(!post[i].isEvent){
+          feedCount += 1;
+        }
+    }
+    countobj.totalEvent = eventCount;
+    countobj.totalFeed = feedCount; 
+    res.json(countobj);
+  });  
+}
+
+function getTotalEventPostCount(req, res, next)
+{  
+  var countobj={};
+  Post.getAll().then(post => {
+    var eventCount = 0;
+    var feedCount = 0;
+    for(var i=0; i<post.length;i++){
+        if(post[i].isEvent){
+          eventCount += 1;
+        }
+        if(!post[i].isEvent){
+          feedCount += 1;
+        }
+    }
+    countobj.totalEvent = eventCount;
+    countobj.totalFeed = feedCount; 
+    res.json(countobj);
+  });
+}
+
+
 
 export default {
   get,
@@ -1343,4 +1492,9 @@ export default {
   getStaffJoinDetails,
   deletePost,
   deleteComment,
+  getNotifications,
+  getTotalEventPostCount,
+  getseveandaysAnalytics,
+  getmonthlyAnalytics,
+  getTotalEventPostCount
 };

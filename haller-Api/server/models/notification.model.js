@@ -158,7 +158,39 @@ NotificationSchema.statics = {
       }
     }
     return names.join(', ') + (allNames.length > 3 ? (allNames.length - 3) : '');
-  }
+  },
+
+getUsersNotification(userId ,skip = 0, limit = 10){
+    return this.find({'createdBy' : userId })
+      .populate(populateMap())
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec()
+      .then((notification) => {
+        if (notification) {
+          return notification;
+        }
+        else return null;
+      });
+},
+
+getAllUsersNotification(skip = 0, limit = 10){
+    return this.find()
+      .populate(populateMap())
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec()
+      .then((notification) => {
+        if (notification) {
+          return notification;
+        }
+        else return null;
+      });
+}
+
+
 
 };
 

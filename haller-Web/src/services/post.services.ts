@@ -48,10 +48,10 @@ export class PostService {
             this.headers.append('Authorization', 'Bearer:' + this.activeToken);
     }
 
-    getFeedByResidence(residence: string, event = false, limit = 50, skip = 0) {
+    getFeedByResidence(userId:string,residence: string, event = false, limit = 50, skip = 0) {
         this.createAuthorizationHeader()
         let q = 'limit=' + limit + '&skip=' + skip + '&event=' + event;
-        return this.http.get(this.adminApiUrl + 'residence/' + residence + '?' + q, { headers: this.headers }).map(this.extractData);
+        return this.http.get(this.adminApiUrl + userId + '/residence/' + residence + '?' + q, { headers: this.headers }).map(this.extractData);
     }
 
     cloudinaryUpload(imageData, preset = 'profile-covers') {
@@ -69,8 +69,7 @@ export class PostService {
     }
 
     createNotification(notificationObj: any) {
-        this.createAuthorizationHeader();
-        
+        this.createAuthorizationHeader();        
         return this.http.post(environment.ApiBaseUrl +'posts/' +'university/notification', notificationObj, { headers: this.headers }).map(this.extractData)
     }
 
@@ -140,8 +139,24 @@ export class PostService {
         this.createAuthorizationHeader();
         return this.http.delete(this.adminApiUrl + postId + '/comments/' + commentId, { headers: this.headers }).map(this.extractData)
     }
-
+    getTotalEventPostCounts() {
+        this.createAuthorizationHeader();
+        return this.http.get(this.adminApiUrl +  'getAllEventPostCount', { headers: this.headers }).map(this.extractData)
+    }
+    getPostAnalyticsData() {
+        this.createAuthorizationHeader();
+        return this.http.get(this.adminApiUrl +  'getPostAnalytics' , { headers: this.headers }).map(this.extractData)
+    }
+    getMonthlyAnalyticsData() {
+        this.createAuthorizationHeader();
+        return this.http.get(this.adminApiUrl +  'getmonthlyAnalytics' , { headers: this.headers }).map(this.extractData)
+    }
     private extractData(res: any) {
         return (typeof res == 'object') ? res.json() : res;
     }
+ getNotification(userId:string) {
+        this.createAuthorizationHeader()
+        return this.http.get(this.adminApiUrl + userId + '/notification/', { headers: this.headers }).map(this.extractData);
+    }
+
 }

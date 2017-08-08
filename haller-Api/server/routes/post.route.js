@@ -10,7 +10,7 @@ import { load, getToken } from '../helpers/AuthorizationHelper';
 const router = express.Router(); // eslint-disable-line new-cap
 
 //admin APIS
-router.route('/admin/residence/:residence')
+router.route('/admin/:userId/residence/:residence')
   .get(expressJwt({
     secret: config.jwtSecret,
     getToken
@@ -325,8 +325,6 @@ router.route('/users/:userId')
     }
   }), load, validate(paramValidation.listByUser), postCtrl.listByUser);
 
-
-
 /** POST /api/university/notification - Create new post */
 
 router.route('/university/notification')
@@ -334,6 +332,29 @@ router.route('/university/notification')
     secret: config.jwtSecret,
     getToken
   }), postCtrl.createUniversityNotification);
+
+router.route('/admin/:userId/notification')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+}), postCtrl.getNotifications);
+
+router.route('/admin/getPostAnalytics')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), postCtrl.getseveandaysAnalytics);
+router.route('/admin/getmonthlyAnalytics')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), postCtrl.getmonthlyAnalytics);
+
+
+router.route('/admin/getAllEventPostCount')
+  .get(expressJwt({    
+   secret: config.jwtSecret,
+   getToken}),postCtrl.getTotalEventPostCount);
 
 // /** Load user when API with userId route parameter is hit */
 // router.param('userId', load);

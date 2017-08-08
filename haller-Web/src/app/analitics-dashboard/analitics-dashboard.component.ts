@@ -3,6 +3,7 @@ import { PostService } from '../../services/post.services';
 import { ModalService } from '../../services/modal.service';
 import {Ng2PaginationModule} from 'ng2-pagination';
 import { EventJoinComponent } from "../modal/eventJoin.component";
+import * as Chartist from 'chartist';
 declare var $: any;
 @Component({
   selector: 'app-analitics-dashboard',
@@ -21,16 +22,21 @@ export class AnaliticsDashboardComponent implements OnInit {
   public staffEventTable:any;
   public staffCount:any = [];
   public staffJoinerCount:any =[];
- 
+  public eventSevandaysEvent='';
+  public sevandaysfeed='';
+  public checking='';
+  public sevanDaysEvent='';
+  public thirthydDaysEvent='';
+  public thirthyDaysfeed='';
+  
+  
   public id;
 
 
   constructor(private postService: PostService, private modalService: ModalService,private zone:NgZone,private cdrf:ChangeDetectorRef) {
    }
 
-  ngOnInit() {
-    this.getDashBoardCount();
-  }
+ 
   
 
 showEventUserName(days){
@@ -103,6 +109,106 @@ showStaffUserName(days){
       })
   }
 
+postAnalytics(postdays:any)
+{ 
+ 
+  console.log("===========",typeof(postdays));
+  if(Number(postdays)==7)
+  {
+    var sevendaysEvent;
+    var sevendaysFeed;
+  this.postService.getPostAnalyticsData().subscribe((res: any) => {
+       console.log("7 front end response",res.eventcount,res.feedcount);
+       sevendaysEvent=res.eventcount;
+       sevendaysFeed=res.feedcount;
+       console.log("type of sevan",typeof(this.sevanDaysEvent));
+      }, error => {
+        console.info('error', error);
+      })
+      setTimeout(function () {
+     
+        var dataSimpleBarChart = {
+          labels: ['Feed', 'Event'],
+          series: [
+            [sevendaysEvent,sevendaysFeed]
+          ]
+        };
+
+        var optionsSimpleBarChart = {
+          seriesBarDistance: 5,
+          axisX: {
+            showGrid: false
+          }
+        };
+
+        var responsiveOptionsSimpleBarChart: any = [
+          ['screen and (max-width: 640px)', {
+            seriesBarDistance: 5,
+            axisX: {
+              labelInterpolationFnc: function (value) {
+                return value[0];
+              }
+            }
+          }]
+        ];
+
+        var simpleBarChart = new Chartist.Bar('#simpleBarChart', dataSimpleBarChart, optionsSimpleBarChart, responsiveOptionsSimpleBarChart);
+        //start animation for the Emails Subscription Chart
+        this.startAnimationForBarChart(simpleBarChart);
+      }, 1000)
+  }
+  if(Number(postdays)==30)
+  {
+    
+    var thirtydaysEvent;
+    var thirtydaysFeed;
+    this.postService.getMonthlyAnalyticsData().subscribe((res: any) => {
+    console.log("30  front end response",res.eventcount,res.feedcount);
+    thirtydaysEvent=res.eventcount;
+    thirtydaysFeed=res.feedcount;
+         
+      }, error => {
+        console.info('error', error);
+      })
+      setTimeout(function () {
+    
+        var dataSimpleBarChart = {
+          labels: ['Feed', 'Event'],
+          series: [
+            [thirtydaysEvent,thirtydaysFeed]
+          ]
+        };
+
+        var optionsSimpleBarChart = {
+          seriesBarDistance: 10,
+          axisX: {
+            showGrid: false
+          }
+        };
+
+        var responsiveOptionsSimpleBarChart: any = [
+          ['screen and (max-width: 640px)', {
+            seriesBarDistance: 5,
+            axisX: {
+              labelInterpolationFnc: function (value) {
+                return value[0];
+              }
+            }
+          }]
+        ];
+
+        var simpleBarChart = new Chartist.Bar('#simpleBarChart', dataSimpleBarChart, optionsSimpleBarChart, responsiveOptionsSimpleBarChart);
+        //start animation for the Emails Subscription Chart
+        this.startAnimationForBarChart(simpleBarChart);
+      }, 1000)  
+
+  }
+  if(Number(postdays)==10)
+  {
+    this.ngOnInit();
+  }
+ 
+}
 modifyTable()
 {  
   if (this.staffEventTable) 
@@ -123,5 +229,109 @@ modifyTable()
    });  
  }); 
 }
+startAnimationForLineChart(chart){
+        var seq, delays, durations;
+        seq = 0;
+        delays = 80;
+        durations = 500;
+        chart.on('draw', function(data) {
 
+          if(data.type === 'line' || data.type === 'area') {
+            data.element.animate({
+              d: {
+                begin: 600,
+                dur: 700,
+                from: data.path.clone().scale(1, 0).translate(0, data.chartRect.height()).stringify(),
+                to: data.path.clone().stringify(),
+                easing: Chartist.Svg.Easing.easeOutQuint
+              }
+            });
+          } else if(data.type === 'point') {
+                seq++;
+                data.element.animate({
+                  opacity: {
+                    begin: seq * delays,
+                    dur: durations,
+                    from: 0,
+                    to: 1,
+                    easing: 'ease'
+                  }
+                });
+            }
+        });
+
+        seq = 0;
+    }
+    startAnimationForBarChart(chart){
+        var seq2, delays2, durations2;
+        seq2 = 0;
+        delays2 = 80;
+        durations2 = 500;
+        chart.on('draw', function(data) {
+          if(data.type === 'bar'){
+              seq2++;
+              data.element.animate({
+                opacity: {
+                  begin: seq2 * delays2,
+                  dur: durations2,
+                  from: 0,
+                  to: 1,
+                  easing: 'ease'
+                }
+              });
+          }
+        });
+
+        seq2 = 0;
+    }
+    storeReset(reset) {
+        console.log(reset);
+    }
+    ngOnInit(){
+      var totalPostCount ;
+      var totalEventCount ;        
+       this.getDashBoardCount();
+       this.postService.getTotalEventPostCounts().subscribe((res: any) => {
+       console.log("front end response");
+        totalPostCount=Number(res.totalFeed);
+        totalEventCount=Number(res.totalEvent);       
+      }, error => {
+        console.info('error', error);
+      })
+      
+      setTimeout(function () {
+      console.log("=====",totalPostCount);
+         console.log("====",totalEventCount);
+        var dataSimpleBarChart = {
+          labels: ['Feed', 'Event'],
+          series: [
+            [totalPostCount,totalEventCount]
+          ]
+        };
+
+        var optionsSimpleBarChart = {
+          seriesBarDistance: 10,
+          axisX: {
+            showGrid: false
+          }
+        };
+
+        var responsiveOptionsSimpleBarChart: any = [
+          ['screen and (max-width: 640px)', {
+            seriesBarDistance: 5,
+            axisX: {
+              labelInterpolationFnc: function (value) {
+                return value[0];
+              }
+            }
+          }]
+        ];
+
+        var simpleBarChart = new Chartist.Bar('#simpleBarChart', dataSimpleBarChart, optionsSimpleBarChart, responsiveOptionsSimpleBarChart);
+        //start animation for the Emails Subscription Chart
+        this.startAnimationForBarChart(simpleBarChart);
+      }, 1000)
+
+         
+    }
 }
