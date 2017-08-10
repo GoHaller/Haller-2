@@ -55,7 +55,8 @@
                                 <div class="stats">
                                     <button class="btn btn-info btn-simple">{{post.liked.length}}&nbsp;Like</button>
                                     <button class="btn btn-info btn-simple" (click)="selectPost(i)">{{post.comments.length}}&nbsp;Comment</button>
-                                    <button class="btn btn-rose btn-simple">{{post.flagged.length}}&nbsp;has flagged</button>
+                                    <button class="btn btn-rose btn-simple" *ngIf="post.flagged.length > 1 || post.flagged.length === 0 ">flagged By {{post.flagged.length}}&nbsp;Users</button>
+                                    <button class="btn btn-rose btn-simple" *ngIf="post.flagged.length === 1">flagged By {{post.flagged.length}}&nbsp;User</button>
                                     <div class="dropdown pull-right">
                                         <button type="button" class="btn btn-small btn-simple btn-info dropdown-toggle" data-toggle="dropdown">
                                         <i class="material-icons">build</i>
@@ -91,7 +92,7 @@
                         </div>
                         <div class="card-content">
                             <h5 class="card-title">{{(posts[postIndex].createdBy?posts[postIndex].createdBy.firstName:'no-name')+' '+(posts[postIndex].createdBy?posts[postIndex].createdBy.lastName:'no-name')}}
-                                <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden && !posts[postIndex].deleted">Hidden</span></p>
+                            <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden && !posts[postIndex].deleted">Hidden</span></p>
                                 <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].deleted">Deleted</span></p>
                             </h5>
                         </div>
@@ -132,7 +133,8 @@
                             <div class="card-footer action">
                                 <div class="stats">
                                     <button class="btn btn-info btn-simple" (click)="likeComment(cmnt)">{{cmnt.liked.length}}&nbsp;Like</button>
-                                    <button class="btn btn-rose btn-simple">{{cmnt.flagged.length}}&nbsp;has flagged</button>
+                                    <button class="btn btn-rose btn-simple" *ngIf="cmnt.flagged.length > 1 || cmnt.flagged.length === 0">flagged By {{cmnt.flagged.length }}  Users</button>
+                                    <button class="btn btn-rose btn-simple" *ngIf="cmnt.flagged.length === 1">flagged By {{cmnt.flagged.length }}  User</button>
                                     <div class="dropdown pull-right " style="z-index:7">
                                         <button type="button" class="btn btn-small btn-simple btn-info dropdown-toggle" data-toggle="dropdown">
                                 <i class="material-icons">build</i>

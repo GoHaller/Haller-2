@@ -6,10 +6,14 @@
             <div class="col-lg-8 col-md-6 col-sm-8">
                 <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-                        <select class="selectpicker" [(ngModel)]="residence.home" (ngModelChange)="changeSegment()" data-style="btn btn-primary btn-round"
+                        <select class="selectpicker" [(ngModel)]="residence.home" (ngModelChange)="changeSegment()" data-style="btn btn-info btn-round"
                             title="" data-size="4">
-                            <option value="Oliver" [attr.selected]="residence == 'Oliver'">Oliver</option>
+                            <option value="Oliver" [attr.selected]="residence == 'Oliver'">Oliver Hall</option>
                             <option value="Scholarship Halls" [attr.selected]="residence == 'Scholarship Halls'">Scholarship Halls</option>
+                            <option value="Oswald Hall" [attr.selected]="residence == 'Oswald Hall'">Oswald Hall</option>
+                            <option value="Self Hall" [attr.selected]="residence == 'Self Hall'">Self Hall</option>
+                            <option value="Ellsworth Halls" [attr.selected]="residence == 'Ellsworth Halls'">Ellsworth Halls</option>
+                            <option value="Downs Hall" [attr.selected]="residence == 'Downs Hall'">Downs Hall</option>
                             <option value="University" [attr.selected]="residence == 'University'">University</option>
                         </select>
                     </div>
@@ -52,8 +56,23 @@
                             </div>
                             <div class="card-footer action">
                                 <div class="stats">
-                                    <button class="btn btn-info btn-simple" (click)="likePost(post)">{{post.liked.length}}&nbsp;Like</button>
-                                    <button class="btn btn-info btn-simple" (click)="selectPost(i)">{{post.comments.length}}&nbsp;Comment</button>
+                                    <button class="btn btn-info btn-simple" (click)="likePost(post)"
+                                        *ngIf="post.liked.length === 1"
+                                    >{{post.liked.length}}&nbsp;Like</button>
+                                    <button class="btn btn-info btn-simple" (click)="likePost(post)"
+                                        *ngIf="post.liked.length > 1 || post.liked.length === 0 "
+                                    >{{post.liked.length}}&nbsp;Likes</button>
+
+
+                                    <button class="btn btn-info btn-simple" (click)="selectPost(i)" *ngIf=
+                                        "post.comments.length === 1"
+                                    >{{post.comments.length}}&nbsp;Comment</button>
+
+                                    <button class="btn btn-info btn-simple" (click)="selectPost(i)" *ngIf=
+                                        "post.comments.length > 1 || post.comments.length === 0"
+                                    >{{post.comments.length}}&nbsp;Comments</button>
+                                    <button class="btn btn-info btn-simple">#Joined: {{post.going.length}}</button>
+
                                 </div>
                             </div>
                         </div>

@@ -21,6 +21,9 @@ export class NavbarComponent implements OnInit {
     private nativeElement: Node;
     private toggleButton;
     private sidebarVisible: boolean;
+    public email:any;
+    public username:any;
+    public role:any;
 
     @ViewChild("navbar-cmp") button;
 
@@ -102,6 +105,13 @@ export class NavbarComponent implements OnInit {
     getPath() {
         // console.log(this.location);
         return this.location.prepareExternalUrl(this.location.path());
+    }
+    userDetails(){
+        var userInfo = localStorage.getItem('userInfo')
+        var userData=JSON.parse(JSON.stringify(eval("(" + userInfo + ")")));
+        this.email     = userData.email;
+        this.username  = userData.firstName + " " + userData.lastName;
+        this.role      = userData.role;
     }
     logmeOut() {
         swal({
