@@ -27,7 +27,14 @@ router.route('/admin/:postId/flagaction')
   .post(expressJwt({
     secret: config.jwtSecret,
     getToken
-  }), postCtrl.adminFlagAction)
+  }), postCtrl.adminFlagAction);
+
+router.route('/admin/:postDays/getpostcount')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), postCtrl.getTotalCountAnalytics);
+
 
 router.route('/admin/desboard/count')
   .get(expressJwt({
@@ -339,22 +346,6 @@ router.route('/admin/:userId/notification')
     getToken
 }), postCtrl.getNotifications);
 
-router.route('/admin/getPostAnalytics')
-  .get(expressJwt({
-    secret: config.jwtSecret,
-    getToken
-  }), postCtrl.getseveandaysAnalytics);
-router.route('/admin/getmonthlyAnalytics')
-  .get(expressJwt({
-    secret: config.jwtSecret,
-    getToken
-  }), postCtrl.getmonthlyAnalytics);
-
-
-router.route('/admin/getAllEventPostCount')
-  .get(expressJwt({    
-   secret: config.jwtSecret,
-   getToken}),postCtrl.getTotalEventPostCount);
 
 // /** Load user when API with userId route parameter is hit */
 // router.param('userId', load);

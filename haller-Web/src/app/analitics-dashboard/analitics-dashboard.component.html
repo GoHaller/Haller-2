@@ -72,7 +72,6 @@
         </div>
       </div>
     </div>
-
     <div class="row">
       <div class="col-lg-4 col-md-6 col-sm-6">
         <div class="card card-stats">
@@ -123,7 +122,6 @@
         </div>
       </div>
     </div>
-
     <div class="row">
       <div class="col-lg-4 col-md-6 col-sm-6">
         <div class="card card-stats">
@@ -160,28 +158,26 @@
           </div>
         </div>
       </div>
-      
-                        <select class="selectpicker col-sm-4" (change)="postAnalytics($event.target.value)" data-style="btn btn-primary btn-round"
+      <select class="selectpicker col-sm-4" (change)="postAnalytics($event.target.value)" data-style="btn btn-primary btn-round"
                             title="" data-size="4">
-
-                            <option value="7" [attr.selected]="days == '7days'">Last 7 days</option>
                             <option value="30" [attr.selected]="days == 'monthly'">Monthly</option>
-                            <option value="10" 
-                             [attr.selected]="days == 'TotalCount'">Total Count</option>
-                        </select>
-      
-      <div class="col-md-8">
-                <div class="card card-chart">
-                    <div class="card-header" data-background-color="blue">
-                        <div id="simpleBarChart" class="ct-chart"></div>
+                            <option value="7" [attr.selected]="days == '7days'">Last 7 days</option>
+                           
+     </select> 
+     <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header card-header-icon" data-background-color="rose">
+                        <i class="material-icons">insert_chart</i>
                     </div>
                     <div class="card-content">
-                        <h4 class="card-title"> Event/Feed Analytics</h4>
-                          <h5 class="card-title">X-axis : Number of Event/Feed Created</h5>
-                          <h5 class="card-title">Y-axis : Event/Feed </h5>
+                        <h4 class="card-title">Post Analysis</h4>
+                    </div>
+                    <div id="multipleBarsChart" class="ct-chart"></div>
+                    <h5 class="whitesqr">Year <p class="row" id="year"> {{year}}</p></h5>
+                    <h5 class="bluesqr"><p id="feedname"> Feed</p></h5>
+                    <h5 class="redsqr"> <p id="eventname">Event</p> </h5>
                     </div>
                 </div>
             </div>
-    </div>
-  </div>
+       </div>
 </div>

@@ -139,22 +139,15 @@ export class PostService {
         this.createAuthorizationHeader();
         return this.http.delete(this.adminApiUrl + postId + '/comments/' + commentId, { headers: this.headers }).map(this.extractData)
     }
-    getTotalEventPostCounts() {
+    
+    getPostAnalyticsData(postDays:string) {
         this.createAuthorizationHeader();
-        return this.http.get(this.adminApiUrl +  'getAllEventPostCount', { headers: this.headers }).map(this.extractData)
-    }
-    getPostAnalyticsData() {
-        this.createAuthorizationHeader();
-        return this.http.get(this.adminApiUrl +  'getPostAnalytics' , { headers: this.headers }).map(this.extractData)
-    }
-    getMonthlyAnalyticsData() {
-        this.createAuthorizationHeader();
-        return this.http.get(this.adminApiUrl +  'getmonthlyAnalytics' , { headers: this.headers }).map(this.extractData)
+        return this.http.get(this.adminApiUrl + postDays +  '/getpostcount' , { headers: this.headers }).map(this.extractData)
     }
     private extractData(res: any) {
         return (typeof res == 'object') ? res.json() : res;
     }
- getNotification(userId:string) {
+    getNotification(userId:string) {
         this.createAuthorizationHeader()
         return this.http.get(this.adminApiUrl + userId + '/notification/', { headers: this.headers }).map(this.extractData);
     }

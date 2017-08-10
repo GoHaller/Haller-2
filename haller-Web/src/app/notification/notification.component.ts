@@ -19,6 +19,7 @@ export class NotificationComponent implements OnInit {
     public title:any;
     public message:any;
     public admin: boolean = false;
+    public recordStatus:boolean = false;
     
     public posts = [];
     public postIndex: number = 0;
@@ -34,13 +35,17 @@ export class NotificationComponent implements OnInit {
     
         var userId =  localStorage.getItem('uid')
         this.postService.getNotification(userId).subscribe((res: any) => {
-            if (res) { 
-              if(res.admin){
-                this.notification = res.allNotification;
-                this.admin = true;
-              }else{
-                this.notification = res.allNotification;
-              }
+            if (res) {
+               if(res.allNotification.length== 0){
+                   this.recordStatus = true;
+               } else{
+                    if(res.admin){
+                        this.notification = res.allNotification;
+                        this.admin = true;
+                    }else{
+                        this.notification = res.allNotification;
+                    }
+               }
             }
         }, error => {
             console.log('getFeedByResidence error', error);
@@ -132,6 +137,7 @@ export class NotificationComponent implements OnInit {
                 console.log('createNotification res', res);
                 this.file = null;
                 this.posts[this.postIndex] = res;
+                window.location.reload();
             }, error => {
                 console.log('createNotification error', error);
             })

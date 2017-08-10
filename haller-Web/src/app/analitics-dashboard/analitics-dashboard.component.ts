@@ -28,6 +28,7 @@ export class AnaliticsDashboardComponent implements OnInit {
   public sevanDaysEvent='';
   public thirthydDaysEvent='';
   public thirthyDaysfeed='';
+  public year:string = '';
   
   
   public id;
@@ -36,8 +37,6 @@ export class AnaliticsDashboardComponent implements OnInit {
   constructor(private postService: PostService, private modalService: ModalService,private zone:NgZone,private cdrf:ChangeDetectorRef) {
    }
 
- 
-  
 
 showEventUserName(days){
   this.postService.getDashBoardEventJoinners(days).subscribe((res: any) => {
@@ -109,39 +108,39 @@ showStaffUserName(days){
       })
   }
 
-postAnalytics(postdays:any)
-{ 
- 
-  console.log("===========",typeof(postdays));
-  if(Number(postdays)==7)
-  {
-    var sevendaysEvent;
-    var sevendaysFeed;
-  this.postService.getPostAnalyticsData().subscribe((res: any) => {
-       console.log("7 front end response",res.eventcount,res.feedcount);
-       sevendaysEvent=res.eventcount;
-       sevendaysFeed=res.feedcount;
-       console.log("type of sevan",typeof(this.sevanDaysEvent));
-      }, error => {
-        console.info('error', error);
-      })
-      setTimeout(function () {
-     
-        var dataSimpleBarChart = {
-          labels: ['Feed', 'Event'],
+postAnalytics(postdays:any = 7){ 
+      this.postService.getPostAnalyticsData(postdays).subscribe((res: any) => {
+      var labels = [];
+      var feedcount = [];
+      var eventcount = [];
+
+
+      for (var key in res) {
+          var day = key.split("-");
+          var daymon = day[0]+"/"+day[1]
+          labels.push(daymon)
+          feedcount.push(res[key].feedcount)
+          eventcount.push(res[key].eventcount)
+      }
+      this.year = day[2];
+
+         var dataMultipleBarsChart = {
+          labels: labels,
           series: [
-            [sevendaysEvent,sevendaysFeed]
+            feedcount,
+            eventcount
           ]
         };
 
-        var optionsSimpleBarChart = {
-          seriesBarDistance: 5,
-          axisX: {
-            showGrid: false
-          }
+       var optionsMultipleBarsChart = {
+            seriesBarDistance: 10,
+            axisX: {
+                showGrid: false,
+            },
+            height: '300px'
         };
 
-        var responsiveOptionsSimpleBarChart: any = [
+        var responsiveOptionsMultipleBarsChart: any = [
           ['screen and (max-width: 640px)', {
             seriesBarDistance: 5,
             axisX: {
@@ -152,62 +151,14 @@ postAnalytics(postdays:any)
           }]
         ];
 
-        var simpleBarChart = new Chartist.Bar('#simpleBarChart', dataSimpleBarChart, optionsSimpleBarChart, responsiveOptionsSimpleBarChart);
+        var multipleBarsChart = new Chartist.Bar('#multipleBarsChart', dataMultipleBarsChart, optionsMultipleBarsChart, responsiveOptionsMultipleBarsChart);
+
         //start animation for the Emails Subscription Chart
-        this.startAnimationForBarChart(simpleBarChart);
-      }, 1000)
-  }
-  if(Number(postdays)==30)
-  {
-    
-    var thirtydaysEvent;
-    var thirtydaysFeed;
-    this.postService.getMonthlyAnalyticsData().subscribe((res: any) => {
-    console.log("30  front end response",res.eventcount,res.feedcount);
-    thirtydaysEvent=res.eventcount;
-    thirtydaysFeed=res.feedcount;
-         
+        this.startAnimationForBarChart(multipleBarsChart);
+      
       }, error => {
         console.info('error', error);
       })
-      setTimeout(function () {
-    
-        var dataSimpleBarChart = {
-          labels: ['Feed', 'Event'],
-          series: [
-            [thirtydaysEvent,thirtydaysFeed]
-          ]
-        };
-
-        var optionsSimpleBarChart = {
-          seriesBarDistance: 10,
-          axisX: {
-            showGrid: false
-          }
-        };
-
-        var responsiveOptionsSimpleBarChart: any = [
-          ['screen and (max-width: 640px)', {
-            seriesBarDistance: 5,
-            axisX: {
-              labelInterpolationFnc: function (value) {
-                return value[0];
-              }
-            }
-          }]
-        ];
-
-        var simpleBarChart = new Chartist.Bar('#simpleBarChart', dataSimpleBarChart, optionsSimpleBarChart, responsiveOptionsSimpleBarChart);
-        //start animation for the Emails Subscription Chart
-        this.startAnimationForBarChart(simpleBarChart);
-      }, 1000)  
-
-  }
-  if(Number(postdays)==10)
-  {
-    this.ngOnInit();
-  }
- 
 }
 modifyTable()
 {  
@@ -235,7 +186,6 @@ startAnimationForLineChart(chart){
         delays = 80;
         durations = 500;
         chart.on('draw', function(data) {
-
           if(data.type === 'line' || data.type === 'area') {
             data.element.animate({
               d: {
@@ -288,50 +238,29 @@ startAnimationForLineChart(chart){
         console.log(reset);
     }
     ngOnInit(){
-      var totalPostCount ;
-      var totalEventCount ;        
+           
        this.getDashBoardCount();
-       this.postService.getTotalEventPostCounts().subscribe((res: any) => {
-       console.log("front end response");
-        totalPostCount=Number(res.totalFeed);
-        totalEventCount=Number(res.totalEvent);       
-      }, error => {
-        console.info('error', error);
-      })
-      
-      setTimeout(function () {
-      console.log("=====",totalPostCount);
-         console.log("====",totalEventCount);
-        var dataSimpleBarChart = {
-          labels: ['Feed', 'Event'],
+       this.postAnalytics();
+        var dataDailySalesChart = {
+          labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
           series: [
-            [totalPostCount,totalEventCount]
+              [5, 6, 7, 8, 9, 10, 11]
           ]
-        };
+      };
+      
 
-        var optionsSimpleBarChart = {
-          seriesBarDistance: 10,
-          axisX: {
-            showGrid: false
-          }
-        };
+     var optionsDailySalesChart = {
+          lineSmooth: Chartist.Interpolation.cardinal({
+              tension: 0
+          }),
+          low: 0,
+          high: 50, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
+          chartPadding: { top: 0, right: 0, bottom: 0, left: 0},
+      }
 
-        var responsiveOptionsSimpleBarChart: any = [
-          ['screen and (max-width: 640px)', {
-            seriesBarDistance: 5,
-            axisX: {
-              labelInterpolationFnc: function (value) {
-                return value[0];
-              }
-            }
-          }]
-        ];
+      var dailySalesChart = new Chartist.Line('#dailySalesChart', dataDailySalesChart, optionsDailySalesChart);
 
-        var simpleBarChart = new Chartist.Bar('#simpleBarChart', dataSimpleBarChart, optionsSimpleBarChart, responsiveOptionsSimpleBarChart);
-        //start animation for the Emails Subscription Chart
-        this.startAnimationForBarChart(simpleBarChart);
-      }, 1000)
-
-         
+      this.startAnimationForLineChart(dailySalesChart);
+      /* ----------==========     Completed Tasks Chart initialization    ==========---------- */
     }
 }

@@ -5,3 +5,7 @@
   overflow:hidden !important;    
   text-overflow: ellipsis;
 }
+#noticenter
+{
+	margin-left: 40%;
+}

@@ -1251,6 +1251,57 @@ function getJoinDetails(req, res, next) {
     });
 }
 
+
+function getTotalCountAnalytics(req, res, next){
+  var days = parseInt(req.params.postDays);
+  var postCount = {};
+  for(var i=1;i<=days;i++){
+    var d = new Date();
+    d.setDate(d.getDate() - i);
+    var date = d
+    date = date.getDate() + '-' + (date.getMonth()+1) + '-' + date.getFullYear()
+    postCount[date] = 0;
+  }
+  var currentDate = new Date();
+  currentDate.setDate(currentDate.getDate() - days);
+  Post.aggregate()
+    .match({ createdAt: { $gt: currentDate } })
+    .exec().then(sevanDays => {
+          var dateCount = []
+          var records = []
+          for(var i=0; i<sevanDays.length;i++){
+              var data = {};              
+              var date = sevanDays[i].createdAt;
+              date = date.getDate() + '-' + (date.getMonth()+1) + '-' + date.getFullYear()
+              dateCount.push(date);
+              records.push({"date":date,"isEvent":sevanDays[i].isEvent})
+            }
+            dateCount = unique(dateCount)          
+            for(var i=0;i<dateCount.length;i++){
+              var eventCount = 0;
+              var feedCount  = 0;
+              for(var j=0;j<records.length;j++){
+                if(records[j].date == dateCount[i]){  
+                    if(records[j].isEvent){
+                      eventCount = eventCount + 1;
+                    }else{
+                      feedCount = feedCount + 1;
+                    }
+                }
+              }
+              for(var key in postCount){
+                  var keyName={}
+                  if(key == dateCount[i]){
+                    keyName["eventcount"] = eventCount;
+                    keyName["feedcount"] = feedCount;
+                    postCount[key] = keyName;
+                  }
+              }
+            }
+        res.json(postCount);
+    });
+}
+
 function getStaffJoinDetails(req, res, next) {
   var days = parseInt(req.params.days);
   var d = new Date();
@@ -1363,91 +1414,6 @@ function getNotifications(req, res, next){
     });
 }
 
-function getseveandaysAnalytics(req, res, next)
-{  
-  
-  var d = new Date();
-  d.setDate(d.getDate() - 7);
-  Post.aggregate()
-    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
-    .exec().then(sevanDays => {
-        var eventCount = 0;
-        var feedCount = 0; 
-        for(var i =0; i<sevanDays.length;i++){
-          if(sevanDays[i].isEvent){
-            eventCount += 1;
-          }
-          if(!sevanDays[i].isEvent){
-            feedCount +=1
-          }
-        }
-        res.json({"eventcount" :eventCount,"feedcount": feedCount});
-
-    });
-}
-
-function getmonthlyAnalytics(req, res, next)
-{  
-  console.log("======30 days api=============");
-  var d = new Date();
-  d.setDate(d.getDate() - 30);
-  Post.aggregate()
-    .match({ createdAt: { $gt: d } }, { _id: 1, going: 1 })
-    .exec().then(sevanDays => {
-        var eventCount = 0;
-        var feedCount = 0; 
-        for(var i =0; i<sevanDays.length;i++){
-          if(sevanDays[i].isEvent){
-            eventCount += 1;
-          }
-          if(!sevanDays[i].isEvent){
-            feedCount +=1
-          }
-        }
-        res.json({"eventcount" :eventCount,"feedcount": feedCount});
-
-    });  
-}
-
-function getTotalEventPostCount(req, res, next)
-{  
-  var countobj={};
-  Post.getAll().then(post => {
-    var eventCount = 0;
-    var feedCount = 0;
-    for(var i=0; i<post.length;i++){
-        if(post[i].isEvent){
-          eventCount += 1;
-        }
-        if(!post[i].isEvent){
-          feedCount += 1;
-        }
-    }
-    countobj.totalEvent = eventCount;
-    countobj.totalFeed = feedCount; 
-    res.json(countobj);
-  });  
-}
-
-function getTotalEventPostCount(req, res, next)
-{  
-  var countobj={};
-  Post.getAll().then(post => {
-    var eventCount = 0;
-    var feedCount = 0;
-    for(var i=0; i<post.length;i++){
-        if(post[i].isEvent){
-          eventCount += 1;
-        }
-        if(!post[i].isEvent){
-          feedCount += 1;
-        }
-    }
-    countobj.totalEvent = eventCount;
-    countobj.totalFeed = feedCount; 
-    res.json(countobj);
-  });
-}
 
 
 
@@ -1493,8 +1459,5 @@ export default {
   deletePost,
   deleteComment,
   getNotifications,
-  getTotalEventPostCount,
-  getseveandaysAnalytics,
-  getmonthlyAnalytics,
-  getTotalEventPostCount
+  getTotalCountAnalytics,
 };

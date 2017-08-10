@@ -2,3 +2,31 @@
   
     height: auto;
 }
+.bluesqr{
+ width:15px;
+ height: 23px;
+  margin-left: 4%;
+ background-color: skyblue;
+}
+.redsqr{
+width:15px;
+ height: 23px;
+  margin-left: 4%;
+ background-color: red;
+}
+.whitesqr{
+ width:15px;
+ height: 23px;
+ margin-left: 4%;
+ background-color: white;
+}
+#feedname{
+ margin-left: 201%;
+}
+#eventname{
+margin-left: 201%;
+}
+#year{
+	margin-left: 287%;
+    margin-top: -26px;
+}
