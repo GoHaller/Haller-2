@@ -410,6 +410,19 @@ PostSchema.statics = {
       .exec();
   },
 
+  listByResidenceForStaff(userId,{ residence, skip = 0, limit = 50, event = false, sortBy = 'createdAt', asc = false } = {}) {
+    var sort = {};
+    sort[sortBy] = asc ? 1 : -1;
+    return this.find({ 'createdBy': userId, authorResidence: residence, isEvent: event })
+      .populate(populateMap())
+      .sort(sort)
+      .skip(parseInt(skip))
+      .limit(parseInt(limit))
+      .exec();
+  },
+
+
+
   findByCustomQuery({ q = {}, skip = 0, limit = 50 } = {}) {
     console.info('q', q);
     return this.find(q)
