@@ -1,33 +1,27 @@
-<!--
-  Generated template for the ChatBot page.
-
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
 <ion-header>
   <ion-navbar color="primary">
     <ion-title>ChatBot</ion-title>
   </ion-navbar>
 </ion-header>
 
-
-<ion-content>
-</ion-content>
+<ion-content></ion-content>
 
 <ion-footer>
   <ion-grid *ngIf="conversation.messages && conversation.messages.length >0 ">
-    <ion-row *ngFor="let msg of conversation.messages" class="conversation" [ngClass]="(msg.createdBy == userInfo._id || msg.createdBy._id == userInfo._id)?'me':'them'">
+    <ion-row *ngFor="let msg of conversation.messages; let last = last" class="conversation" [ngClass]="(msg.createdBy == userInfo._id || msg.createdBy._id == userInfo._id)?'me':'them'">
       <ion-col col-12>
         <div class="msg-container" *ngIf="msg.body">
           <div>{{msg.body}}</div>
         </div>
         <div *ngIf="msg.botBody" class="msg-container">
-          <div *ngFor="let bmsg of parseResponse(msg.botBody)">
+          <div *ngFor="let bmsg of msg.botBody1">
             <div *ngIf="bmsg.body">{{bmsg.body}}</div>
             <div *ngIf="bmsg.image" class="img-container"><img [src]="bmsg.image" /></div>
             <div *ngIf="bmsg.replies">
               <button ion-button round (click)="sendQuestion(r)" small *ngFor="let r of bmsg.replies">{{r}}</button>
             </div>
+            <div *ngIf="bmsg.link" style="margin-top:5px"><a (click)="openExternalLink(bmsg.link)">{{bmsg.linkText || 'Click here'}}</a></div>
+            <div *ngIf="bmsg.location || bmsg.address" style="margin-top:5px"><a (click)="openMap(bmsg)">{{bmsg.linkText || 'Show on map'}}</a></div>
           </div>
         </div>
       </ion-col>

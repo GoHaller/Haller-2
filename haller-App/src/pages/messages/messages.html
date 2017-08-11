@@ -26,6 +26,7 @@
   </ion-scroll>
   <ion-list-header class="bot-header">Conversations</ion-list-header>
 </ion-content> class="msg-ion-content"-->
+
 <ion-content>
   <ion-refresher (ionRefresh)="doRefresh($event)">
     <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles" refreshingText="Refreshing...">
@@ -33,13 +34,13 @@
   </ion-refresher>
 
   <ion-list class="msg-list">
-    <!-- <ion-list-header class="bot-header">Bots</ion-list-header>
+    <ion-list-header class="bot-header">Bots</ion-list-header>
     <ion-item class="read-convo" (click)="gotoBotCherry()">
       <ion-avatar item-left>
         <img src="assets/img/user-group.png">
       </ion-avatar>
       <h2>Cherry</h2>
-    </ion-item> -->
+    </ion-item>
     <ion-list-header>Conversations</ion-list-header>
     <ion-item *ngFor="let msg of messageList | convosearch:['firstName','lastName',searchText]" [ngClass]="checkMsgIfRead(msg.messages[msg.messages.length - 1]) ? '':'read-convo'">
       <ion-icon *ngIf="edit" (click)="presentEditActionSheet(msg)" item-left color="danger" name="ios-remove-circle-outline"></ion-icon>

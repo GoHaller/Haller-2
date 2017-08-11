@@ -644,7 +644,7 @@ function allUsersByFilter(req, res, next) {
           { residence: { $regex: '^' + search, $options: 'i' } },
           { role: { $regex: '^' + search, $options: 'i' } }]
       }, { _id: { $ne: req.params.userId } }]
-    }).select({ "currentProfile": 1,"firstName": 1,"_id":1, "isRA":1,"lastName": 1,"graduationYear":1, "residence": 1, "role": 1, "isBlocked": 1 })
+    }).select({ "currentProfile": 1, "firstName": 1, "_id": 1, "isRA": 1, "lastName": 1, "graduationYear": 1, "residence": 1, "role": 1, "isBlocked": 1 })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -653,52 +653,52 @@ function allUsersByFilter(req, res, next) {
         if (Users) {
           Post.getAll()
             .then(post => {
-             
-            //  var userData={};
+
+              //  var userData={};
               var userInfo = [];
-              for(var i=0;i<Users.length;i++){
-                var userData={};
+              for (var i = 0; i < Users.length; i++) {
+                var userData = {};
                 //post count
-                  var postCount    = 0;
-                  var eventCount   = 0;
-                  var commentCount = 0;
-                  var commentAvg   = 0;
-                  var coverCount   = 0;
-                  for(var j=0; j<post.length;j++){
-                    var uId  = (Users[i]._id).toString();
-                    var pUId = (post[j].createdBy._id).toString();
-                    if(uId == pUId){
-                      postCount += 1;
-                      //event count
-                      if( post[j].isEvent){
-                        eventCount += 1; 
-                      }
-                      //comment avg
-                      if(post[j].comments.length > 0){
-                        commentCount += post[j].comments.length; 
-                      }
-                      //image count
-                      if((post[j].cover).length>0 && post[j].cover != "undefined" ){
-                        coverCount += post[j].cover.length;
-                      }
+                var postCount = 0;
+                var eventCount = 0;
+                var commentCount = 0;
+                var commentAvg = 0;
+                var coverCount = 0;
+                for (var j = 0; j < post.length; j++) {
+                  var uId = (Users[i]._id).toString();
+                  var pUId = (post[j].createdBy._id).toString();
+                  if (uId == pUId) {
+                    postCount += 1;
+                    //event count
+                    if (post[j].isEvent) {
+                      eventCount += 1;
+                    }
+                    //comment avg
+                    if (post[j].comments.length > 0) {
+                      commentCount += post[j].comments.length;
+                    }
+                    //image count
+                    if ((post[j].cover).length > 0 && post[j].cover != "undefined") {
+                      coverCount += post[j].cover.length;
                     }
                   }
-                  commentAvg = Math.round(commentCount / postCount);
-                  userData._id = Users[i]._id;
-                  userData.currentProfile = Users[i].currentProfile;
-                  userData.firstName = Users[i].firstName;
-                  userData.isRA = Users[i].isRA;
-                  userData.lastName = Users[i].lastName;
-                  userData.graduationYear = Users[i].graduationYear;
-                  userData.residence = Users[i].residence;
-                  userData.role = Users[i].role;
-                  userData.isBlocked = Users[i].isBlocked;
-                  userData.postcount  = postCount;
-                  userData.eventcount = eventCount;
-                  userData.commentavg = commentAvg;
-                  userData.covercount  = coverCount;
-                  //push data
-                  userInfo[i]=userData
+                }
+                commentAvg = Math.round(commentCount / postCount);
+                userData._id = Users[i]._id;
+                userData.currentProfile = Users[i].currentProfile;
+                userData.firstName = Users[i].firstName;
+                userData.isRA = Users[i].isRA;
+                userData.lastName = Users[i].lastName;
+                userData.graduationYear = Users[i].graduationYear;
+                userData.residence = Users[i].residence;
+                userData.role = Users[i].role;
+                userData.isBlocked = Users[i].isBlocked;
+                userData.postcount = postCount;
+                userData.eventcount = eventCount;
+                userData.commentavg = commentAvg;
+                userData.covercount = coverCount;
+                //push data
+                userInfo[i] = userData
               }
               return res.json({
                 "draw": 1,
@@ -732,7 +732,8 @@ function toggleUserStatus(req, res, next) {
 
 function getBotUser(req, res, next) {
   if (req.params.email) {
-    var email = 'dev.bot@' + req.params.email.split('@')[1];
+    var domain = req.params.email.split('@')[1];
+    var email = 'dev.bot@ku.edu';// + domain;
     User.findOne({ email: email, role: 'bot' })
       .then(user => res.json(user))
       .error(e => next(e))

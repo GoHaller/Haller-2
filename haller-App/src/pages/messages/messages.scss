@@ -35,6 +35,7 @@ page-messages {
         .msg-list{
             .list-header{
                 min-height: 2rem;
+                margin-bottom: 0px;
                 text-transform: capitalize;
                 background-color: color($colors,colorwhite);
                 .label{

@@ -280,7 +280,8 @@ function update(req, res, next) { //eslint-disable-line
 */
 function createBotConversation(req, res, next) { //eslint-disable-line
   let message = req.body.messages[0];
-  devBot.sendText(req.body.accessToken, message['body'], (error, response) => {
+  let id = mongoose.Types.ObjectId();
+  devBot.sendText(req.body.accessToken, id.toString(), message['body'], (error, response) => {
     console.log('devBot.sendText error', error)
     let messagesObj = {
       createdBy: message.recipient,
@@ -296,7 +297,7 @@ function createBotConversation(req, res, next) { //eslint-disable-line
     req.body.messages.push(messagesObj);
 
     const convo = new Conversation(_.extend(req.body, {
-      _id: mongoose.Types.ObjectId(), //eslint-disable-line
+      _id: id, //eslint-disable-line
       createdAt: new Date()
     }));
     convo.save().then((savedConvo) => {
@@ -345,7 +346,7 @@ function askToBot(req, res, next) {
         savedConvo.messages.push(req.body.message);
         savedConvo.updatedAt = new Date();
       }
-      devBot.sendText(req.body.accessToken, req.body.message['body'], (error, response) => {
+      devBot.sendText(req.body.accessToken, savedConvo._id, req.body.message['body'], (error, response) => {
         let messagesObj = {
           createdBy: req.body.message.recipient,
           createdAt: new Date(),

@@ -13,9 +13,9 @@ import { Storage } from '@ionic/storage';
 export class HttpClient {
   private local: Storage;
   public activeToken: String;
-  // private ApiBaseUrl = 'http://192.168.0.103:4040/api';
-  // private ApiBaseUrl = 'https://haller-api-v2.herokuapp.com/api';
-  private ApiBaseUrl = 'https://haller-api-v2-main.herokuapp.com/api';
+  // private ApiBaseUrl = 'http://10.0.0.20:4040/api';
+  private ApiBaseUrl = 'https://haller-api-v2.herokuapp.com/api';
+  // private ApiBaseUrl = 'https://haller-api-v2-main.herokuapp.com/api';
   //private ApiBaseUrl = 'https://haller-api-app-stage.herokuapp.com/api';
   //private ApiBaseUrl = 'https://haller-app-api.herokuapp.com/api';
   public emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

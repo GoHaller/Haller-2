@@ -5,7 +5,6 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { Storage } from '@ionic/storage';
 import { HttpClient } from '../../shared/providers/http-client';
 
-@IonicPage()
 @Component({
   selector: 'page-tabs',
   templateUrl: 'tabs.html',
@@ -22,8 +21,8 @@ export class TabsPage {
   tab5Root: any = 'Peers';
   mySelectedIndex: number = 0;
   firstNotification: any;
-  private msgCount: String = '';
-  private notiCount: String = '';
+  public msgCount: String = '';
+  public notiCount: String = '';
   public userInfo: Object = {};
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private statusBar: StatusBar,

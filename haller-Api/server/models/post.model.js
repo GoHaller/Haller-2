@@ -257,7 +257,7 @@ PostSchema.statics = {
    * Get all Posts
    * @returns {Promise<Post, APIError>}
    */
-   getAll() {
+  getAll() {
     return this.find()
       .populate(populateMap())
       .exec()
@@ -275,8 +275,8 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of posts to be returned.
    * @returns {Promise<User[]>}
    */
-  list({ skip = 0, limit = 50, deteled = false } = {}) {
-    return this.find({ deteled: deteled })
+  list({ skip = 0, limit = 50, deleted = false } = {}) {
+    return this.find({ deleted: deleted })
       .populate(populateMap())
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -293,8 +293,8 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of posts to be returned.
    * @returns {Promise<User[]>}
    */
-  listByFeed({ feed = 'all', residenceHall, skip = 0, limit = 50, isEvent = null, blockedMe = [], deteled = false } = {}) {
-    const q = { $or: [{ deteled: { $exists: false } }, { deteled: deteled }] };
+  listByFeed({ feed = 'all', residenceHall, skip = 0, limit = 50, isEvent = null, blockedMe = [], deleted = false } = {}) {
+    const q = { $or: [{ deleted: { $exists: false } }, { deleted: deleted }] };
     if (feed === 'discovery') { q.discoveryFeed = true; }
     else if (feed === 'residents' && residenceHall) {
       q.residentsFeed = true;
@@ -320,8 +320,8 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<User[]>}
    */
-  listByResidence({ residence, skip = 0, limit = 50, blockedMe = [], deteled = false } = {}) {
-    return this.find({ authorResidence: residence, createdBy: { $nin: blockedMe }, $or: [{ deteled: { $exists: false } }, { deteled: deteled }, { isHidden: false }, { 'flagged.3': { $exists: false } }] })
+  listByResidence({ residence, skip = 0, limit = 50, blockedMe = [], deleted = false } = {}) {
+    return this.find({ authorResidence: residence, createdBy: { $nin: blockedMe }, $or: [{ deleted: { $exists: false } }, { deleted: deleted }, { isHidden: false }, { 'flagged.3': { $exists: false } }] })
       .populate(populateMap())
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -335,8 +335,8 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<User[]>}
    */
-  listByUser({ userId, skip = 0, limit = 50, deteled = false } = {}) {
-    return this.find({ createdBy: userId, $or: [{ deteled: { $exists: false } }, { deteled: deteled }] })
+  listByUser({ userId, skip = 0, limit = 50, deleted = false } = {}) {
+    return this.find({ createdBy: userId, $or: [{ deleted: { $exists: false } }, { deleted: deleted }] })
       .populate(populateMap())
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -365,8 +365,8 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<User[]>}
    */
-  listUserEvents({ userId, skip = 0, limit = 50, deteled = false } = {}) {
-    return this.find({ $and: [{ $or: [{ createdBy: userId }, { 'going.actedBy': userId }] }, { $or: [{ deteled: { $exists: false } }, { deteled: deteled }] }] })
+  listUserEvents({ userId, skip = 0, limit = 50, deleted = false } = {}) {
+    return this.find({ $and: [{ $or: [{ createdBy: userId }, { 'going.actedBy': userId }] }, { $or: [{ deleted: { $exists: false } }, { deleted: deleted }] }] })
       .populate(populateMap())
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -388,15 +388,15 @@ PostSchema.statics = {
   },
 
   getUserCreatedPosts(userId) {
-    return this.find({ 'createdBy': userId, $or: [{ deteled: { $exists: false } }, { deteled: false }] }).populate(populateMap()).sort({ createdAt: -1 }).exec();
+    return this.find({ 'createdBy': userId, $or: [{ deleted: { $exists: false } }, { deleted: false }] }).populate(populateMap()).sort({ createdAt: -1 }).exec();
   },
 
   getUserLikedPosts(userId) {
-    return this.find({ 'liked.actedBy': userId, $or: [{ deteled: { $exists: false } }, { deteled: false }] }).populate(populateMap()).sort({ 'liked.createdAt': -1 }).exec();
+    return this.find({ 'liked.actedBy': userId, $or: [{ deleted: { $exists: false } }, { deleted: false }] }).populate(populateMap()).sort({ 'liked.createdAt': -1 }).exec();
   },
 
   getUserCommentedPosts(userId) {
-    return this.find({ 'comments.createdBy': userId, $or: [{ deteled: { $exists: false } }, { deteled: false }] }).populate(populateMap()).sort({ 'comments.createdAt': -1 }).exec();
+    return this.find({ 'comments.createdBy': userId, $or: [{ deleted: { $exists: false } }, { deleted: false }] }).populate(populateMap()).sort({ 'comments.createdAt': -1 }).exec();
   },
 
   listByResidenceForAdmin({ residence, skip = 0, limit = 50, event = false, sortBy = 'createdAt', asc = false } = {}) {
