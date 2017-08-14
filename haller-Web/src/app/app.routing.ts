@@ -17,8 +17,8 @@ export const AppRoutes: Routes = [
                 path: '',
                 loadChildren: './dashboard/dashboard.module#DashboardModule'
             }, {
-                path: 'analitics-dashboard',
-                loadChildren: './analitics-dashboard/analitics-dashboard.module#AnaliticsDashboardModule'
+                path: 'analytics-dashboard',
+                loadChildren: './analytics-dashboard/analitics-dashboard.module#AnaliticsDashboardModule'
             }, {
                 path: 'feed',
                 loadChildren: './feed/feed.module#FeedModule'

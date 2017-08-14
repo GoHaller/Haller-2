@@ -332,21 +332,6 @@ router.route('/users/:userId')
     }
   }), load, validate(paramValidation.listByUser), postCtrl.listByUser);
 
-/** POST /api/university/notification - Create new post */
-
-router.route('/university/notification')
-  .post(expressJwt({
-    secret: config.jwtSecret,
-    getToken
-  }), postCtrl.createUniversityNotification);
-
-router.route('/admin/:userId/notification')
-  .get(expressJwt({
-    secret: config.jwtSecret,
-    getToken
-}), postCtrl.getNotifications);
-
-
 // /** Load user when API with userId route parameter is hit */
 // router.param('userId', load);
 

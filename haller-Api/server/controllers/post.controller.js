@@ -93,27 +93,6 @@ function create(req, res, next) {
   }
 }
 
-function createUniversityNotification(req, res, next) {
-  var notiObje = { _id: mongoose.Types.ObjectId(), type: 20 };
-  notiObje.body = { title: req.body.title || 'Haller University says',
-                    message: req.body.message || 'Hello friends, this is lorem ippsem.',
-                  };
-
-  notiObje.createdBy = req.body.createdBy;  
-  var notification = new Notification(notiObje);
-  notification.save().then(savedNoti => {
-    Notification.get(savedNoti._id)
-      .then(noti => {
-        sendUniversityNotification(noti);
-        res.json(noti);
-        // console.info('university savedNoti', savedNoti);
-      }).catch(e => {
-        console.info('university savedNoti error', e);
-        next(e);
-      });
-  });
-}
-
 /**
  * Update existing post
  * @property {string} title - The title of the event/discover post
@@ -1374,42 +1353,6 @@ function deleteComment(req, res, next) {
         });
     });
 }
-function getNotifications(req, res, next){
-  User.get(req.params.userId)
-    .then(user => {
-        var allNotification = [];
-
-        if(user.role != "admin" && user.role != "student"){
-          Notification.getUsersNotification(req.params.userId)
-          .then(notification =>{
-            for(var i = 0; i < notification.length ; i++){
-              if(notification[i].body.title && notification[i].body.title  ) {
-                allNotification.push(notification[i]);
-              }
-            }
-            return res.json({ allNotification});
-          });
-
-        }else if(user.role == "admin"){
-          Notification.getAllUsersNotification()
-          .then(notification =>{
-            for(var i = 0; i < notification.length ; i++){
-              if(notification[i].body.title && notification[i].body.title && notification[i].createdBy ){
-                allNotification.push(notification[i]);
-              }
-            }
-            var admin = {"admin":"admin"}
-            return res.json({ allNotification,admin});
-          });
-        }
-    })
-    .error(e => next(e))
-    .catch((e) => {
-      next(e);
-    });
-}
-
-
 
 
 export default {
@@ -1443,7 +1386,6 @@ export default {
   listLibraryItems,
   removeStandAloneLibraryItem,
   listUserFavorites,
-  createUniversityNotification,
   //adminAPIS
   adminListByResidence,
   adminGetFlagedPost,
@@ -1453,6 +1395,5 @@ export default {
   getStaffJoinDetails,
   deletePost,
   deleteComment,
-  getNotifications,
   getTotalCountAnalytics,
 };

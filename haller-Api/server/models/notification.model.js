@@ -19,7 +19,8 @@ const NotificationSchema = new mongoose.Schema({
   },
   body: {
     title: { type: String, default: '' },
-    message: { type: String, default: '' }
+    message: { type: String, default: '' },
+    image: { type: mongoose.Schema.Types.Mixed }
   },
   objectId: {
     type: String,

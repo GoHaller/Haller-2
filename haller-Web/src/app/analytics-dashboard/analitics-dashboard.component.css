@@ -30,3 +30,16 @@ margin-left: 201%;
 	margin-left: 287%;
     margin-top: -26px;
 }
+.dropdown {
+    
+    background-color: #ae4caf;
+    color: white;
+    margin-left: 15px;
+    padding: 9px;
+    border: none;
+    cursor: pointer;
+}
+.values{
+	padding: 40px;
+	
+}

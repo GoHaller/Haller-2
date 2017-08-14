@@ -5,6 +5,7 @@ import User from '../models/user.model';
 import Notification from '../models/notification.model';
 import Conversation from '../models/conversation.model';
 import APIError from '../helpers/APIError';
+import Library from '../models/library.model';
 
 /**
  * get notification by id
@@ -102,6 +103,100 @@ function create(req, res, next) { //eslint-disable-line
     });
   });
 }
+
+function createUniversityNotification(req, res, next) {
+  var notiObje = { _id: mongoose.Types.ObjectId(), type: 20 };
+  if(!req.body.title && !req.body.message){res.json({"message":" no data found "});}
+  notiObje.body = { title: req.body.title || 'Haller University says',
+                    message: req.body.message || 'Hello friends, this is lorem ippsem.',
+                  };
+  console.log(req.body.file)
+  if(req.body.file){
+   const lib = new Library(_.extend(req.body.file, { _id: mongoose.Types.ObjectId() })); 
+    lib.save()
+    .then((libItem) => {
+        notiObje.body.image = libItem._id
+        notiObje.createdBy = req.body.createdBy;
+        var notification = new Notification(notiObje);
+        notification.save().then(savedNoti => {
+          Notification.get(savedNoti._id)
+            .then(noti => {
+                res.json(noti);
+            }).catch(e => {
+              console.info('university savedNoti error', e);
+              next(e);
+            });
+        });
+    })
+    .catch((e) => {
+      console.log(e); //eslint-disable-line
+      next(e);
+    });
+  }else{
+      notiObje.createdBy = req.body.createdBy;
+        var notification = new Notification(notiObje);
+        notification.save().then(savedNoti => {
+          Notification.get(savedNoti._id)
+            .then(noti => {
+              res.json(noti);
+            }).catch(e => {
+              console.info('university savedNoti error', e);
+              next(e);
+            });
+        });
+  }
+}
+
+function getNotifications(req, res, next){
+  if(!req.params.userId){res.json({"message":" no data found "});}
+  User.get(req.params.userId)
+    .then(user => {
+        var allNotification = [];
+
+        if(user.role != "admin" && user.role != "student"){
+          Notification.getUsersNotification(req.params.userId)
+          .then(notification =>{
+            for(var i = 0; i < notification.length ; i++){
+              // if(notification[i].body.image){
+              //   Library.get(notification[i].body.image).then(notImage=>{
+              //     notification[i].body.image = notImage
+              //   });
+
+              // }
+              if(notification[i].body.title && notification[i].body.message  ) {
+                allNotification.push(notification[i]);
+              }
+            }
+            return res.json({ allNotification});
+          });
+        }else if(user.role == "admin"){
+          Notification.getAllUsersNotification()
+          .then(notification =>{
+            for(var i = 0; i < notification.length ; i++){
+              var image = [];
+              if(notification[i].body.image){
+                
+                Library.get(notification[i].body.image)
+                .then(notiImage=>{
+                  image.push(notiImage)
+                });
+              }
+              if(notification[i].body.title && notification[i].body.title && notification[i].createdBy ){
+                allNotification.push(notification[i]);
+                notification[i].body.image = "hiii";
+              }
+            }
+            var admin = {"admin":"admin"}
+            return res.json({ allNotification,admin});
+          });
+        }
+    })
+    .error(e => next(e))
+    .catch((e) => {
+      next(e);
+    });
+}
+
 
 /**
  * Remove Notification.
@@ -256,4 +351,4 @@ function getNamesFromArray(nameList) {
   return names.join(', ') + (allNames.length > 3 ? (allNames.length - 3) : '');
 }
 
-export default { get, list, create, update, remove, getNotification, readNotification, getUnreadNotificationCount };
+export default { get, list, create, update, remove, getNotification, readNotification, getUnreadNotificationCount, getNotifications, createUniversityNotification };

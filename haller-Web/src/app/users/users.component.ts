@@ -99,10 +99,10 @@ export class UsersComponent implements OnInit {
         {
           "data": "action", "mRender": function (data, type, row) {
             if (row.isBlocked) {
-              var actionhtml = '<div class="row"><div class="col-sm-7"><button type="button" rel="tooltip" class="btn btn-success block btn-sm" data-status=0 data-id="' + row.id + '" ">UnBlock</button></div><div class="col-sm-3"></div><div class="col-sm-2"><button type="button" rel="tooltip" class="btn btn-success btn-sm">Edit</button></div></div>';
+              var actionhtml = '<div class="row"><div class="col-sm-7"><button type="button" rel="tooltip" class="btn btn-success block btn-sm" data-status=0 data-id="' + row.id + '" ">UnBlock</button></div><div class="col-sm-3"></div></div>';
             
             } else {
-              var actionhtml = '<div class="row"><div class="col-sm-3"><button type="button" rel="tooltip" class="btn btn-danger  block btn-sm" data-status=1 data-id="' + row.id + '" ">Block</button></div><div class="col-sm-3"></div><div class="col-sm-2"><button type="button" rel="tooltip" class="btn btn-success btn-sm">Edit</button></div></div>';
+              var actionhtml = '<div class="row"><div class="col-sm-3"><button type="button" rel="tooltip" class="btn btn-danger  block btn-sm" data-status=1 data-id="' + row.id + '" ">Block</button></div><div class="col-sm-3"></div></div>';
             }
             return actionhtml;
           }

@@ -651,7 +651,7 @@ function allUsersByFilter(req, res, next) {
       .exec()
       .then((Users) => {
         if (Users) {
-          Post.getAll()
+          Post.list()
             .then(post => {
 
               //  var userData={};

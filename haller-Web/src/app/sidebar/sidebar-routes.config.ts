@@ -1,7 +1,7 @@
 import { RouteInfo } from './sidebar.metadata';
 
 export const APPROUTES: RouteInfo[] = [
-    { path: '/analitics-dashboard', title: 'Dashboard', icon: 'material-icons', iconName:'dashboard' },
+    { path: '/analytics-dashboard', title: 'Dashboard', icon: 'material-icons', iconName:'dashboard' },
     { path: '/feed', title: 'Feed', icon: 'material-icons', iconName:'rss_feed' },
     { path: '/event', title: 'Event', icon: 'material-icons', iconName:'event' },
     { path: '/flag-section', title: 'Flag Section', icon: 'material-icons', iconName:'flag' },

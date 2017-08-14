@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { ModalService } from '../../services/modal.service';
+import { NotificationService } from '../../services/notification.service';
 import { PostService } from '../../services/post.services';
 import { Ng2PaginationModule } from 'ng2-pagination';
 
@@ -31,10 +32,12 @@ export class NotificationComponent implements OnInit {
     beingRefresh = false;
 
     file: File;
+    constructor(private location: Location, private modalService: ModalService, private notificationService: NotificationService, private postService: PostService) {  }
+
     ngOnInit() {
-    
+        
         var userId =  localStorage.getItem('uid')
-        this.postService.getNotification(userId).subscribe((res: any) => {
+        this.notificationService.getNotification(userId).subscribe((res: any) => {
             if (res) {
                if(res.allNotification.length== 0){
                    this.recordStatus = true;
@@ -52,7 +55,7 @@ export class NotificationComponent implements OnInit {
         })
   }
 
-    constructor(private location: Location, private modalService: ModalService, public postService: PostService) { }
+    
     addNotification(model, isValid, id) {
     
         if (isValid) {
@@ -132,18 +135,17 @@ export class NotificationComponent implements OnInit {
         }else{
             notificationObj['file'] = "";
         }
-        this.postService.createNotification(notificationObj)
+        this.notificationService.createNotification(notificationObj)
             .subscribe((res: any) => {
                 console.log('createNotification res', res);
                 this.file = null;
                 this.posts[this.postIndex] = res;
-                window.location.reload();
+                this.ngOnInit();
+               
             }, error => {
                 console.log('createNotification error', error);
             })
     }
-
-   
 
     changeSegment() {
         this.posts = [];

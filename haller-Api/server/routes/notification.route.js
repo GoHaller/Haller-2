@@ -7,7 +7,6 @@ import { getToken } from '../helpers/AuthorizationHelper';
 import config from '../../config/env';
 
 const router = express.Router(); // eslint-disable-line new-cap
-
 router.route('/')
   /** POST /api/notifications - Create new notification */
   .post(validate(paramValidation.createNotification), notificationCtrl.create);
@@ -47,5 +46,20 @@ router.route('/users/:userId/unread')
     secret: config.jwtSecret,
     getToken
   }), validate(paramValidation.unreadNotifications), notificationCtrl.getUnreadNotificationCount);
+
+/** POST /api/university/notification - Create new post */
+
+router.route('/createnew')
+  .post(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), notificationCtrl.createUniversityNotification);
+
+router.route('/:userId/list')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+}), notificationCtrl.getNotifications);
+
 
 export default router;
