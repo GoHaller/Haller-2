@@ -13,8 +13,8 @@ import { Storage } from '@ionic/storage';
 export class HttpClient {
   private local: Storage;
   public activeToken: String;
-  // private ApiBaseUrl = 'http://10.0.0.20:4040/api';
-  private ApiBaseUrl = 'https://haller-api-v2.herokuapp.com/api';
+  private ApiBaseUrl = 'http://10.0.0.20:4040/api';
+  // private ApiBaseUrl = 'https://haller-api-v2.herokuapp.com/api';
   // private ApiBaseUrl = 'https://haller-api-v2-main.herokuapp.com/api';
   //private ApiBaseUrl = 'https://haller-api-app-stage.herokuapp.com/api';
   //private ApiBaseUrl = 'https://haller-app-api.herokuapp.com/api';

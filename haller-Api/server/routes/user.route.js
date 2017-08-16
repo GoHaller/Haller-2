@@ -3,6 +3,7 @@ import expressJwt from 'express-jwt';
 import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user.controller';
+import universityCtrl from '../controllers/university.controller'
 
 import { load, getToken } from '../helpers/AuthorizationHelper';
 import config from '../../config/env';
@@ -26,6 +27,9 @@ router.route('/admin/change-user-sataus')
 
 
 //App APIS
+router.route('/university/:id')
+  .get(universityCtrl.getById)
+
 router.route('/organization')
   /** GET /api/users/organization - Get organization */
   .get(expressJwt({

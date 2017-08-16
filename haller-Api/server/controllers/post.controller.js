@@ -1030,30 +1030,30 @@ function sendUniversityNotification(notification) {
 function adminListByResidence(req, res, next) {
   User.get(req.params.userId)
     .then(user => {
-        if(user.role != "admin" && user.role != "student"){
-          const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
-            Post.listByResidenceForStaff(req.params.userId,{  residence: req.params.residence, limit, skip, event, sortBy, asc })
-              .then(posts => {
-                console.log("---------posts.length------",posts.length)
-                // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
-                res.json(posts)
-              })
-              .catch((e) => {
-                console.log(e); //eslint-disable-line
-                next(e);
-              });
-        }else if(user.role == "admin"){ 
-          const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
-              Post.listByResidenceForAdmin({ residence: req.params.residence, limit, skip, event, sortBy, asc })
-                .then(posts => {
-                  // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
-                  res.json(posts)
-                })
-                .catch((e) => {
-                  console.log(e); //eslint-disable-line
-                  next(e);
-                });
-        }
+      if (user.role != "admin" && user.role != "student") {
+        const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
+        Post.listByResidenceForStaff(req.params.userId, { residence: req.params.residence, limit, skip, event, sortBy, asc })
+          .then(posts => {
+            console.log("---------posts.length------", posts.length)
+            // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
+            res.json(posts)
+          })
+          .catch((e) => {
+            console.log(e); //eslint-disable-line
+            next(e);
+          });
+      } else if (user.role == "admin") {
+        const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
+        Post.listByResidenceForAdmin({ residence: req.params.residence, limit, skip, event, sortBy, asc })
+          .then(posts => {
+            // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
+            res.json(posts)
+          })
+          .catch((e) => {
+            console.log(e); //eslint-disable-line
+            next(e);
+          });
+      }
 
     })
     .error(e => next(e))
@@ -1226,14 +1226,14 @@ function getJoinDetails(req, res, next) {
 }
 
 
-function getTotalCountAnalytics(req, res, next){
+function getTotalCountAnalytics(req, res, next) {
   var days = parseInt(req.params.postDays);
   var postCount = {};
-  for(var i=1;i<=days;i++){
+  for (var i = 1; i <= days; i++) {
     var d = new Date();
     d.setDate(d.getDate() - i);
     var date = d
-    date = date.getDate() + '-' + (date.getMonth()+1) + '-' + date.getFullYear()
+    date = date.getDate() + '-' + (date.getMonth() + 1) + '-' + date.getFullYear()
     postCount[date] = 0;
   }
   var currentDate = new Date();
@@ -1241,38 +1241,38 @@ function getTotalCountAnalytics(req, res, next){
   Post.aggregate()
     .match({ createdAt: { $gt: currentDate } })
     .exec().then(sevanDays => {
-          var dateCount = []
-          var records = []
-          for(var i=0; i<sevanDays.length;i++){
-              var data = {};              
-              var date = sevanDays[i].createdAt;
-              date = date.getDate() + '-' + (date.getMonth()+1) + '-' + date.getFullYear()
-              dateCount.push(date);
-              records.push({"date":date,"isEvent":sevanDays[i].isEvent})
+      var dateCount = []
+      var records = []
+      for (var i = 0; i < sevanDays.length; i++) {
+        var data = {};
+        var date = sevanDays[i].createdAt;
+        date = date.getDate() + '-' + (date.getMonth() + 1) + '-' + date.getFullYear()
+        dateCount.push(date);
+        records.push({ "date": date, "isEvent": sevanDays[i].isEvent })
+      }
+      dateCount = unique(dateCount)
+      for (var i = 0; i < dateCount.length; i++) {
+        var eventCount = 0;
+        var feedCount = 0;
+        for (var j = 0; j < records.length; j++) {
+          if (records[j].date == dateCount[i]) {
+            if (records[j].isEvent) {
+              eventCount = eventCount + 1;
+            } else {
+              feedCount = feedCount + 1;
             }
-            dateCount = unique(dateCount)          
-            for(var i=0;i<dateCount.length;i++){
-              var eventCount = 0;
-              var feedCount  = 0;
-              for(var j=0;j<records.length;j++){
-                if(records[j].date == dateCount[i]){  
-                    if(records[j].isEvent){
-                      eventCount = eventCount + 1;
-                    }else{
-                      feedCount = feedCount + 1;
-                    }
-                }
-              }
-              for(var key in postCount){
-                  var keyName={}
-                  if(key == dateCount[i]){
-                    keyName["eventcount"] = eventCount;
-                    keyName["feedcount"] = feedCount;
-                    postCount[key] = keyName;
-                  }
-              }
-            }
-        res.json(postCount);
+          }
+        }
+        for (var key in postCount) {
+          var keyName = {}
+          if (key == dateCount[i]) {
+            keyName["eventcount"] = eventCount;
+            keyName["feedcount"] = feedCount;
+            postCount[key] = keyName;
+          }
+        }
+      }
+      res.json(postCount);
     });
 }
 

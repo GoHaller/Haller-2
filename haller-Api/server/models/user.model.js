@@ -268,6 +268,15 @@ UserSchema.statics = {
       });
   },
 
+  getByEmailNoError(email) {
+    return this.findOne({ email: email })
+      .populate(populateMap())
+      .exec()
+      .then((user) => {
+        return user;
+      });
+  },
+
   getByFBId(id) {
     return this.findOne({ 'facebook.id': id })
       .populate(populateMap())

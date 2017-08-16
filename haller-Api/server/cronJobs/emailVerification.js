@@ -71,9 +71,11 @@ const sendProblemReportEmail = (user, problemData) =>
     const link = `${config.rootUrl}users/${user._id}/verify-email`;
     const data = {
       from: 'Haller Problem <noreply@gohaller.com>',
-      to: 'kamal.mandalia@plutustec.com',
+      to: 'support@gohaller.com',
       subject: 'By ' + user.firstName + ' ' + user.lastName,
-      html: `<h3> Residence: ` + user.residence + `<h3/>` +
+      html: `<h3> Name: ` + user.firstName + ' ' + user.lastName + `<h3/>` +
+      `<h3> Email: ` + user.email + `<h3/>` +
+      `<h3> Residence: ` + user.residence + `<h3/>` +
       `<h3>Issue Title: ` + problemData.title + `</h3>` +
       `<h3>Issue Description: ` + problemData.description + `</h3>`
     };

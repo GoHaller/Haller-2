@@ -33,7 +33,7 @@ export class Message {
   searchText: String = '';
   searchInputText: string = '';
   //data to send new message
-  msgContent: String;
+  msgContent: String = '';
   private localImage: String = null;
   private cloudinaryImageData: Object = null;
   private userAvatar = '';
@@ -241,9 +241,9 @@ export class Message {
     }
   }
   addMessage() {
-    if ((this.msgContent || this.cloudinaryImageData != null || this.cloudinaryProvider.gif['id']) && this.recipients.length > 0) {
+    if (((this.msgContent && this.msgContent.length > 0) || this.cloudinaryImageData != null || this.cloudinaryProvider.gif['id']) && this.recipients.length > 0) {
       let messagesObj: Object = {
-        body: this.msgContent,
+        body: this.msgContent || '',
         createdBy: this.userInfo['_id'],
         createdAt: new Date(),
         recipient: this.recipients[0]['_id'],

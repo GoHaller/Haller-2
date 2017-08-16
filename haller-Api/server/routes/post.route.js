@@ -56,11 +56,11 @@ router.route('/admin/desboard/staffeventjoiners/:days')
 
 router.route('/admin/:postId/deletepost')
   .delete(expressJwt({
-     secret: config.jwtSecret,
-     getToken  
-  }),postCtrl.deletePost)
+    secret: config.jwtSecret,
+    getToken
+  }), postCtrl.deletePost)
 
-  
+
 // router.route('/admin/hide/:postId/comment/:commentId')
 //App APIS
 
@@ -115,6 +115,12 @@ router.route('/:postId/comments/:commentId')
   validate(paramValidation.unComment),
   postCtrl.removeCommentFromPost)
 
+  .put(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), validate(paramValidation.updateComment),
+  postCtrl.updateCommentOnPost);
+
 router.route('/admin/:postId/comments/:commentId')
   .delete(expressJwt({
     secret: config.jwtSecret,
@@ -122,7 +128,6 @@ router.route('/admin/:postId/comments/:commentId')
   }),
   validate(paramValidation.unComment),
   postCtrl.deleteComment)
-  
 
   .put(expressJwt({
     secret: config.jwtSecret,

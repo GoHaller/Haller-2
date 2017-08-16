@@ -64,7 +64,7 @@ export class CloudinaryProvider {
       this.event.publish('image-loaded');
     }, (err) => {
       console.info('err', err);
-      if (err != "no image selected")
+      if (["no image selected", "Selection cancelled"].indexOf(err) == -1)
         this.presentToast('Error while selecting image.');
     });
   }

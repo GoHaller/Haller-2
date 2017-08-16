@@ -58,24 +58,65 @@ function getByEmail(req, res, next) {
  * @returns { token, User }
  */
 function create(req, res, next) {
-  getByEmail(req, res, (e) => {
-    if (req.body.facebook) {
-      User.getByFBId(req.body.facebook.id)
-        .then((user) => {
-          if (user) {
-            // res.json(user);
-            const error = new APIError('Facebook account is already in use.', httpStatus.UNAUTHORIZED);
-            next(error);
-          } else {
-            createUser(req, res, next);
-          }
-        }).catch((e) => {
+  // console.log('req.body.email', req.body.email);
+  User.getByEmailNoError(req.body.email)
+    .then(emailUser => {
+      // console.log('emailUser', emailUser);
+      if (emailUser && emailUser._id) {
+        if (emailUser.firstName) {
+          res.json(emailUser);
+        } else {
+          console.log('email adderess found', emailUser.email);
+          updateCreatedUser(req, res, next);
+        }
+      } else {
+        // getByEmail(req, res, (e) => {
+        if (req.body.facebook) {
+          User.getByFBId(req.body.facebook.id)
+            .then((user) => {
+              if (user) {
+                // res.json(user);
+                const error = new APIError('Facebook account is already in use.', httpStatus.UNAUTHORIZED);
+                next(error);
+              } else {
+                createUser(req, res, next);
+              }
+            }).catch((e) => {
+              createUser(req, res, next);
+            });
+        } else {
           createUser(req, res, next);
+        }
+      }
+    });
+}
+
+function updateCreatedUser(req, res, next) {
+  User.getByEmail(req.body.email)
+    .then(emailUser => {
+      emailUser.password = req.body.password ? bcrypt.hashSync(req.body.password, 10) : '';
+      emailUser.facebook = req.body.facebook ? req.body.facebook : null;
+      emailUser.status = {
+        online: true,
+        lastOnline: new Date(),
+        currentStatus: 'online',
+      }
+      emailUser.save()
+        .then((savedUser) => {
+          const token = jwt.sign({
+            email: savedUser.email
+          }, config.jwtSecret);
+          const userCpy = savedUser;   // update the user status object to
+          userCpy.status.activeToken = token;
+          userCpy.save().then((upU) => {
+            // upU.otp = {};
+            res.json({ //eslint-disable-line
+              token,
+              user: upU,
+            })
+          });
         });
-    } else {
-      createUser(req, res, next);
-    }
-  });
+    });
 }
 
 function createUser(req, res, next) {
@@ -107,17 +148,18 @@ function createUser(req, res, next) {
           token,
           user: upU,
         })
-        // if (userCpy.isRARequested == true && !userCpy.RAData.verificationSent) {
-        //   emailVerification.sendIsRAVerificationEmail(upU);
-        // }
-        // emailVerification.sendVerificationEmail(upU)
-        //   .then(({ success, notified }) => {
-        //     notified.otp = {};
-        //     success ? res.json({ //eslint-disable-line
-        //       token,
-        //       user: notified,
-        //     }) : res.error('not successful notifying user by email')
-        //   });
+        if (userCpy.isRARequested == true && !userCpy.RAData.verificationSent) {
+          emailVerification.sendIsRAVerificationEmail(upU);
+        }
+        emailVerification.sendVerificationEmail(upU)
+          .then(({ success, notified }) => {
+            notified.otp = {};
+            console.log(upU._id, 'not successful notifying user by email');
+            // success ? res.json({ //eslint-disable-line
+            //   token,
+            //   user: notified,
+            // }) : res.error('not successful notifying user by email')
+          });
       });
     })
     .catch((exc) => {

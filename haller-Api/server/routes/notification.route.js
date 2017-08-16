@@ -59,7 +59,6 @@ router.route('/:userId/list')
   .get(expressJwt({
     secret: config.jwtSecret,
     getToken
-}), notificationCtrl.getNotifications);
-
+  }), notificationCtrl.getNotifications);
 
 export default router;

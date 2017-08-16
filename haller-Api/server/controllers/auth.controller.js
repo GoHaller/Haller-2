@@ -51,7 +51,7 @@ function login(req, res, next) {
   if (!!req.body.email && !!req.body.password) {
     return User.getByEmail(req.body.email)
       .then((user) => { //eslint-disable-line
-        if (user) {
+        if (user && user.role == 'student') {
           bcrypt.compare(req.body.password, user.password, (err, same) => { //eslint-disable-line
             if (same) {
               const token = jwt.sign({

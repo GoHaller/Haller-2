@@ -65,6 +65,9 @@
         <div class="msg-container">
           <div *ngIf="msg.image" (click)="viewFullImage(msg.image)" class="img-container"><img [src]="msg.image.secure_url" /></div>
           <div *ngIf="msg.giphy" class="img-container"><img [src]="msg.giphy.gif.url" /></div>
+          <div *ngIf="msg.giphy" class="powered-giphy">
+            <ion-note>Powered by GIPHY</ion-note>
+          </div>
           <div>{{msg.body}}</div>
           <ion-note class="msg-time">
             {{msg.createdAt | date:getMessageDateFormate(msg.createdAt)}}

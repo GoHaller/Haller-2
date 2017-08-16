@@ -15,7 +15,7 @@ export class FeedDetail {
   public userInfo: Object = {};
   public feed: Object = {};
   public feedId: string = '';
-  public commentContent: String;
+  public commentContent: String = '';
   public commentId: String = null;
   public localImage: String = null;
   public refresher: any;
@@ -121,7 +121,7 @@ export class FeedDetail {
 
   //Comment Section
   postComment() {
-    if (this.commentContent) {
+    if (this.commentContent || this.feedProvider.cloudinaryProvider.gif['id'] || this.feedProvider.cloudinaryProvider.imageLocalPath) {
       this.feedProvider.submitComment(this.feed['_id'], this.commentContent, this.commentId)
         .subscribe((observ: any) => {
           observ.subscribe((res: any) => {

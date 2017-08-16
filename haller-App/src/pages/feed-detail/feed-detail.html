@@ -83,7 +83,7 @@
             : 'No One')}}
           </h2>
           <ion-note>{{comment.createdAt | date: getCommentDateFormatr(comment.createdAt)}}</ion-note>
-          <p *ngIf="!comment.isHidden">{{comment.body}}</p>
+          <p *ngIf="!comment.isHidden">{{comment.body!='undefined'?comment.body:''}}</p>
           <p *ngIf="comment.isHidden" style="margin-bottom:5px">
             <ion-note color="danger">This comment has been removed by Administrator.</ion-note>
           </p>
@@ -91,7 +91,7 @@
           />
           <img class="comment-image" *ngIf="comment.giphy && !comment.isHidden" [src]="comment.giphy.gif.url" />
           <div *ngIf="comment.giphy && !comment.isHidden" class="powered-giphy">
-            <ion-note>GIPHY</ion-note>
+            <ion-note>Powered by GIPHY</ion-note>
           </div>
         </ion-item>
         <ion-item class="comment-action" *ngIf="!comment.isHidden">

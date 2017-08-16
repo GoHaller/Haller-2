@@ -39,7 +39,7 @@ export class Registration {
   private years = [];
   private email: string = '';
   public loaderObj: any = null;
-  public universityData: any = { halls: ['Scholarship Halls', 'Oliver', 'Ellsworth Hall', 'Oswald Hall', 'Self Hall', 'New Hall'] };
+  public universityData: any = { halls: ['Scholarship Hall', 'Oliver Hall', 'Ellsworth Hall', 'Oswald Hall', 'Self Hall', 'New Hall'] };
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private authProvider: AuthProvider,
     private profileProvider: ProfileProvider, private formBuilder: FormBuilder, public toastCtrl: ToastController,
@@ -74,6 +74,7 @@ export class Registration {
   ionViewDidLoad() {
     this.local.get('fcm-data').then((val) => {
       this.fcmData = JSON.parse(val);
+      console.log('this.fcmData', this.fcmData);
     });
     this.slides.lockSwipes(true);
     this.authProvider.getUniversityData()
