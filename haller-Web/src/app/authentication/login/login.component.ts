@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from "../../../services/auth.service";
 import { Router } from "@angular/router";
+import { ModalService } from "../../../services/modal.service";
+import { forgotModel } from "../../modal/forgot.component";
+import { UserService } from '../../../services/user.service';
 
 declare var $: any;
 
@@ -13,8 +16,9 @@ declare var $: any;
 export class LoginComponent implements OnInit {
     test: Date = new Date();
     userObj: any = { email: "", password: "" };
+    public email:any;
 
-    constructor(private authService: AuthService, private router: Router) {
+    constructor(private authService: AuthService, private router: Router,private modalService: ModalService,private userService: UserService) {
         if (localStorage.getItem('uid'))
             this.router.navigate(['/analitics-dashboard']);
     }
@@ -54,4 +58,25 @@ export class LoginComponent implements OnInit {
                 console.info('login error', error);
             })
     }
+    forgotpassword()
+    {
+       this.modalService.open("forgot");  
+    }
+    closeModal() {
+    this.modalService.close("forgot");
+  }
+  sendEmail()
+  {
+    console.log("in email");
+    
+  }
+  forgotrequest(email:any)
+  {
+    console.log(email);
+     this.authService.forgotRequest(email).subscribe((res: any) => {
+            console.log("response");
+        }, error => {
+            console.log('forgoterror error', error);
+        })
+  }
 }

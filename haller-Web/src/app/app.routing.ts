@@ -9,6 +9,9 @@ export const AppRoutes: Routes = [
         redirectTo: 'login',
         pathMatch: 'full',
     },
+    {     path: 'Forgotpassword',
+          loadChildren: './forgotpassword/forgot.module#ForgotModule'
+    },
     {
         path: '',
         component: AdminLayoutComponent,

@@ -14,6 +14,12 @@ router.route('/admin/login')
 router.route('/login')
   .post(validate(paramValidation.login), authCtrl.login);
 
+router.route('/send-mail')
+  .post(authCtrl.sendEmailResetPassword);
+
+router.route('/reset-password')
+  .post(authCtrl.changePassword);
+
 router.route('/encrypt/:password')
   .get(authCtrl.encryptPassword);
 

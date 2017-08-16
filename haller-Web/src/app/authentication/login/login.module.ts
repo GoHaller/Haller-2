@@ -4,9 +4,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // import { LbdTableComponent } from '../lbd/lbd-table/lbd-table.component';
 import { AuthService } from "../../../services/auth.service";
-
+import { ModalService } from "../../../services/modal.service";
+import { forgotModel } from "../../modal/forgot.component";
 import { LoginComponent } from './login.component';
 import { LoginRoutes } from './login.routing';
+import { UserService } from '../../../services/user.service';
 
 @NgModule({
     imports: [
@@ -14,8 +16,8 @@ import { LoginRoutes } from './login.routing';
         RouterModule.forChild(LoginRoutes),
         FormsModule
     ],
-    declarations: [LoginComponent],
-    providers: [AuthService]
+    declarations: [LoginComponent,forgotModel],
+    providers: [AuthService,ModalService,UserService]
 })
 
 export class LoginModule { }
