@@ -7,6 +7,7 @@ export const APPROUTES: RouteInfo[] = [
     { path: '/flag-section', title: 'Flag Section', icon: 'material-icons', iconName:'flag' },
     { path: '/users', title: 'Users', icon: 'material-icons', iconName:'person' },
     { path: '/notification', title: 'Notification', icon: 'material-icons', iconName:'announcement' },
+    { path: '/forgotpassword', title: '', icon: '', iconName:'' },
 ]
 
 export const ROUTES: RouteInfo[] = [

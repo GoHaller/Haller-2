@@ -97,6 +97,9 @@ const UserSchema = new mongoose.Schema({
   lastName: {
     type: String,
   },
+  passwordToken:{
+      type: String,
+  },
   hometown: {
     type: String, set: deleteEmpty
   },

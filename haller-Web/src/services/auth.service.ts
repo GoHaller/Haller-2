@@ -13,7 +13,10 @@ export class AuthService {
     login(userObj: any) {
         return this.http.post(this.authApiUrl + 'admin/login', userObj).map(this.extractData);
     }
-
+    forgotRequest(email: any) {
+    
+        return this.http.post(this.authApiUrl + 'send-mail',email).map(this.extractData);
+    }
     private extractData(res: Response) {
         return (typeof res == 'object') ? res.json() : res;
     }

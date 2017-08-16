@@ -6,6 +6,9 @@ import emailVerification from '../cronJobs/emailVerification';
 
 const config = require('../../config/env');
 const bcrypt = require('bcryptjs');
+var nodemailer = require('nodemailer');
+var randtoken = require('rand-token');
+var token = randtoken.generate(16);
 
 /**
  * /api/auth/:userId/logout
@@ -225,4 +228,67 @@ function adminlogin(req, res, next) {
   }
 }
 
-export default { login, adminlogin, getRandomNumber, logout, encryptPassword, changePassword, createPassword, reportProblem };
+function sendEmailResetPassword(req, res, next){
+  if (req.body.Email) {
+       return User.getByEmail(req.body.Email)
+      .then((user) => { //eslint-disable-line
+        if (user && user.role != 'student') {
+          var email = user.email;
+          var uid = require('rand-token').uid;
+          var passwordToken = uid(16);
+      // create reusable transporter object using the default SMTP transport
+          let transporter = nodemailer.createTransport({
+              host: 'smtp.gmail.com',
+              port: 465,
+              secure: true, // secure:true for port 465, secure:false for port 587
+              auth: {
+                  user: "pran9665@gmail.com", // project email
+                  pass: 'sahil2011'
+              }
+          });
+      // setup email data with unicode symbols
+      let mailOptions = {
+          from: '"Fred Foo 👻"'+email, // sender address
+          to: email, // list of receivers
+          subject: 'Reset Password ✔', // Subject line
+          text: 'Click below link', // plain text body
+          html: '<b>Click Here : </b>' + "http://localhost:4200/create-password/"+email+"/"+ passwordToken // html body
+      };
+      // send mail with defined transport object
+      transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+              return console.log(error);
+          }else{
+            user.passwordToken = passwordToken;
+            user.save()
+            .then((user) => {
+                return res.json('Message is sent please check your email');
+            });
+          }
+      });     
+      } else {
+       return res.json('No User Found with that email');
+      }
+    }).catch((e) => {
+      return res.json('Invalid');
+    });
+}
+}
+
+function changePassword(req, res, next){
+  if (!req.body.token && !req.body.email ){return res.json('Sorry invalid token');}
+  User.getByEmail(req.body.email)
+      .then((user) => {
+        if(req.body.token == user.passwordToken){
+            user.password = req.body.password ? bcrypt.hashSync(req.body.password, 10) : '';
+            user.save()
+            .then((user) => {
+                return res.json('password Updated Successfuly');
+            });
+        }else{
+            return res.json('Failed to Updated password');
+        }
+    });
+}
+
+export default {changePassword, sendEmailResetPassword, login, adminlogin, getRandomNumber, logout, encryptPassword, changePassword, createPassword, reportProblem };
