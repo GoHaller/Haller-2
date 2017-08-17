@@ -252,7 +252,7 @@ function sendEmailResetPassword(req, res, next){
           to: email, // list of receivers
           subject: 'Verify your Haller email address ✔', // Subject line
           text: 'Click below link', // plain text body
-          html: '<b>Click Here : </b>' + "http://localhost:4200/forgotpassword/"+ passwordToken // html body
+          html: '<b>Click Here To change Account Password  : </b>' + "http://localhost:4200/forgotpassword/"+ passwordToken // html body
       };
       // send mail with defined transport object
       transporter.sendMail(mailOptions, (error, info) => {
