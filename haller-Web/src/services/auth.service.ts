@@ -17,6 +17,10 @@ export class AuthService {
     
         return this.http.post(this.authApiUrl + 'send-mail',email).map(this.extractData);
     }
+    passwordChanged(passwordobj: any) {
+    
+        return this.http.post(this.authApiUrl + 'reset-password',passwordobj).map(this.extractData);
+    }
     private extractData(res: Response) {
         return (typeof res == 'object') ? res.json() : res;
     }

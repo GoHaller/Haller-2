@@ -18,7 +18,7 @@ router.route('/send-mail')
   .post(authCtrl.sendEmailResetPassword);
 
 router.route('/reset-password')
-  .post(authCtrl.changePassword);
+  .post(authCtrl.changeUserPassword);
 
 router.route('/encrypt/:password')
   .get(authCtrl.encryptPassword);

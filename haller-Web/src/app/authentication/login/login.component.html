@@ -8,6 +8,8 @@
                     <div class="card-header card-header-icon" data-background-color="blue">
                         <i class="material-icons">featured_play_list</i>
                     </div>
+                     <h4 *ngIf="emailStatus" class="alert alert-success">Link has been send to your Email</h4> 
+                     <h4 *ngIf="sendMailStatus" class="alert alert-danger">Account not associated with this Email</h4>
                     <div class="card-content">
                      
                         <div class="col-lg-12" >
