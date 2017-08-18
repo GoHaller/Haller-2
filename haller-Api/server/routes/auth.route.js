@@ -14,10 +14,10 @@ router.route('/admin/login')
 router.route('/login')
   .post(validate(paramValidation.login), authCtrl.login);
 
-router.route('/send-mail')
+router.route('/sendmail')
   .post(authCtrl.sendEmailResetPassword);
 
-router.route('/reset-password')
+router.route('/resetpassword')
   .post(authCtrl.changeUserPassword);
 
 router.route('/encrypt/:password')
