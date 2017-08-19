@@ -280,6 +280,20 @@ UserSchema.statics = {
       });
   },
 
+getByToken(token) {
+    return this.findOne({ passwordToken: token })
+      .populate(populateMap())
+      .exec()
+      .then((user) => {
+        if (user) {
+          user.otp = {};
+          return user;
+        }
+        const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+        return Promise.reject(err);
+      });
+  },
+
   getByFBId(id) {
     return this.findOne({ 'facebook.id': id })
       .populate(populateMap())

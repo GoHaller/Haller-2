@@ -9,7 +9,7 @@ export const AppRoutes: Routes = [
         redirectTo: 'login',
         pathMatch: 'full',
     },
-    {     path: 'Forgotpassword',
+    {     path: 'forgotpassword/:id',
           loadChildren: './forgotpassword/forgot.module#ForgotModule'
     },
     {
@@ -65,6 +65,10 @@ export const AppRoutes: Routes = [
             }, {
                 path: '',
                 loadChildren: './timeline/timeline.module#TimelineModule'
+            },
+            {
+                path: 'forgotpassword',
+                loadChildren: './forgotpassword/forgot.module#ForgotModule'
             }
         ]
     },
@@ -77,6 +81,9 @@ export const AppRoutes: Routes = [
         }, {
             path: 'login',
             loadChildren: './authentication/login/login.module#LoginModule'
+        },{
+                path: 'forgotpassword',
+                loadChildren: './forgotpassword/forgot.module#ForgotModule'
         }]
     }
 ];

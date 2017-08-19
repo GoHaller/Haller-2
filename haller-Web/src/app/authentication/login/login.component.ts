@@ -17,7 +17,8 @@ export class LoginComponent implements OnInit {
     test: Date = new Date();
     userObj: any = { email: "", password: "" };
     public email:any;
-
+    public emailStatus:Boolean=false;
+    public sendMailStatus:Boolean=false;
     constructor(private authService: AuthService, private router: Router,private modalService: ModalService,private userService: UserService) {
         if (localStorage.getItem('uid'))
             this.router.navigate(['/analitics-dashboard']);
@@ -75,6 +76,17 @@ export class LoginComponent implements OnInit {
     console.log(email);
      this.authService.forgotRequest(email).subscribe((res: any) => {
             console.log("response");
+            if(res == "success"){
+             this.emailStatus=true;
+             this.sendMailStatus=false;
+             setTimeout(()=>{ 
+               this.router.navigate(['/']);
+             },500);
+            }
+            if(res == "invalid"){
+              this.emailStatus=false;
+              this.sendMailStatus=true;
+            }
         }, error => {
             console.log('forgoterror error', error);
         })

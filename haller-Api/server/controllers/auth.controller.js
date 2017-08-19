@@ -242,17 +242,17 @@ function sendEmailResetPassword(req, res, next){
               port: 465,
               secure: true, // secure:true for port 465, secure:false for port 587
               auth: {
-                  user: "pran9665@gmail.com", // project email
-                  pass: 'sahil2011'
+                  user: "support@gohaller.com", // project email
+                  pass: 'G0haller!'
               }
           });
       // setup email data with unicode symbols
       let mailOptions = {
-          from: '"Fred Foo 👻"'+email, // sender address
+          from: 'Haller Verification <support@gohaller.com>', // sender address
           to: email, // list of receivers
-          subject: 'Reset Password ✔', // Subject line
+          subject: 'Verify your Haller email address ✔', // Subject line
           text: 'Click below link', // plain text body
-          html: '<b>Click Here : </b>' + "http://localhost:4200/create-password/"+email+"/"+ passwordToken // html body
+          html: '<b>Click Here To change Account Password  : </b>' + "http://localhost:4200/forgotpassword/"+ passwordToken // html body
       };
       // send mail with defined transport object
       transporter.sendMail(mailOptions, (error, info) => {
@@ -262,7 +262,7 @@ function sendEmailResetPassword(req, res, next){
             user.passwordToken = passwordToken;
             user.save()
             .then((user) => {
-                return res.json('Message is sent please check your email');
+                return res.json('success');
             });
           }
       });     
@@ -270,20 +270,22 @@ function sendEmailResetPassword(req, res, next){
        return res.json('No User Found with that email');
       }
     }).catch((e) => {
-      return res.json('Invalid');
+      return res.json('invalid');
     });
 }
 }
 
-function changePassword(req, res, next){
-  if (!req.body.token && !req.body.email ){return res.json('Sorry invalid token');}
-  User.getByEmail(req.body.email)
+function changeUserPassword(req, res, next){
+  if (!req.body.token){return res.json('Sorry invalid token');}
+  User.getByToken(req.body.token)
       .then((user) => {
         if(req.body.token == user.passwordToken){
             user.password = req.body.password ? bcrypt.hashSync(req.body.password, 10) : '';
             user.save()
             .then((user) => {
-                return res.json('password Updated Successfuly');
+                user.passwordToken = "user token"
+                user.save()
+                return res.json('success');
             });
         }else{
             return res.json('Failed to Updated password');
@@ -291,4 +293,4 @@ function changePassword(req, res, next){
     });
 }
 
-export default {changePassword, sendEmailResetPassword, login, adminlogin, getRandomNumber, logout, encryptPassword, changePassword, createPassword, reportProblem };
+export default {changeUserPassword, sendEmailResetPassword, login, adminlogin, getRandomNumber, logout, encryptPassword, changePassword, createPassword, reportProblem };
