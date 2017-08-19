@@ -47,7 +47,8 @@ const UserAction = new mongoose.Schema({
 const Comment = new mongoose.Schema({
   body: {
     type: String,
-    set: cleanHtml
+    set: cleanHtml,
+    required: false
   },
   createdAt: {
     type: Date,
@@ -154,6 +155,11 @@ const PostSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'Library',
   }],
+  giphy: {
+    id: { type: mongoose.Schema.Types.Mixed },
+    still: { type: mongoose.Schema.Types.Mixed },
+    gif: { type: mongoose.Schema.Types.Mixed }
+  },
   authorResidence: {
     type: String,
     required: true
@@ -353,7 +359,7 @@ PostSchema.statics = {
   listUserFavorites({ userId, skip = 0, limit = 50 } = {}) {
     return this.find({ 'starred.actedBy': userId })
       .populate(populateMap())
-      .sort({ createdAt: -1 })
+      .sort({ 'starred.actedAt': -1 })
       .skip(skip)
       .limit(limit)
       .exec();
@@ -410,7 +416,7 @@ PostSchema.statics = {
       .exec();
   },
 
-  listByResidenceForStaff(userId,{ residence, skip = 0, limit = 50, event = false, sortBy = 'createdAt', asc = false } = {}) {
+  listByResidenceForStaff(userId, { residence, skip = 0, limit = 50, event = false, sortBy = 'createdAt', asc = false } = {}) {
     var sort = {};
     sort[sortBy] = asc ? 1 : -1;
     return this.find({ 'createdBy': userId, authorResidence: residence, isEvent: event })
@@ -420,8 +426,6 @@ PostSchema.statics = {
       .limit(parseInt(limit))
       .exec();
   },
-
-
 
   findByCustomQuery({ q = {}, skip = 0, limit = 50 } = {}) {
     console.info('q', q);

@@ -108,6 +108,9 @@ function update(req, res, next) {
       const body = req.body;
       const updatedPost = post;
       // update the post properties from the body of the request. Avoid overwriting with blank values.
+      if (body.giphy) {
+        updatedPost.giphy = body.giphy;
+      }
       if (body.title) {
         updatedPost.title = body.title;
       }
@@ -355,18 +358,20 @@ function flagPost(req, res, next) {
       post.flagged.push(flag);
       post.save()
         .then(updatedPost =>
-          updatedPost.populate(postsMap, (e, d) =>
+          updatedPost.populate(postsMap, (e, d) => {
+            return res.json(d);
+
             //sendFlaggedEmailWithMailgun(d).then(p =>
-            d.populate(postsMap, (err, doc) => {
-              if (err) {
-                return next(err);
-              }
-              // var act = { _id: mongoose.Types.ObjectId(), post: doc._id, activityType: 6, createdBy: req.body.actedBy };
-              // createActivityLog(act, function () {
-              return res.json(doc);
-              // });
-            }).catch(err => next(err))
-          )
+            // d.populate(postsMap, (err, doc) => {
+            //   if (err) {
+            //     return next(err);
+            //   }
+            //   // var act = { _id: mongoose.Types.ObjectId(), post: doc._id, activityType: 6, createdBy: req.body.actedBy };
+            //   // createActivityLog(act, function () {
+            //   return res.json(doc);
+            //   // });
+            // }).catch(err => next(err))
+          })
         )
         .catch((e) => {
           console.log(e); //eslint-disable-line

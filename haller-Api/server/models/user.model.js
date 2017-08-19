@@ -97,8 +97,8 @@ const UserSchema = new mongoose.Schema({
   lastName: {
     type: String,
   },
-  passwordToken:{
-      type: String,
+  passwordToken: {
+    type: String,
   },
   hometown: {
     type: String, set: deleteEmpty
@@ -301,9 +301,11 @@ UserSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<User[]>}
    */
-  list({ skip = 0, limit = 50, blocked = [] } = {}) {
-    let blockMe = { _id: { $nin: blocked } };
-    return this.find(blockMe)
+  list({ skip = 0, limit = 50, blocked = [], role = null } = {}) {
+    let q = { _id: { $nin: blocked } };
+    if (role) q.role = role;
+    console.log(q);
+    return this.find(q)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

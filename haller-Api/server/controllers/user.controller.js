@@ -299,7 +299,8 @@ function listForUser(req, res, next) {
           for (var i = 0; i < bu.blocked.length; i++) {
             user.push({ _id: bu.blocked[i].user });
           }
-          User.list({ limit: Number.parseInt(limit, 10), skip: Number.parseInt(skip, 10), blocked: user })
+          let role = bu.role == 'student' ? bu.role : null;
+          User.list({ limit: Number.parseInt(limit, 10), skip: Number.parseInt(skip, 10), blocked: user, role: role })
             .then(users => res.json(users))
             .catch((e) => {//eslint-disable-line
               return next(e);
