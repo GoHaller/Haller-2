@@ -6,10 +6,14 @@ import emailVerification from '../cronJobs/emailVerification';
 
 const config = require('../../config/env');
 const bcrypt = require('bcryptjs');
-var nodemailer = require('nodemailer');
-var randtoken = require('rand-token');
-var token = randtoken.generate(16);
-
+// var nodemailer = require('nodemailer');
+// var randtoken = require('rand-token');
+// var token = randtoken.generate(16);
+// var rand = Math.random();
+// console.log('randtoken', rand.toString(36));
+// console.log('randtoken', rand.toString(36).substring(2));
+// console.log('randtoken', rand.toString(36).substring(7));
+// console.log('randtoken', rand.toString(36).substring(2, 18));
 /**
  * /api/auth/:userId/logout
  * Logout user and set the appropriate user status variables
@@ -228,69 +232,88 @@ function adminlogin(req, res, next) {
   }
 }
 
-function sendEmailResetPassword(req, res, next){
+
+function sendEmailResetPassword(req, res, next) {
   if (req.body.Email) {
-       return User.getByEmail(req.body.Email)
+    return User.getByEmail(req.body.Email)
       .then((user) => { //eslint-disable-line
         if (user && user.role != 'student') {
-          var email = user.email;
-          var uid = require('rand-token').uid;
-          var passwordToken = uid(16);
-      // create reusable transporter object using the default SMTP transport
-          let transporter = nodemailer.createTransport({
-              host: 'smtp.gmail.com',
-              port: 465,
-              secure: true, // secure:true for port 465, secure:false for port 587
-              auth: {
-                  user: "support@gohaller.com", // project email
-                  pass: 'G0haller!'
-              }
-          });
-      // setup email data with unicode symbols
-      let mailOptions = {
-          from: 'Haller Verification <support@gohaller.com>', // sender address
-          to: email, // list of receivers
-          subject: 'Verify your Haller email address ✔', // Subject line
-          text: 'Click below link', // plain text body
-          html: '<b>Click Here To change Account Password  : </b>' + "http://localhost:4200/forgotpassword/"+ passwordToken // html body
-      };
-      // send mail with defined transport object
-      transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-              return console.log(error);
-          }else{
-            user.passwordToken = passwordToken;
-            user.save()
-            .then((user) => {
-                return res.json('success');
-            });
+          var uid = Math.random();
+          var passwordToken = uid.toString(36).substring(2, 18);
+          let userData = {
+            _id: user._id,
+            passwordToken: passwordToken,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName
           }
-      });     
-      } else {
-       return res.json('No User Found with that email');
-      }
-    }).catch((e) => {
-      return res.json('invalid');
-    });
-}
-}
 
-function changeUserPassword(req, res, next){
-  if (!req.body.token){return res.json('Sorry invalid token');}
-  User.getByToken(req.body.token)
-      .then((user) => {
-        if(req.body.token == user.passwordToken){
-            user.password = req.body.password ? bcrypt.hashSync(req.body.password, 10) : '';
-            user.save()
-            .then((user) => {
-                user.passwordToken = "user token"
-                user.save()
-                return res.json('success');
-            });
-        }else{
-            return res.json('Failed to Updated password');
+          emailVerification.sendForgotPasswordEmail(userData)
+            .then((success, userNotify) => {
+              user.passwordToken = passwordToken;
+              user.save()
+                .then((user) => {
+                  return res.json('success');
+                });
+            }).catch(error => {
+              const err = new APIError('Unable to proccess your request.', httpStatus.INTERNAL_SERVER_ERROR);
+              return next(err);
+            })
+          // create reusable transporter object using the default SMTP transport
+          // let transporter = nodemailer.createTransport({
+          //   host: 'smtp.gmail.com',
+          //   port: 465,
+          //   secure: true, // secure:true for port 465, secure:false for port 587
+          //   auth: {
+          //     user: "support@gohaller.com", // project email
+          //     pass: 'G0haller!'
+          //   }
+          // });
+          // setup email data with unicode symbols
+          // let mailOptions = {
+          //   from: 'Haller Verification <support@gohaller.com>', // sender address
+          //   to: email, // list of receivers
+          //   subject: 'Verify your Haller email address ✔', // Subject line
+          //   text: 'Click below link', // plain text body
+          //   html: '<b>Click Here To change Account Password  : </b>' + "http://localhost:4200/forgotpassword/" + passwordToken // html body
+          // };
+          // send mail with defined transport object
+          // transporter.sendMail(mailOptions, (error, info) => {
+          //   if (error) {
+          //     return console.log(error);
+          //   } else {
+          //     user.passwordToken = passwordToken;
+          //     user.save()
+          //       .then((user) => {
+          //         return res.json('success');
+          //       });
+          //   }
+          // });
+        } else {
+          return res.json('No User Found with that email');
         }
+      }).catch((e) => {
+        return res.json('invalid');
+      });
+  }
+}
+
+function changeUserPassword(req, res, next) {
+  if (!req.body.token) { return res.json('Sorry invalid token'); }
+  User.getByToken(req.body.token)
+    .then((user) => {
+      if (req.body.token == user.passwordToken) {
+        user.password = req.body.password ? bcrypt.hashSync(req.body.password, 10) : '';
+        user.save()
+          .then((user) => {
+            user.passwordToken = "user token"
+            user.save()
+            return res.json('success');
+          });
+      } else {
+        return res.json('Failed to Updated password');
+      }
     });
 }
 
-export default {changeUserPassword, sendEmailResetPassword, login, adminlogin, getRandomNumber, logout, encryptPassword, changePassword, createPassword, reportProblem };
+export default { changeUserPassword, sendEmailResetPassword, login, adminlogin, getRandomNumber, logout, encryptPassword, changePassword, createPassword, reportProblem };

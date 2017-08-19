@@ -68,14 +68,14 @@ const sendProblemReportEmail = (user, problemData) =>
     if (config.env === 'test') {
       return fulfill({ success: true, notified: user });
     }
-    const link = `${config.rootUrl}users/${user._id}/verify-email`;
+
     const data = {
       from: 'Haller Problem <noreply@gohaller.com>',
       to: 'support@gohaller.com',
       subject: 'By ' + user.firstName + ' ' + user.lastName,
-      html: `<h3> Name: ` + user.firstName + ' ' + user.lastName + `<h3/>` +
-      `<h3> Email: ` + user.email + `<h3/>` +
-      `<h3> Residence: ` + user.residence + `<h3/>` +
+      html: `<h3> Name: ` + user.firstName + ' ' + user.lastName + `</h3>` +
+      `<h3> Email: ` + user.email + `</h3>` +
+      `<h3> Residence: ` + user.residence + `</h3>` +
       `<h3>Issue Title: ` + problemData.title + `</h3>` +
       `<h3>Issue Description: ` + problemData.description + `</h3>`
     };
@@ -90,4 +90,27 @@ const sendProblemReportEmail = (user, problemData) =>
     });
   });
 
-export default { sendVerificationEmail, sendIsRAVerificationEmail, sendProblemReportEmail };
+const sendForgotPasswordEmail = (user) =>
+  new Promise((fulfill, reject) => {
+    const data = {
+      from: 'Haller Support <noreply@gohaller.com>',
+      to: user.email,
+      subject: 'Haller Password reset.',
+      html: '<h3>Dear, ' + user.firstName + ' ' + user.lastName + '</h3>' +
+      '<div>We have recieved a password change request.</div>' +
+      '<b>To change your account password  : </b>' +
+      '<a href="http://' + config.websiteUrl + '/forgotpassword/' + user.passwordToken + '">Click here</a><br/><br/>' +
+      '<div>Note: If it is not you, please ignore.</div>'// html body
+    };
+    mailgun.messages().send(data, (error, body) => {
+      if (error) {
+        console.error(error); //eslint-disable-line
+        reject(error);
+      } else {
+        // console.log(body); //eslint-disable-line
+        fulfill({ success: true, notified: user }); //eslint-disable-line
+      }
+    });
+  })
+
+export default { sendVerificationEmail, sendIsRAVerificationEmail, sendProblemReportEmail, sendForgotPasswordEmail };

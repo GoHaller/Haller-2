@@ -1035,30 +1035,30 @@ function sendUniversityNotification(notification) {
 function adminListByResidence(req, res, next) {
   User.get(req.params.userId)
     .then(user => {
-      if (user.role != "admin" && user.role != "student") {
-        const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
-        Post.listByResidenceForStaff(req.params.userId, { residence: req.params.residence, limit, skip, event, sortBy, asc })
-          .then(posts => {
-            console.log("---------posts.length------", posts.length)
-            // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
-            res.json(posts)
-          })
-          .catch((e) => {
-            console.log(e); //eslint-disable-line
-            next(e);
-          });
-      } else if (user.role == "admin") {
-        const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
-        Post.listByResidenceForAdmin({ residence: req.params.residence, limit, skip, event, sortBy, asc })
-          .then(posts => {
-            // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
-            res.json(posts)
-          })
-          .catch((e) => {
-            console.log(e); //eslint-disable-line
-            next(e);
-          });
-      }
+      // if (user.role != "admin" && user.role != "student") {
+      //   const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
+      //   Post.listByResidenceForStaff(req.params.userId, { residence: req.params.residence, limit, skip, event, sortBy, asc })
+      //     .then(posts => {
+      //       console.log("---------posts.length------", posts.length)
+      //       // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
+      //       res.json(posts)
+      //     })
+      //     .catch((e) => {
+      //       console.log(e); //eslint-disable-line
+      //       next(e);
+      //     });
+      // } else if (user.role == "admin") {
+      const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
+      Post.listByResidenceForAdmin({ residence: req.params.residence, limit, skip, event, sortBy, asc })
+        .then(posts => {
+          // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
+          res.json(posts)
+        })
+        .catch((e) => {
+          console.log(e); //eslint-disable-line
+          next(e);
+        });
+      // }
 
     })
     .error(e => next(e))
