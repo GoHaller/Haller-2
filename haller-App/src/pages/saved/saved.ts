@@ -31,6 +31,7 @@ export class Saved {
     console.log('ionViewDidLoad Saved');
     this.local.get('uid').then((val) => {
       this.uid = val;
+      this.feedProvider.userId = val;
       this.getList();
     });
   }
@@ -42,8 +43,7 @@ export class Saved {
           feed = this.feedProvider.processFeed(feed);
         });
         this.savedList = res;
-        if(this.refresher) this.refresher.complete();
-        // console.info('savedProvider.list res', res);
+        if (this.refresher) this.refresher.complete();
       }, error => {
         console.info('savedProvider.list error', error);
       })

@@ -9,9 +9,11 @@
         <h5 class="color-white font-size-12">Verification Code</h5>
         <ion-list>
           <ion-item>
-            <ion-input type="text" placeholder="Please enter the verification code" (input)="checkInviteCode($event)"></ion-input>
+            <!-- <ion-input type="text" placeholder="Please enter the verification code" (input)="checkInviteCode($event)"></ion-input> -->
+            <ion-input type="text" placeholder="Please enter the verification code"  [(ngModel)]="inviteCode"></ion-input>
           </ion-item>
         </ion-list>
+        <button class="auth-btn" ion-button color="light" (click)="checkInviteCode()">Submit</button>
         <button ion-button block (click)="gotoLoginPage()" clear color="light" style="margin-top:10px">Already have an account? Log in.</button>
       </ion-slide>
 

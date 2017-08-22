@@ -6,7 +6,10 @@
 -->
 <ion-header>
 
-  <ion-navbar color="primary">
+  <ion-navbar color="primary" hideBackButton>
+    <ion-buttons left>
+      <button ion-button color="light" (click)="goBack()">Back</button>
+    </ion-buttons>
     <ion-title>Settings</ion-title>
   </ion-navbar>
 
@@ -20,7 +23,7 @@
         <!-- <img [src]="userInfo.currentProfile ? userInfo.currentProfile.secure_url : 'assets/img/default-user.png'"> -->
         <img [src]="profileProvider.httpClient.getProfileImageToDisplay(userInfo)">
       </ion-avatar>
-      {{userInfo.firstName+' '+userInfo.lastName}}
+      {{(userInfo.firstName || '')+' '+(userInfo.lastName || '')}}
     </button>
     <!--<button ion-item (click)="goToAddress('Peers')">Peers</button>-->
   </ion-item-group>

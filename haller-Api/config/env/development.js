@@ -10,5 +10,5 @@ export default {
     domain: 'mg.gohaller.com'
   },
   websiteUrl: 'localhost:4200',
-  inviteCode: 'hallerku!'
+  inviteCode: 'gohallerku'
 };

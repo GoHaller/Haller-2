@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { IonicPage, NavController, NavParams, Slides, ToastController, LoadingController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Slides, ToastController, LoadingController, AlertController } from 'ionic-angular';
 import { Validators, FormBuilder, FormGroup } from '@angular/forms';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -39,11 +39,12 @@ export class Registration {
   private years = [];
   private email: string = '';
   public loaderObj: any = null;
-  public universityData: any = { halls: ['Scholarship Hall', 'Oliver Hall', 'Ellsworth Hall', 'Oswald Hall', 'Self Hall', 'New Hall'] };
+  public inviteCode: string = '';
+  public universityData: any = { halls: ['Scholarship Hall', 'Oliver Hall', 'Ellsworth Hall', 'Oswald/Self Hall', 'New Hall'] };
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private authProvider: AuthProvider,
     private profileProvider: ProfileProvider, private formBuilder: FormBuilder, public toastCtrl: ToastController,
-    private loadingCtrl: LoadingController, statusBar: StatusBar, splashScreen: SplashScreen, private cloudinaryProvider: CloudinaryProvider) {
+    private loadingCtrl: LoadingController, statusBar: StatusBar, splashScreen: SplashScreen, private cloudinaryProvider: CloudinaryProvider, public alertCtrl: AlertController) {
     this.local = new Storage('localstorage');
     this.authForm = this.formBuilder.group({
       pwd1: ['', Validators.compose([Validators.maxLength(50), Validators.required])],
@@ -74,7 +75,6 @@ export class Registration {
   ionViewDidLoad() {
     this.local.get('fcm-data').then((val) => {
       this.fcmData = JSON.parse(val);
-      console.log('this.fcmData', this.fcmData);
     });
     this.slides.lockSwipes(true);
     this.authProvider.getUniversityData()
@@ -153,14 +153,21 @@ export class Registration {
         }, error => {
           loader.dismiss();
           console.info('create error', error);
+          if (error.status == 401 || error._body.indexOf('No such user exists') > -1 || error._body.indexOf("Facebook account is already in use.") > -1) {
+            let prompt = this.alertCtrl.create({
+              title: "Incorrect access code",
+              buttons: [{ text: 'Ok', handler: data => { } }]
+            });
+            prompt.present();
+          }
         })
     }
   }
 
-  checkInviteCode(event) {
+  checkInviteCode() {
     // console.info('event', event.target.value);
-    if (event.target.value.length > 3) {
-      this.authProvider.checkInviteCode(event.target.value).subscribe((res: any) => {
+    if (this.inviteCode.length > 0) {
+      this.authProvider.checkInviteCode(this.inviteCode).subscribe((res: any) => {
         // console.info('checkInviteCode res', res);
         this.swipeTo(this.currentTab + 1);
         setTimeout(() => {
@@ -168,6 +175,13 @@ export class Registration {
         }, 200);
       }, (error: any) => {
         // console.info('checkInviteCode error', error);
+        if (error.status == 400 && error._body.indexOf('invalid code') > -1) {
+          let prompt = this.alertCtrl.create({
+            title: "Incorrect access code",
+            buttons: [{ text: 'Ok', handler: data => { } }]
+          });
+          prompt.present();
+        }
       })
     }
   }
@@ -194,41 +208,53 @@ export class Registration {
   }
 
   finishRegistration(data) {
-    //genderPronouns: data['pronouns'].split(', '),
-    let user = {
-      firstName: data['firstName'],
-      lastName: data['lastName'],
-      genderPronouns: [],//data['pronouns'] ? data['pronouns'].split(', ') : [],
-      graduationYear: data['graduationYear'].toString(),
-      // major: '',//data['major'],
-      residence: this.residence,
-      bio: this.userInfo['bio'],
-      // hometown: '',//data['hometown'],
-      notifications: { deviceToken: this.fcmData.deviceData.token, os: this.fcmData.deviceData.os }
-    }
-    //facebook: this.facebookData
-    let loader = this.loadingCtrl.create({
-      content: "Please wait...",
-      // duration: 3000,
-      dismissOnPageChange: true
-    });
-    loader.present();
-    this.profileProvider.updateUser(this.userInfo['_id'], user)
-      .subscribe((res: any) => {
-        this.userInfo = res;
-        this.local.set('auth', this.authToken);
-        this.local.set('uid', this.userInfo['_id']);
-        this.local.set('userInfo', JSON.stringify(this.userInfo)).then(() => {
-          loader.dismiss();
-          // this.navCtrl.setRoot(TabsPage, {}, { animate: true, direction: 'forward' });
-          this.gotoProfile(this.userInfo['_id']);
-        });
-        // console.info('updateUser res', res);
-      }, error => {
-        loader.dismiss();
-        console.info('updateUser error', error);
+    this.local.get('fcm-data').then((val) => {
+      if (val)
+        this.fcmData = JSON.parse(val);
+      //genderPronouns: data['pronouns'].split(', '),
+      let deviceData = { deviceToken: '', os: '' };
+      if (this.fcmData) {
+        if (this.fcmData.deviceData && this.fcmData.deviceData.token) {
+          deviceData.deviceToken = this.fcmData.deviceData.token;
+        }
+        if (this.fcmData.deviceData && this.fcmData.deviceData.os) {
+          deviceData.os = this.fcmData.deviceData.os;
+        }
+      }
+      let user = {
+        firstName: data['firstName'],
+        lastName: data['lastName'],
+        genderPronouns: [],//data['pronouns'] ? data['pronouns'].split(', ') : [],
+        graduationYear: data['graduationYear'].toString(),
+        // major: '',//data['major'],
+        residence: this.residence,
+        bio: this.userInfo['bio'],
+        // hometown: '',//data['hometown'],
+        notifications: deviceData
+      }
+      //facebook: this.facebookData
+      let loader = this.loadingCtrl.create({
+        content: "Please wait...",
+        // duration: 3000,
+        dismissOnPageChange: true
       });
-
+      loader.present();
+      this.profileProvider.updateUser(this.userInfo['_id'], user)
+        .subscribe((res: any) => {
+          this.userInfo = res;
+          this.local.set('auth', this.authToken);
+          this.local.set('uid', this.userInfo['_id']);
+          this.local.set('userInfo', JSON.stringify(this.userInfo)).then(() => {
+            loader.dismiss();
+            // this.navCtrl.setRoot(TabsPage, {}, { animate: true, direction: 'forward' });
+            this.gotoProfile(this.userInfo['_id']);
+          });
+          // console.info('updateUser res', res);
+        }, error => {
+          loader.dismiss();
+          console.info('updateUser error', error);
+        });
+    });
   }
 
   getFbLoginStatus() {
@@ -253,15 +279,17 @@ export class Registration {
       dismissOnPageChange: true
     });
     this.loaderObj.present();
-    this.authProvider.loginToFB()
-      .then((res: any) => {
-        // console.log('Logged into Facebook!', res);
-        if (res.status == 'connected') {
-          this.fbAuthDetail = res.authResponse;
-          this.getFbDetail();
-        }
-      })
-      .catch(e => { console.log('Error logging into Facebook', e); this.loaderObj.dismiss(); });
+    this.authProvider.logoutFromFB().then((response) => {
+      this.authProvider.loginToFB()
+        .then((res: any) => {
+          // console.log('Logged into Facebook!', res);
+          if (res.status == 'connected') {
+            this.fbAuthDetail = res.authResponse;
+            this.getFbDetail();
+          }
+        })
+        .catch(e => { console.log('Error logging into Facebook', e); this.loaderObj.dismiss(); });
+    }).catch(e => { console.log('Error logging out Facebook', e); this.loaderObj.dismiss(); });
   }
 
   getFbDetail() {
@@ -274,6 +302,16 @@ export class Registration {
         this.userInfo['hometown'] = res.hometown ? res.hometown.name : '';
         // this.userInfo['location'] = res.location ? res.location.name : '';
         this.facebookData = res;
+        this.facebookData['auth'] = this.fbAuthDetail;
+        // console.info('this.facebookData', this.facebookData);
+        // if (!this.facebookData.likes) {
+        //   this.authProvider.getUserslikes(this.fbAuthDetail['userID'])
+        //     .then((likesRes: any) => {
+        //       console.log('likesRes', likesRes);
+        //     })
+        // } else {
+        //   console.log('this.facebookData', this.facebookData);
+        // }
         // this.saveProfileImageToCloudinary();
         // this.swipeTo(this.currentTab + 2);
         this.loaderObj.dismiss();
@@ -283,6 +321,12 @@ export class Registration {
         this.loaderObj.dismiss();
       });
   }
+
+  // getNextFacebookLikes(){
+  //   if(this.facebookData.likes){
+
+  //   }
+  // }
 
   saveProfileImageToCloudinary() {
     this.cloudinaryProvider.imageLocalPath = this.facebookData.picture.data.url;

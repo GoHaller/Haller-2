@@ -11,6 +11,9 @@ export class Lists {
 
   private selectedList = [];
   private orgList = [];
+  public showOrg = [];
+  limit = 50;
+  skip = 0;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public viewCtrl: ViewController, private profileProvider: ProfileProvider) {
     this.selectedList = navParams.get('orgList');
@@ -21,6 +24,7 @@ export class Lists {
     this.profileProvider.getAllOrg().subscribe((res: any) => {
       // console.info('res', res);
       this.orgList = res;
+      this.showOrg = this.orgList.slice(this.skip, this.limit);
     })
   }
 
@@ -36,6 +40,25 @@ export class Lists {
 
   isOrgSelected(org) {
     return this.selectedList.findIndex(i => i._id === org._id) > -1;
+  }
+
+  doInfinite(infiniteScroll) {
+    if (this.showOrg.length < this.orgList.length) {
+
+      setTimeout(() => {
+
+        this.skip = this.showOrg.length;// + this.limit;
+        let end = (this.skip + this.limit) < this.orgList.length ? (this.showOrg.length + this.limit) : this.orgList.length;
+        
+        for (let i = this.skip; i < end; i++) {
+          this.showOrg.push(this.orgList[i]);
+        }
+
+        infiniteScroll.complete();
+      }, 500);
+    } else {
+      infiniteScroll.complete();
+    }
   }
 
 }

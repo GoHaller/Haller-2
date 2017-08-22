@@ -208,19 +208,26 @@ function adminlogin(req, res, next) {
     return User.getByEmail(req.body.email)
       .then((user) => { //eslint-disable-line
         if (user && user.role != 'student') {
-          const token = jwt.sign({
-            email: user.email
-          }, config.jwtSecret);
-          const userCpy = user;   // update the user status object to
-          userCpy.status.online = true; // reflect their current online status.
-          userCpy.status.currentStatus = 'online';
-          userCpy.status.activeToken = token;
-          userCpy.save().then(updatedUser =>
-            res.json({
-              token,
-              user: updatedUser,
-            })
-          );
+          bcrypt.compare(req.body.password, user.password, (err, same) => { //eslint-disable-line
+            if (same) {
+              const token = jwt.sign({
+                email: user.email
+              }, config.jwtSecret);
+              const userCpy = user;   // update the user status object to
+              userCpy.status.online = true; // reflect their current online status.
+              userCpy.status.currentStatus = 'online';
+              userCpy.status.activeToken = token;
+              userCpy.save().then(updatedUser =>
+                res.json({
+                  token,
+                  user: updatedUser,
+                })
+              );
+            } else {
+              const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
+              return next(error);
+            }
+          });
         } else {
           const error = new APIError('No User Found with that email!', httpStatus.NOT_FOUND);
           return next(error);

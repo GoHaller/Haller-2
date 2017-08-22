@@ -280,7 +280,7 @@ UserSchema.statics = {
       });
   },
 
-getByToken(token) {
+  getByToken(token) {
     return this.findOne({ passwordToken: token })
       .populate(populateMap())
       .exec()
@@ -318,7 +318,7 @@ getByToken(token) {
   list({ skip = 0, limit = 50, blocked = [], role = null } = {}) {
     let q = { _id: { $nin: blocked } };
     if (role) q.role = role;
-    console.log(q);
+    // console.log(q);
     return this.find(q)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -337,6 +337,40 @@ getByToken(token) {
       .sort({ createdAt: -1 })
       .exec();
   },
+
+  searchPeers({ userId, residence = null, skip = 0, limit = 50, blocked = [], role = 'student', search = null, orglist = [] } = {}) {
+    let andq = [];
+    andq.push({ _id: { $nin: blocked } });
+    andq.push({ _id: { $ne: userId } });
+    andq.push({ firstName: { $exists: true } });
+    if (residence) andq.push({ residence: residence });
+    andq.push({ $or: [{ isBlocked: { $exists: false } }, { isBlocked: { $ne: true } }] });
+    andq.push({ $or: [{ role: { $exists: false } }, { role: role }] });
+    if (search) {
+      let searchQ = {
+        $or: [
+          { firstName: { $regex: '^' + search, $options: 'i' } },
+          { lastName: { $regex: '^' + search, $options: 'i' } },
+          { major: { $regex: '^' + search, $options: 'i' } },
+          { hometown: { $regex: '^' + search, $options: 'i' } },
+          { 'facebook.likes.data.name': { $regex: '^' + search, $options: 'i' } },
+          { 'organizations': { $in: orglist } }]
+      }
+      andq.push(searchQ);
+    }
+    // if (orglist.length > 0) {
+    //   andq.push({ 'organizations': { $in: orglist } });
+    // }
+    let q = { $and: andq };
+    // console.log('q', JSON.stringify(q));
+    // let q = { $and: [{ residence: residence, _id: { $nin: blocked } }, { $or: [{ isBlocked: { $exists: false } }, { isBlocked: { $ne: true } }] }] };
+    return this.find(q)
+      .sort({ createdAt: -1 })
+      .skip(parseInt(skip))
+      .limit(parseInt(limit))
+      .populate(populateMap())
+      .exec();
+  },
   /**
    * List users in the current users residence in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of users to be skipped.
@@ -344,7 +378,8 @@ getByToken(token) {
    * @returns {Promise<User[]>}
    */
   listByResidence({ residence, skip = 0, limit = 50, blocked = [] } = {}) {
-    return this.find({ $and: [{ residence: residence, _id: { $nin: blocked } }, { $or: [{ isBlocked: { $exists: false } }, { isBlocked: { $ne: true } }] }] })
+    let q = { $and: [{ residence: residence, _id: { $nin: blocked } }, { $or: [{ isBlocked: { $exists: false } }, { isBlocked: { $ne: true } }] }] };
+    return this.find(q)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

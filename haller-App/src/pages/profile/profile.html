@@ -10,7 +10,8 @@
     <ion-buttons left>
       <button ion-button (click)="goBack()">Back</button>
     </ion-buttons>
-    <ion-title>{{userInfo.firstName + ' ' + userInfo.lastName}}</ion-title>
+    <ion-title>{{(userInfo.firstName || '')+ ' ' + (userInfo.lastName || '')}}</ion-title>
+    <!-- <ion-title>Profile</ion-title> -->
     <ion-buttons end *ngIf="userId == userInfo._id">
       <button ion-button (click)="gotoProfileEdit()">Edit</button>
     </ion-buttons>
@@ -25,40 +26,31 @@
   <ion-card *ngIf="!!userInfo._id">
     <ion-card-content>
       <div class="profile-image">
-        <!-- <img class="profile-image" (click)="viewFullImage(userInfo.currentProfile)" [src]="userInfo.currentProfile ? userInfo.currentProfile.secure_url : userAvatar"
-        /> -->
-
         <img class="profile-image" (click)="viewFullImage(profileProvider.httpClient.getProfileImageToDisplay(userInfo))" [src]="profileProvider.httpClient.getProfileImageToDisplay(userInfo)"
         />
-         <!-- <table class="mini-detail-table">
-          <tr>
-            <td class="rb"><b>{{userInfo.major || 'Major'}}</b></td>
-            <td class="rb"><b>{{userInfo.hometown || 'Hometown'}}</b></td>
-            <td><b>Class of {{userInfo.graduationYear || ''}}</b></td>
-          </tr>
-        </table>  -->
-          <ion-row align-items-center class="mini-detail">
-          <ion-col col-4 class="r-b-1"><b>{{userInfo.major || 'Major'}}</b></ion-col>
-          <ion-col col-4 class="r-b-1"><b>{{userInfo.hometown || 'Hometown'}}</b></ion-col>
-          <ion-col col-4><b>{{userInfo.graduationYear || 'Class'}}</b></ion-col>
-        </ion-row>   
-        <!-- <ion-row align-items-center class="mini-detail">
-          <ion-col>
-            <b style="padding:0px 10px">{{userInfo.major || 'Major'}}</b><b>|</b>
-            <b style="padding:0px 10px">{{userInfo.hometown || 'Hometown'}}</b><b>|</b>
-            <b style="padding:0px 10px">Class of {{userInfo.graduationYear || ''}}</b>
-          </ion-col>
-        </ion-row> -->
+        <div text-center class="profile-description">
+          <b>{{userInfo.hometown?((userInfo.firstName || '')+ ' ' + (userInfo.lastName || '')+' from '+userInfo.hometown):''}}</b>
+        </div>
       </div>
+      <ion-row>
+        <ion-col col-6>
+          <ion-card-title><b>Major</b></ion-card-title>
+          <p>{{userInfo.major || 'Major'}}</p>
+        </ion-col>
+        <ion-col col-6>
+          <ion-card-title><b>Class of</b></ion-card-title>
+          <p>{{userInfo.graduationYear || 'Class'}}</p>
+        </ion-col>
+      </ion-row>
       <ion-card-title><b>About</b></ion-card-title>
       <p>{{userInfo.bio || 'About'}}</p>
       <ion-card-title><b>Organizations</b></ion-card-title>
-      <p>
+      <p *ngIf="userInfo.organizations && userInfo.organizations.length > 0">
         <button *ngFor="let org of userInfo.organizations" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{org.name}}</span></button>
       </p>
       <ion-card-title><b>Interests</b></ion-card-title>
       <p>
-        <button *ngFor="let interest of userInfo.interests" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{interest.name}}</span></button>
+        <!-- <button *ngFor="let interest of userInfo.interests" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{interest.name}}</span></button> -->
         <button *ngFor="let interest of getFbLikesObject(userInfo)" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{interest.name}}</span></button>
       </p>
       <ion-card-title><b>Pronouns</b></ion-card-title>

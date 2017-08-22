@@ -1,4 +1,16 @@
 page-feed, page-feed-detail {
+    .process-spinner{
+        ion-spinner{
+            margin: 0px 0px 0px 16px !important;
+        }
+        .label{
+            margin: 0px
+        }
+        min-height: 0px;
+        // position: absolute;
+        // z-index: 1;
+        max-width: 450px;
+    }
     .toolbar-ios .segment-button{
         max-width: 65px;
     }
@@ -17,6 +29,20 @@ page-feed, page-feed-detail {
             margin-top: 0px;
             width: 100%;
             // padding: 0px 12px 0px 12px;
+            .img-container{
+                width: 100%;
+                margin-bottom: 2px;
+                img{
+                    max-height: 300px;
+                    max-width: 300px;;
+                    display: block;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+            }
+            .powered-giphy{
+                margin: 0px 16px;
+            }
             .item{
                 padding-left: 16px;
             }

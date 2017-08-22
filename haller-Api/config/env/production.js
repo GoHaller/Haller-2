@@ -8,5 +8,5 @@ export default {
     domain: 'mg.gohaller.com'
   },
   websiteUrl: 'demo.gohaller.com',
-  inviteCode: 'hallerku!'
+  inviteCode: 'gohallerku'
 };

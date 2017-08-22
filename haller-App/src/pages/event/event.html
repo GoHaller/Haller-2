@@ -12,10 +12,10 @@
     </ion-buttons>
     <ion-segment [(ngModel)]="whichfeed" color="colorwhite">
       <ion-segment-button value="residents" (ionSelect)="changeSegment('residents')">
-        Hall
+        <ion-icon class="icon hall-icon"></ion-icon>
       </ion-segment-button>
       <ion-segment-button value="discovery" (ionSelect)="changeSegment('discovery')">
-        Campus
+        <ion-icon class="icon campus-icon"></ion-icon>
       </ion-segment-button>
     </ion-segment>
     <ion-buttons right>
@@ -50,7 +50,7 @@
         <h2><b>{{event.title}}</b>&nbsp;
           <ion-icon *ngIf="event.createdBy.isRA" style="color:green" name="md-checkmark-circle-outline"></ion-icon>
         </h2>
-        <h3>{{event.time | date: 'shortTime'}}&nbsp;{{event.date | date: 'MMMM d, yyyy '}}</h3>
+        <h3>{{getlocalTime(event.date) | date: 'h:mm a'}}&nbsp;{{getlocalTime(event.date) | date: 'MMMM d, yyyy '}}</h3>
         <p>{{event.location}}</p>
         <p style="margin-top:10px">{{event.details}}</p>
       </div>
@@ -62,8 +62,8 @@
     </ion-card-content>
     <ion-row>
       <ion-col *ngIf="event.liked.length > 0 || event.comments.length > 0">
-        <button style="float:left" ion-button color="dark" clear small (click)="openLikeModel(event.liked,null)">{{event.liked.length +' Likes'}}</button>
-        <button style="float:right" ion-button color="dark" clear small (click)="openLikeModel(null,event.comments)">{{event.comments.length + ' Comments'}}</button>
+        <button style="float:left" ion-button color="dark" clear small (click)="openLikeModel(event.liked,null)">{{event.liked.length +' '}}{{event.liked.length>1||event.liked.length==0?'Likes':'Like'}}</button>
+        <button style="float:right" ion-button color="dark" clear small (click)="openLikeModel(null,event.comments)">{{event.comments.length + ' '}}{{event.comments.length>1||event.comments.length==0?'Comments':'Comment'}}</button>
         <!-- <span style="float:left" *ngIf="event.liked.length > 0" (click)="openLikeModel(event.liked,null)">{{event.liked.length +' Likes'}}</span>
         <span style="float:right" *ngIf="event.comments.length > 0" (click)="openLikeModel(null,event.comments)">{{event.comments.length + ' Comments'}}</span> -->
       </ion-col>

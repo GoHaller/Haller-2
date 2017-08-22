@@ -22,8 +22,8 @@ export class FeedComponent implements OnInit {
     public posts = [];
     public postIndex: number = 0;
     public residence: any = { home: 'Oliver' };
-    
-    
+
+
 
     skip = 0;
     limit = 10;
@@ -111,39 +111,39 @@ export class FeedComponent implements OnInit {
 
     getFeeds() {
         var userId = localStorage.getItem('uid');
-        this.postService.getFeedByResidence(userId,this.residence.home, this.isEvent, this.limit, this.skip).subscribe((res: any) => {
+        this.postService.getFeedByResidence(userId, this.residence.home, this.isEvent, this.limit, this.skip).subscribe((res: any) => {
             if (res) { this.posts = this.posts.concat(res); this.beingRefresh = false; }
-            
-            
+
+
         }, error => {
             console.log('getFeedByResidence error', error);
         })
     }
-    
-    isEmptyObject(obj) { 
+
+    isEmptyObject(obj) {
         return (obj && (Object.keys(obj).length === 0));
     }
-   
-    
+
+
     addPost(model, isValid, id) {
         if (isValid) {
             this.modalService.close(id);
-            this.detail  = model.details;
-            
+            this.detail = model.details;
+
             if (this.file && this.file.size) {
                 this.postService.cloudinaryUpload(this.file['result'], 'profile-covers')
                     .subscribe((res: any) => {
                         // console.info('cloudinaryUpload res', res);
                         if (id == 'new-feed-form') { this.createPostToApi(res); }
                         else if (id == 'new-feed-comment-form') { this.createCommentApi(res); }
-                       
+
                     }, error => {
                         console.log('cloudinaryUpload error', error);
                     });
             } else {
                 if (id == 'new-feed-form') { this.createPostToApi(null); }
                 else if (id == 'new-feed-comment-form') { this.createCommentApi(null); }
-                
+
             }
         }
     }

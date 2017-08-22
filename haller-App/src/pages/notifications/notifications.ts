@@ -14,7 +14,7 @@ export class Notifications {
   public userInfo: Object = {};
   private userMessage: string = '';
   private notifications = [];
-  private whichnotification: String = 'personal';
+  private whichnotification: String = 'university';
   private userAvatar = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public httpClient: HttpClient, private event: Events) {

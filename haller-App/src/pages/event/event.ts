@@ -24,7 +24,7 @@ export class EventPage {
   private infiniteScroll = null;
   private startskip = 0;
   private skip: number = 0;
-  private limit: number = 50;
+  private limit: number = 10;
   private cleanList: Boolean = false;
   private userAvatar = '';
 
@@ -111,9 +111,14 @@ export class EventPage {
   viewProfile(user) {
     this.navCtrl.push('Profile', { userData: user }, { animate: true, direction: 'forward' });
   }
-
+  getlocalTime(date) {
+    let d = new Date(date);
+    let timeOffset = d.getTimezoneOffset();
+    d.setMinutes(d.getMinutes() + timeOffset);
+    return d;
+  }
   gotoProfileSetting() {
-    this.navCtrl.push('ProfileSettings', {}, { animate: true, direction: 'forward' });
+    this.navCtrl.push('ProfileSettings', {}, { animate: true, direction: 'back' });
   }
 
   allowUserToPost() {
@@ -189,7 +194,7 @@ export class EventPage {
 
   presentEventActionSheet(event) {
     let options = [];
-    options.push({ text: event._userFlagged ? 'Un-flag' : 'Flag', handler: () => { } });
+    options.push({ text: event._userFlagged ? 'Unflag' : 'Flag', handler: () => { } });
     if (event.createdBy._id == this.userInfo['_id']) {
       options.push({ text: 'Edit', handler: () => { this.gotoEditFeed(event); } });
       options.push({ text: 'Delete', handler: () => { this.confirmEventDeletion(event) } });

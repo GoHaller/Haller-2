@@ -6,17 +6,18 @@ import { FeedProvider } from '../../shared/providers/feed.provider';
 import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
 import { Camera } from '@ionic-native/camera';
 import { Transfer } from '@ionic-native/transfer';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
 
 @NgModule({
   declarations: [
-    Feed, 
+    Feed,
   ],
   imports: [
     IonicPageModule.forChild(Feed),
   ],
   exports: [
-    Feed, 
+    Feed,
   ],
-  providers: [HttpClient, FeedProvider, CloudinaryProvider, Camera, Transfer]
+  providers: [HttpClient, FeedProvider, CloudinaryProvider, Camera, Transfer, InAppBrowser]
 })
 export class FeedModule { }

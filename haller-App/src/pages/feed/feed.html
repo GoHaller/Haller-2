@@ -11,16 +11,22 @@
     </ion-buttons>
     <ion-segment [(ngModel)]="whichfeed" color="colorwhite">
       <ion-segment-button value="residents" (ionSelect)="changeSegment('residents')">
-        Hall
+        <ion-icon class="icon hall-icon"></ion-icon>
       </ion-segment-button>
       <ion-segment-button value="discovery" (ionSelect)="changeSegment('discovery')">
-        Campus
+        <ion-icon class="icon campus-icon"></ion-icon>
       </ion-segment-button>
     </ion-segment>
     <ion-buttons right>
       <button (click)="gotoFeedNew()" *ngIf="allowUserToPost()" ion-button>Create</button>
     </ion-buttons>
   </ion-toolbar>
+  <!-- <ion-toolbar no-border-top style="padding: 0px;min-height:auto">
+    <ion-item class="process-spinner" *ngIf="proceesedPost != proceesingPost">
+      <ion-spinner item-left name="bubbles"></ion-spinner>
+      <h4>Uploading... ({{proceesedPost}}/{{proceesingPost}})</h4>
+    </ion-item>
+  </ion-toolbar> -->
 </ion-header>
 
 <ion-content>
@@ -41,13 +47,23 @@
       <button ion-button icon-only item-right clear small color="newlight" (click)="presentFeedActionSheet(feed)"><ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon></button>
     </ion-item>
     <img *ngIf="feed.cover.length > 0" (click)="gototFeedDetail(feed)" [src]="feed.cover[feed.cover.length - 1].secure_url">
-    <ion-card-content *ngIf="feed.details" (click)="gototFeedDetail(feed)">
+    <div *ngIf="feed.giphy" class="img-container"><img [src]="feed.giphy.gif.url" /></div>
+    <div *ngIf="feed.giphy" class="powered-giphy">
+      <ion-note>Powered by GIPHY</ion-note>
+    </div>
+    <ion-card-content *ngIf="feed.details && !checkLink(feed.details)" (click)="gototFeedDetail(feed)">
       <p>{{feed.details}}</p>
     </ion-card-content>
+    <ion-card-content *ngIf="feed.details && checkLink(feed.details)" (click)="openExternalLink(feed.details)">
+      <p class="link-text">{{feed.details}}</p>
+    </ion-card-content>
+    <!-- <ion-card-content *ngIf="feed.details">
+      <p [innerHTML]="linkify(feed.details)"></p>
+    </ion-card-content> -->
     <ion-row class="action-count">
       <ion-col *ngIf="feed.liked.length > 0 || feed.comments.length > 0">
-        <button style="float:left" ion-button color="dark" clear small (click)="openLikeModel(feed.liked,null)">{{feed.liked.length +' Likes'}}</button>
-        <button style="float:right" ion-button color="dark" clear small (click)="openLikeModel(null,feed.comments)">{{feed.comments.length + ' Comments'}}</button>
+        <button style="float:left" ion-button color="dark" clear small (click)="openLikeModel(feed.liked,null)">{{feed.liked.length +' '}}{{feed.liked.length>1||feed.liked.length==0?'Likes':'Like'}}</button>
+        <button style="float:right" ion-button color="dark" clear small (click)="openLikeModel(null,feed.comments)">{{feed.comments.length + ' '}}{{feed.comments.length>1||feed.comments.length==0?'Comments':'Comment'}}</button>
         <!-- <span style="float:left" *ngIf="feed.liked.length > 0" (click)="openLikeModel(feed.liked,null)">{{feed.liked.length +' Likes'}}</span> -->
         <!-- <span style="float:right" *ngIf="feed.comments.length > 0" (click)="openLikeModel(null,feed.comments)">{{feed.comments.length + ' Comments'}}</span> -->
       </ion-col>

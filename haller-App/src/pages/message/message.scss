@@ -5,7 +5,10 @@ page-message {
         }
     }
     .user-image{
-        width: 4vh;
+        img{
+            width: 6vh;
+            border-radius: 50%;
+        }
     }
     .new-msg{
         border: 1px solid rgba(0,0,0,0.2);

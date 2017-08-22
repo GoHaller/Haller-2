@@ -1,7 +1,9 @@
 page-feed-new {
     .footer{
         border-top: 2px solid color($colors, light);
+        background-color: #fff;
     }
+    
     .scroll-content{
         // padding: 0px 16px 16px;
     }
@@ -48,8 +50,5 @@ page-feed-new {
                 border-bottom: none;
             }
         }
-    }
-    .footer{
-      background-color: #fff;
     }
 }

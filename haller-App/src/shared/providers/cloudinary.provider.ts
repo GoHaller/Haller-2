@@ -72,7 +72,7 @@ export class CloudinaryProvider {
   public takePictureFromCamera() {
     // Create options for the Camera Dialog
     var options = {
-      quality: 100,
+      quality: 20,
       allowEdit: true,
       sourceType: this.camera.PictureSourceType.CAMERA,
       saveToPhotoAlbum: false,
@@ -95,6 +95,14 @@ export class CloudinaryProvider {
 
     // Get the data of an image
     return this.camera.getPicture(options);
+  }
+
+  public uploadPictureWithData(preset, imagePath) {
+    const fileTransfer: TransferObject = this.transfer.create();
+    let uploadOptions = {
+      params: { 'upload_preset': preset }
+    };
+    return fileTransfer.upload(imagePath, this.clodinaryApi, uploadOptions)
   }
 
   public uploadPicture(preset) {

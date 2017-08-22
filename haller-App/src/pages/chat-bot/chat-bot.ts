@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Content, LoadingController } from 'ionic-angular';
 import { ConvoProvider } from "../../shared/providers/convo.provider";
 import { Storage } from '@ionic/storage';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
@@ -30,9 +30,10 @@ export class ChatBot {
 
 
   //, private googleMaps: GoogleMaps
-  @ViewChild('mapCanvas') mapElement: ElementRef;
+  // @ViewChild('mapCanvas') mapElement: ElementRef;
+  @ViewChild(Content) content: Content;
   constructor(public navCtrl: NavController, private elementRef: ElementRef, public navParams: NavParams,
-    private convoProvider: ConvoProvider, private iab: InAppBrowser) {
+    private convoProvider: ConvoProvider, private iab: InAppBrowser, private loadingCtrl: LoadingController) {
     this.local = new Storage('localstorage');
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
@@ -43,6 +44,11 @@ export class ChatBot {
 
   ionViewDidLoad() {
     // console.log('ionViewDidLoad ChatBot');
+  }
+
+  callFunction() {
+    this.content.scrollToBottom(0);
+    return '';
   }
 
   getBotUser() {
@@ -125,7 +131,8 @@ export class ChatBot {
         if (!msg.platform) {
           if (msg.type == 0) {
             if (res.result.action.indexOf('location') == -1) {
-              botConvo.push({ id: res['id'], body: msg.speech });
+              // botConvo.push({ id: res['id'], body: msg.speech });
+              this.extractLink(msg.speech, botConvo, res['id']);
             } else {
               botConvo.push({ id: res['id'], location: msg.speech });
             }
@@ -138,7 +145,7 @@ export class ChatBot {
             botConvo.push({ id: res['id'], body: msg.title, image: msg.imageUrl });
           } else if (msg.payload) {
             if (msg.payload.link) {
-              botConvo.push({ id: res['id'], link: msg.payload.link, linkText: msg.payload.linkText || "Show on map" });
+              botConvo.push({ id: res['id'], link: msg.payload.link, linkText: msg.payload.linkText || msg.payload.link });
             }
             if (msg.payload.location) {
               botConvo.push({ id: res['id'], location: msg.payload.location, linkText: msg.payload.linkText || "Show on map" });
@@ -151,10 +158,50 @@ export class ChatBot {
         }
       });
     } else if (res.result.fulfillment && res.result.fulfillment.speech) {
-      botConvo.push({ id: res['id'], body: res.result.fulfillment.speech, date: new Date() });
+      // botConvo.push({ id: res['id'], body: res.result.fulfillment.speech });
+      this.extractLink(res.result.fulfillment.speech, botConvo, res['id']);
     }
     return botConvo;
   }
+
+  extractLink(body, botConvo, id) {
+    let exp = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?");
+    let links = exp.exec(body);
+    if (links && links[0]) {
+      let urls = links[0].split(' ');
+      urls.forEach(url => {
+        // body = body.replace(url, '');
+        let bs = body.split(url);
+        botConvo.push({ id: id, body: bs[0] });
+        body = bs[1];
+        botConvo.push({ id: id, link: url, linkText: url });
+      });
+      // botConvo.push({ id: id, body: body });
+    } else {
+      botConvo.push({ id: id, body: body });
+    }
+  }
+
+  // private linkify(plainText): string {
+  //   let replacedText;
+  //   let replacePattern1;
+  //   let replacePattern2;
+  //   let replacePattern3;
+
+  //   //URLs starting with http://, https://, or ftp://
+  //   replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+  //   replacedText = plainText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+
+  //   //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+  //   replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+  //   replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+
+  //   //Change email addresses to mailto:: links.
+  //   replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+  //   replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+  //   return replacedText;
+  // }
 
   openExternalLink(link) {
     this.iab.create(link, '_system');
@@ -165,15 +212,24 @@ export class ChatBot {
   }
 
   getConversationForRecipient() {
+    let loader = this.loadingCtrl.create({
+      content: "Please wait...",
+      // duration: 3000,
+      dismissOnPageChange: true
+    });
+    loader.present();
     this.convoProvider.getConversationForRecipient(this.userInfo['_id'], this.botInfo['_id'], true)
       .subscribe((res: any) => {
+        loader.dismiss();
         if (res[0])
           this.conversation = res[0];
         if (this.conversation) {
           this.conversationId = this.conversation['_id'];
+          // console.log(this.conversationId);
           this.parseConversation();
         }
       }, error => {
+        loader.dismiss();
         console.info('usres error', error);
       });
   }

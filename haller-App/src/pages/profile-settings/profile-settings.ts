@@ -29,14 +29,15 @@ export class ProfileSettings {
     public profileProvider: ProfileProvider, private event: Events, public alertCtrl: AlertController,
     public toastCtrl: ToastController, public loadingCtrl: LoadingController) {
     this.local = new Storage('localstorage');
+    this.ionViewDidEnter();
   }
 
   ionViewDidLoad() {
-    this.event.subscribe('user-updated', () => {
-      this.local.get('userInfo').then((val) => {
-        this.userInfo = JSON.parse(val);
-      });
-    });
+    // this.event.subscribe('user-updated', () => {
+    //   this.local.get('userInfo').then((val) => {
+    //     this.userInfo = JSON.parse(val);
+    //   });
+    // });
   }
 
   ionViewDidEnter() {
@@ -46,6 +47,9 @@ export class ProfileSettings {
       // this.facebookBtnShow = this.userInfo['facebook'] && this.userInfo['facebook'].id && this.userInfo['password'] ? true : false;
       this.uid = this.userInfo['_id'];
     })
+  }
+  goBack() {
+    this.navCtrl.pop({ animate: true, direction: 'forward' });
   }
 
   goToAddress(page: string) {

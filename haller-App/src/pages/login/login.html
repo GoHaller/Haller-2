@@ -7,7 +7,7 @@
     <form [formGroup]="authForm" class="text-center" (ngSubmit)="loginClicked(authForm.value)">
       <ion-list>
         <ion-item>
-          <ion-input type="text" placeholder="KU Email" formControlName="email"></ion-input>
+          <ion-input type="email" placeholder="KU Email" formControlName="email"></ion-input>
         </ion-item>
         <ion-item>
           <ion-input type="password" placeholder="Password" formControlName="password"></ion-input>

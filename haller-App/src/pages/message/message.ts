@@ -7,6 +7,7 @@ import { TabsPage } from "../tabs/tabs";
 import { ConvoProvider } from "../../shared/providers/convo.provider";
 import { ImageFullComponent } from '../../shared/pages/image.full';
 import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
+import { InAppBrowser } from "@ionic-native/in-app-browser";
 
 /**
  * Generated class for the Message page.
@@ -37,14 +38,18 @@ export class Message {
   private localImage: String = null;
   private cloudinaryImageData: Object = null;
   private userAvatar = '';
+  private autoscrollToBottomOnLoad: boolean = false;
 
   constructor(public modalCtrl: ModalController, public navCtrl: NavController, public navParams: NavParams,
     public convoProvider: ConvoProvider, public cloudinaryProvider: CloudinaryProvider, private event: Events,
-    public loadingCtrl: LoadingController, private zone: NgZone, public alertCtrl: AlertController) {
+    public loadingCtrl: LoadingController, private zone: NgZone, public alertCtrl: AlertController, private iab: InAppBrowser) {
     this.conversationId = this.navParams.data.conversationId;
 
     this.recipients = this.navParams.data.recipients ? [this.navParams.data.recipients] : [];
+
     this.userAvatar = convoProvider.httpClient.userAvatar;
+
+    this.recipients = this.navParams.get('selected') || this.recipients;
 
     this.local = new Storage('localstorage');
     this.local.get('userInfo').then((val) => {
@@ -52,12 +57,13 @@ export class Message {
       if (this.conversationId) {
         this.isNewConvo = false;
         this.getConversation();
-      } else if (this.recipients.length) {
+      } else if (this.recipients.length == 1) {
         this.getConversationForRecipient();
-      } else {
+      } else if (this.recipients.length == 0) {
         this.isNewConvo = true;
-        this.getUsers();
+        // this.getUsers();
       }
+
     });
     this.event.subscribe('notification:message', (conversationId) => {
       this.zone.run(() => {
@@ -73,6 +79,12 @@ export class Message {
         });
       }
     });
+  }
+
+  callFunction() {
+    if (this.autoscrollToBottomOnLoad)
+      this.content.scrollToBottom(0);
+    return '';
   }
 
   onPageWillLeave() {
@@ -92,9 +104,9 @@ export class Message {
   }
 
   ionViewDidLoad() {
-    setTimeout(() => {
-      this.content.scrollTo(0, 100000);
-    }, 1000);
+    // setTimeout(() => {
+    //   this.content.scrollTo(0, 100000);
+    // }, 1000);
     this.event.subscribe('image-loaded', () => {
       this.localImage = this.cloudinaryProvider.imageLocalPath;
     });
@@ -159,10 +171,14 @@ export class Message {
   getConversationForRecipient() {
     this.convoProvider.getConversationForRecipient(this.userInfo['_id'], this.recipients[0]['_id']).subscribe((res: any) => {
       // res[0].messages = this.setMessagesIfUserDeleted(res[0]);
-      this.conversation = res[0];
-      if (this.conversation)
-        this.conversationId = this.conversation['_id'];
-      this.markMessageAsRead();
+      console.log('res', res);
+      if (res.length) {
+        this.autoscrollToBottomOnLoad = true;
+        this.conversation = res[0];
+        if (this.conversation)
+          this.conversationId = this.conversation['_id'];
+        this.markMessageAsRead();
+      }
     }, error => {
       console.info('usres error', error);
     });
@@ -180,6 +196,7 @@ export class Message {
     this.convoProvider.getConversation(this.conversationId, this.userInfo['_id']).subscribe((res: any) => {
       // res.messages = this.setMessagesIfUserDeleted(res);
       this.conversation = res;
+      this.autoscrollToBottomOnLoad = true;
       // console.info('conversation', this.conversation);
       this.recipients = this.conversation['participants'].filter(part => {
         return part._id !== this.userInfo['_id'];
@@ -277,6 +294,8 @@ export class Message {
         }).subscribe((res: any) => {
           this.isNewConvo = false;
           this.conversation = res;
+          if (this.conversation)
+            this.conversationId = this.conversation['_id'];
           this.msgContent = '';
           this.localImage = '';
           this.cloudinaryImageData = null;
@@ -384,7 +403,7 @@ export class Message {
 
   showUserList() {
     new Promise((resolve, reject) => {
-      this.navCtrl.push('Peers', { resolve: resolve }, { animate: true, direction: 'forward' })
+      this.navCtrl.push('Peers', { resolve: resolve, selected: this.recipients }, { animate: true, direction: 'forward' })
     }).then((data: any) => {
       if (data.length > 0) {
         this.recipients = data;
@@ -396,6 +415,20 @@ export class Message {
         if (data.length == 1) this.getConversationForRecipient();
       }
     });
+  }
+
+  openExternalLink(link) {
+    if (this.checkLink(link)) {
+      if (link.indexOf('http') > 5 || link.indexOf('http') == -1)
+        link = 'http://' + link;
+      this.iab.create(link, '_system');
+    }
+  }
+
+  checkLink(detail) {
+    // let exp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+    let exp = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?");
+    return exp.test(detail)
   }
 }
 

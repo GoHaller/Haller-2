@@ -73,7 +73,8 @@ export class Messages {
   }
 
   composeNewMessage() {
-    this.navCtrl.push('Message', {}, { animate: true, direction: 'forward' });
+    // this.navCtrl.push('Message', {}, { animate: true, direction: 'forward' });
+    this.navCtrl.push('Peers', { selection: true }, { animate: true, direction: 'forward' });
   }
 
   showConversation(msg) {
@@ -82,8 +83,9 @@ export class Messages {
     }).then(data => {
       let convo = this.messageList.filter(convo => {
         return convo['_id'] == data['_id'];
-      })[0];
-      convo.messages = data['messages'];
+      });
+      if (convo.length)
+        convo[0].messages = data['messages'];
     });
 
   }
@@ -145,7 +147,7 @@ export class Messages {
     }
   }
 
-  gotoBotCherry() {
+  gotoInfoBot() {
     this.navCtrl.push('ChatBot', {}, { animate: true, direction: 'forward' });
   }
 }

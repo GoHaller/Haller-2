@@ -43,7 +43,7 @@ export class ProblemReport {
     this.sendProblem(data)
       .subscribe((res: any) => {
         let toast = this.toastCtrl.create({
-          message: 'Your issue has been reported, Thank you',
+          message: 'Your issue has been reported. Thank you.',
           duration: 5000,
           position: 'top'
         });

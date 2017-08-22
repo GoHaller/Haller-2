@@ -44,4 +44,11 @@ export class ProfileProvider {
         return this.httpClient.get('/users/' + userId + '/list/?skip=' + skip + '&limit=' + limit).map(this.httpClient.extractData)
             .catch(this.httpClient.extractError);
     }
+
+    serachPeers(userId, skip, limit, residence = null, searchKeyword = null) {
+        let query = 'skip=' + skip + '&limit=' + limit;
+        if (residence) query += '&residence=' + residence;
+        if (searchKeyword) query += '&search=' + searchKeyword;
+        return this.httpClient.get('/users/' + userId + '/search/?' + query).map(this.httpClient.extractData)
+    }
 }

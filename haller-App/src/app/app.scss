@@ -30,6 +30,9 @@ ion-title {
    text-align: center;
    z-index: -1;
 }
+  .link-text{
+    color: color($colors,primary) !important;
+  }
 .scroll-content{
     overflow-y: auto !important;
     // padding: 16px !important;
@@ -126,6 +129,8 @@ ion-item.ng-dirty.ng-invalid{
 
 .gif-icon{content: url('../assets/icon/GIF_icon.png');height: 12px; width: 14px;}
 .comment-icon{content: url("../assets/icon/chat_icon.png");height: 15px;}
+.hall-icon{content: url("../assets/img/hall-icon.png");height: 17px;margin-top: 3px;}
+.campus-icon{content: url("../assets/img/campus-icon.png");height: 17px;margin-top: 3px;}
 
 .bar-button-md, .button, .segment .segment-button{
     text-transform: none;

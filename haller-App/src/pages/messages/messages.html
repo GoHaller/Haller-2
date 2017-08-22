@@ -35,11 +35,11 @@
 
   <ion-list class="msg-list">
     <ion-list-header class="bot-header">Bots</ion-list-header>
-    <ion-item class="read-convo" (click)="gotoBotCherry()">
+    <ion-item class="read-convo" (click)="gotoInfoBot()">
       <ion-avatar item-left>
         <img src="assets/img/user-group.png">
       </ion-avatar>
-      <h2>Cherry</h2>
+      <h2>InfoBot</h2>
     </ion-item>
     <ion-list-header>Conversations</ion-list-header>
     <ion-item *ngFor="let msg of messageList | convosearch:['firstName','lastName',searchText]" [ngClass]="checkMsgIfRead(msg.messages[msg.messages.length - 1]) ? '':'read-convo'">
@@ -51,9 +51,10 @@
       <ion-avatar item-left *ngIf="msg.participants.length > 2" (click)="showConversation(msg)">
         <img [src]="groupAvatar">
       </ion-avatar>
-      <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length == 2 && msg.participants[0] && msg.participants[0]._id !== userInfo._id">{{msg.participants[0].firstName + ' ' + msg.participants[0].lastName}}</h2>
-      <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length == 2 && msg.participants[1] && msg.participants[1]._id !== userInfo._id">{{msg.participants[1].firstName + ' ' + msg.participants[1].lastName}}</h2>
-      <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length > 2">{{getGroupChatName(msg)+ ' (' + msg.participants.length + ')'}}</h2>
+      <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length == 2 && msg.participants[0] && msg.participants[0]._id !== userInfo._id"><span>{{msg.participants[0].firstName + ' ' + msg.participants[0].lastName}}</span></h2>
+      <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length == 2 && msg.participants[1] && msg.participants[1]._id !== userInfo._id"><span>{{msg.participants[1].firstName + ' ' + msg.participants[1].lastName}}</span></h2>
+      <h2 (click)="showConversation(msg)" *ngIf="msg.participants.length > 2"><span>{{getGroupChatName(msg)}}</span></h2>
+      <!-- + ' (' + msg.participants.length + ')' -->
       <p (click)="showConversation(msg)">
         <!--<span *ngIf="msg.participants.length > 2">-->
         {{msg.messages[msg.messages.length - 1].createdBy._id == userInfo._id ? 'You' : msg.messages[msg.messages.length - 1].createdBy.firstName}}:&nbsp;

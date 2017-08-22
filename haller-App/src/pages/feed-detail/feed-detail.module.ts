@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { Camera } from '@ionic-native/camera';
 import { Transfer } from '@ionic-native/transfer';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
 
 import { FeedDetail } from './feed-detail';
 import { HttpClient } from '../../shared/providers/http-client';
@@ -18,6 +19,6 @@ import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
   exports: [
     FeedDetail
   ],
-  providers: [HttpClient, FeedProvider, CloudinaryProvider, Camera, Transfer]
+  providers: [HttpClient, FeedProvider, CloudinaryProvider, Camera, Transfer, InAppBrowser]
 })
-export class FeedDetailModule {}
+export class FeedDetailModule { }

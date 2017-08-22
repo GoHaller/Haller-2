@@ -51,13 +51,16 @@ app.use(express.static(__dirname + '/public')); //eslint-disable-line
 app.use('/api', routes);
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {
+  // console.log('err', err);
   if (err instanceof expressValidation.ValidationError) {
     // validation error contains errors which is an array of error each containing message[]
     const unifiedErrorMessage = err.errors.map(error => error.messages.join('. ')).join(' and ');
     const error = new APIError(unifiedErrorMessage, err.status, true);
+    // console.log('error', error);
     return next(error);
   } else if (!(err instanceof APIError)) {
     const apiError = new APIError(err.message, err.status, err.isPublic);
+    // console.log('APIError', apiError);
     return next(apiError);
   } else {
     return next(err);
@@ -74,11 +77,12 @@ app.use((req, res, next) => {
 //   }));
 // }
 // error handler, send stacktrace only during development
-app.use((err, req, res, next) => // eslint-disable-line no-unused-vars
+app.use((err, req, res, next) => {// eslint-disable-line no-unused-vars
   res.status(err.status).json({
-    message: err.isPublic ? err.message : httpStatus[err.status],
+    // message: err.isPublic ? err.message : httpStatus[err.status],
+    message: err.message || httpStatus[err.status],
     stack: config.env === 'development' ? err.stack : {}
   })
-);
+});
 
 export default app;

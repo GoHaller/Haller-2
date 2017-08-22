@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { PopoverController, IonicPage, NavController, NavParams, LoadingController, ActionSheetController, AlertController, Events, ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { FeedProvider } from '../../shared/providers/feed.provider';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
 
 @IonicPage()
 @Component({
@@ -18,14 +19,18 @@ export class Feed {
   public infiniteScroll = null;
   public startskip = 0;
   public skip: number = 0;
-  public limit: number = 50;
+  public limit: number = 10;
   public cleanList: Boolean = false;
   public userAvatar = '';
+  public proceesingPost = 0;
+  public proceesedPost = 0;
+
   // private loader: any;
   constructor(public navCtrl: NavController, public navParams: NavParams,
     public feedProvider: FeedProvider, private loadingCtrl: LoadingController,
     private popoverCtrl: PopoverController, public actionSheetCtrl: ActionSheetController,
-    private alertCtrl: AlertController, private event: Events, private modalCtrl: ModalController) {
+    private alertCtrl: AlertController, private event: Events, private modalCtrl: ModalController,
+    private iab: InAppBrowser) {
     this.local = new Storage('localstorage');
     this.userAvatar = feedProvider.httpClient.userAvatar;
   }
@@ -49,6 +54,7 @@ export class Feed {
     return (this.whichfeed == 'discovery' && this.feedProvider.isAdmin(this.userInfo['email'])) || this.whichfeed != 'discovery'
   }
 
+
   gotoFeedNew() {
     if (this.allowUserToPost()) {
       new Promise((resolve, reject) => {
@@ -57,9 +63,11 @@ export class Feed {
         if (data !== null) {
           this.feedList.unshift(data);
         }
+        // this.addEditFeed(null, data);
       });
     }
   }
+
   gototFeedDetail(feed) {
     new Promise((resolve, reject) => {
       this.navCtrl.push('FeedDetail', { feed: feed, resolve: resolve }, { animate: true, direction: 'forward' })
@@ -68,13 +76,40 @@ export class Feed {
         this.updateFeed(feed, data);
     });
   }
+
   gotoEditFeed(feed) {
     new Promise((resolve, reject) => {
       this.navCtrl.push('FeedNew', { feed: feed, resolve: resolve }, { animate: true, direction: 'forward' })
     }).then(data => {
       if (data['_id'] == feed['_id'])
         this.updateFeed(feed, data);
+      // this.addEditFeed(feed, data);
     });
+  }
+
+  addEditFeed(oldfeed, feed) {
+    if (this.proceesedPost == this.proceesingPost) {
+      this.proceesedPost = 0;
+      this.proceesingPost = 0;
+    }
+    this.proceesingPost += 1;
+    this.feedProvider.addFeed(feed)
+      .subscribe((observ: any) => {
+        observ.subscribe((res: any) => {
+          if (oldfeed && oldfeed['_id'] == res['_id'])
+            this.updateFeed(oldfeed, res);
+          else if (oldfeed == null) {
+            this.feedList.unshift(res);
+          }
+          this.proceesedPost += 1;
+        }, error => {
+          console.info('error', error);
+          this.proceesedPost += 1;
+        })
+      }, error => {
+        console.info('error', error);
+        this.proceesedPost += 1;
+      })
   }
 
   viewProfile(user) {
@@ -83,7 +118,7 @@ export class Feed {
   }
 
   gotoProfileSetting() {
-    this.navCtrl.push('ProfileSettings', {}, { animate: true, direction: 'forward' });
+    this.navCtrl.push('ProfileSettings', {}, { animate: true, direction: 'back' });
   }
 
   updateFeed(oldFeed, newFeed) {
@@ -150,7 +185,7 @@ export class Feed {
 
   presentFeedActionSheet(feed) {
     let options = [];
-    options.push({ text: feed._userFlagged ? 'Un-flag' : 'Flag', handler: () => { this.flagFeed(feed) } });
+    options.push({ text: feed._userFlagged ? 'Unflag' : 'Flag', handler: () => { this.flagFeed(feed) } });
     // options.push({ text: 'Share', handler: () => { this.shareFeed(feed) } });
     if (feed.createdBy._id == this.userInfo['_id']) {
       options.push({ text: 'Edit', handler: () => { this.gotoEditFeed(feed); } });
@@ -240,6 +275,20 @@ export class Feed {
       console.info('data', data);
     });
     modal.present();
+  }
+
+  openExternalLink(link) {
+    if (this.checkLink(link)) {
+      if (link.indexOf('http') > 5 || link.indexOf('http') == -1)
+        link = 'http://' + link;
+      this.iab.create(link, '_system');
+    }
+  }
+
+  checkLink(detail) {
+    // let exp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+    let exp = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?");
+    return exp.test(detail)
   }
 
 }

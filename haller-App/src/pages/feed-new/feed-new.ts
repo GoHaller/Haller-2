@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, LoadingController, AlertController, ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 
 import { FeedProvider } from '../../shared/providers/feed.provider';
@@ -33,7 +33,7 @@ export class FeedNew {
   private userAvatar = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public feedProvider: FeedProvider,
-    public loadingCtrl: LoadingController) {
+    public loadingCtrl: LoadingController, public alertCtrl: AlertController, public modalCtrl: ModalController) {
     this.feed = this.navParams.get('feed') || this.feed;
     this.local = new Storage('localstorage');
     this.userAvatar = feedProvider.httpClient.userAvatar;
@@ -66,41 +66,69 @@ export class FeedNew {
 
   removeImage() {
     this.feedProvider.cloudinaryProvider.imageLocalPath = null;
+    this.feedProvider.cloudinaryProvider.gif = {};
   }
 
   takePictureFromPhotoLibrary() {
     this.feedProvider.cloudinaryProvider.pictureFromPhotoLibrary();
   }
+
   takePictureFromCamera() {
     this.feedProvider.cloudinaryProvider.pictureFromCamera()
   }
 
   addEditFeed() {
     // this.feed['cover'] = this.feedProvider.cloudinaryProvider.imageLocalPath ? [this.feedProvider.cloudinaryProvider.imageLocalPath] : [];
-    this.feed['createdAt'] = new Date();
-    let loader = this.loadingCtrl.create({
-      content: "Please wait...",
-      dismissOnPageChange: true
-    });
-    loader.present();
-    this.feedProvider.addFeed(this.feed)
-      .subscribe((observ: any) => {
-        observ.subscribe((res: any) => {
-          loader.dismiss();
-          this.feed = res;
-          this.removeImage();
-          this.goBack();
+    if (this.feed['details'] || this.feedProvider.cloudinaryProvider.gif['id'] || this.feedProvider.cloudinaryProvider.imageLocalPath) {
+      this.feed['createdAt'] = new Date();
+      let loader = this.loadingCtrl.create({
+        content: "Please wait...",
+        dismissOnPageChange: true
+      });
+      loader.present();
+      if (this.feedProvider.cloudinaryProvider.gif['id']) {
+        this.feed['giphy'] = this.feedProvider.cloudinaryProvider.gif;
+      }
+      if (this.feedProvider.cloudinaryProvider.imageLocalPath) {
+        this.feed['cover'] = this.feedProvider.cloudinaryProvider.imageLocalPath;
+      }
+      // this.navParams.get('resolve')(this.feed);
+      // this.removeImage();
+      // this.goBack();
+      this.feedProvider.addFeed(this.feed)
+        .subscribe((observ: any) => {
+          observ.subscribe((res: any) => {
+            loader.dismiss();
+            this.feed = res;
+            this.removeImage();
+            this.goBack();
+          }, error => {
+            console.info('error', error);
+            loader.dismiss();
+          })
         }, error => {
           console.info('error', error);
           loader.dismiss();
         })
-      }, error => {
-        console.info('error', error);
-        loader.dismiss();
-      })
+    } else {
+      this.alertCtrl.create({ subTitle: "Please fill in some information", buttons: ['OK'] }).present();
+    }
   }
 
   onPageWillLeave() {
     this.removeImage();
+  }
+
+  showGiphyGif() {
+    let gifModal = this.modalCtrl.create('GiphyModel');
+    gifModal.onDidDismiss(gif => {
+      if (gif) {
+        // this.cloudinaryProvider.imageLocalPath = gif.images.fixed_height_downsampled.url;
+        this.feedProvider.cloudinaryProvider.gif['id'] = gif.id;
+        this.feedProvider.cloudinaryProvider.gif['still'] = gif.images.fixed_height_still;
+        this.feedProvider.cloudinaryProvider.gif['gif'] = gif.images.fixed_height_downsampled;
+      }
+    });
+    gifModal.present();
   }
 }

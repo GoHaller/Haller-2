@@ -56,7 +56,10 @@ export class Login {
       dismissOnPageChange: true
     });
     loader.present();
+    if (data.email)
+      data.email = data.email.trim();
     this.authProvider.login(data).subscribe((res: any) => {
+      console.log('login res', res);
       if (res.isBlocked) {
         let prompt = this.alertCtrl.create({
           title: 'Blocked',
@@ -76,19 +79,25 @@ export class Login {
         this.local.set('uid', res.user._id);
         this.local.set('userInfo', JSON.stringify(res.user)).then(() => {
           this.local.get('fcm-data').then((val) => {
+            console.log('fcm-data val', val);
             if (val) {
               let fcmData = JSON.parse(val);
-              let userData = res.user['notifications'];
-              userData.deviceToken = fcmData.deviceData.token;
-              userData.os = fcmData.deviceData.os;
-              this.ProfileProvider.updateUser(res.user._id, { 'notifications': userData })
-                .subscribe((re: any) => {
-                  loader.dismiss();
-                  this.gotoTabsPage();
-                }, error => {
-                  loader.dismiss();
-                  console.info('updateUser error', error);
-                });
+              if (fcmData.deviceData) {
+                let userData = res.user['notifications'];
+                userData.deviceToken = fcmData.deviceData.token;
+                userData.os = fcmData.deviceData.os;
+                this.ProfileProvider.updateUser(res.user._id, { 'notifications': userData })
+                  .subscribe((re: any) => {
+                    loader.dismiss();
+                    this.gotoTabsPage();
+                  }, error => {
+                    loader.dismiss();
+                    console.info('updateUser error', error);
+                  });
+              } else {
+                loader.dismiss();
+                this.gotoTabsPage();
+              }
             } else {
               loader.dismiss();
               this.gotoTabsPage();

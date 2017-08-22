@@ -16,10 +16,10 @@ declare var $: any;
 export class LoginComponent implements OnInit {
     test: Date = new Date();
     userObj: any = { email: "", password: "" };
-    public email:any;
-    public emailStatus:Boolean=false;
-    public sendMailStatus:Boolean=false;
-    constructor(private authService: AuthService, private router: Router,private modalService: ModalService,private userService: UserService) {
+    public email: any;
+    public emailStatus: Boolean = false;
+    public sendMailStatus: Boolean = false;
+    constructor(private authService: AuthService, private router: Router, private modalService: ModalService, private userService: UserService) {
         if (localStorage.getItem('uid'))
             this.router.navigate(['/analitics-dashboard']);
     }
@@ -59,36 +59,35 @@ export class LoginComponent implements OnInit {
                 console.info('login error', error);
             })
     }
-    forgotpassword()
-    {
-       this.modalService.open("forgot");  
+    forgotpassword() {
+        this.email = '';
+        this.emailStatus = false;
+        this.sendMailStatus = false;
+        this.modalService.open("forgot");
     }
     closeModal() {
-    this.modalService.close("forgot");
-  }
-  sendEmail()
-  {
-    console.log("in email");
-    
-  }
-  forgotrequest(email:any)
-  {
-    console.log(email);
-     this.authService.forgotRequest(email).subscribe((res: any) => {
-            console.log("response");
-            if(res == "success"){
-             this.emailStatus=true;
-             this.sendMailStatus=false;
-             setTimeout(()=>{ 
-               this.router.navigate(['/']);
-             },500);
+        this.modalService.close("forgot");
+    }
+    sendEmail() {
+        console.log("in email");
+
+    }
+    forgotrequest(email: any) {
+        this.authService.forgotRequest(email).subscribe((res: any) => {
+            if (res == "success") {
+                this.emailStatus = true;
+                this.sendMailStatus = false;
+                this.email = '';
+                // setTimeout(() => {
+                //     this.router.navigate(['/']);
+                // }, 500);
             }
-            if(res == "invalid"){
-              this.emailStatus=false;
-              this.sendMailStatus=true;
+            if (res == "invalid") {
+                this.emailStatus = false;
+                this.sendMailStatus = true;
             }
         }, error => {
             console.log('forgoterror error', error);
         })
-  }
+    }
 }

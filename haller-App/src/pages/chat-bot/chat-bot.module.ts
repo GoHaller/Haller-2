@@ -5,6 +5,7 @@ import { HttpClient } from '../../shared/providers/http-client';
 import { ConvoProvider } from "../../shared/providers/convo.provider";
 import { GoogleMaps } from '@ionic-native/google-maps';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
+import { Geocoder } from '@ionic-native/google-maps';
 
 @NgModule({
   declarations: [
@@ -16,6 +17,6 @@ import { InAppBrowser } from '@ionic-native/in-app-browser';
   exports: [
     ChatBot
   ],
-  providers: [ConvoProvider, HttpClient, GoogleMaps, InAppBrowser]
+  providers: [ConvoProvider, HttpClient, GoogleMaps, InAppBrowser, Geocoder]
 })
 export class ChatBotModule { }

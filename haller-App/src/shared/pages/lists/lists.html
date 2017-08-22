@@ -18,6 +18,11 @@
 
 <ion-content>
   <ion-list>
-    <ion-item *ngFor="let org of orgList" (click)="selectOrg(org)"  [ngClass]="isOrgSelected(org)?'select':''">{{org.name}}</ion-item>
+    <ion-item *ngFor="let org of showOrg" (click)="selectOrg(org)" [ngClass]="isOrgSelected(org)?'select':''">{{org.name}}</ion-item>
   </ion-list>
+
+  <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+    <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>

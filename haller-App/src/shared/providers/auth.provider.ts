@@ -68,6 +68,10 @@ export class AuthProvider {
     return this.fb.api(fbUserID + '/?fields=id,name,picture.type(large),email,hometown,birthday,location,likes', [])
   }
 
+  getUserslikes(fbUserID: string) {
+    return this.fb.api(fbUserID + '/likes.limit(500)', [])
+  }
+
   getUniversityData() {
     return this.httpClient.get('/users/university/5985d5d53bf71dd7b17db2be')
       .map(this.httpClient.extractData);

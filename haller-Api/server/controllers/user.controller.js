@@ -333,6 +333,7 @@ function listByResidence(req, res, next) {
     });
 }
 
+
 function listByResidenceForUser(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
   User.userWhoBlockedMe(req.params.userId)
@@ -360,6 +361,50 @@ function listByResidenceForUser(req, res, next) {
     });
 }
 
+function searchPeers(req, res, next) {
+  console.log('req.query', req.query);
+  const { limit = 50, skip = 0, search = null, residence = null, role = 'student' } = req.query;
+  // console.log('limit', skip);
+  // skip = parseInt(skip);
+  // console.log('limit', limit);
+  // limit = parseInt(limit);
+  User.userWhoBlockedMe(req.params.userId)
+    .then(user => {
+      User.findOne({ '_id': req.params.userId }, { 'blocked.user': 1 }).exec()
+        .then(bu => {
+          for (var i = 0; i < bu.blocked.length; i++) {
+            user.push({ _id: bu.blocked[i].user });
+          }
+          let searchPeer = null;
+          if (search) {
+            Organization.getByNameOnlyIds(search)
+              .then(orgs => {
+                //{ userId, residence = null, skip = 0, limit = 50, blocked = [], role = 'student', search = null, orglist = [] }
+                User.searchPeers({ userId: req.params.userId, residence: residence, skip: skip, limit: limit, blocked: user, role: 'student', search: search, orglist: orgs })
+                  .then(users => res.json(users))
+                  .catch((e) => {
+                    console.log(e); //eslint-disable-line
+                    next(e);
+                  });
+              }).catch((e) => {//eslint-disable-line
+                return next(e);
+              });
+          } else {
+            User.searchPeers({ userId: req.params.userId, residence: residence, skip: skip, limit: limit, blocked: user, role: 'student', search: search, orglist: [] })
+              .then(users => res.json(users))
+              .catch((e) => {
+                console.log(e); //eslint-disable-line
+                next(e);
+              });
+          }
+        }).catch((e) => {//eslint-disable-line
+          return next(e);
+        });
+    })
+    .catch((e) => {//eslint-disable-line
+      return next(e);
+    });
+}
 
 /**
  * Delete user.
@@ -814,5 +859,6 @@ export default {
   getAllOrganization,
   allUsersByFilter,
   toggleUserStatus,
-  getBotUser
+  getBotUser,
+  searchPeers
 };

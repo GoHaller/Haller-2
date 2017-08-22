@@ -37,7 +37,9 @@ export class MyApp {
       //Registration
       // statusBar.styleDefault();
       // splashScreen.hide();
+      console.log('connection', navigator.onLine);
     });
+
   }
 
   initPushNotification() {

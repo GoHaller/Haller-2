@@ -4,7 +4,8 @@
 // The list of which env maps to which file can be found in `.angular-cli.json`.
 //ApiBaseUrl: 'http://10.0.0.20:4040/api/'
 //ApiBaseUrl: 'https://haller-api-v2.herokuapp.com/api/'
+//ApiBaseUrl: 'https://haller-api-v2-main.herokuapp.com/api/'
 export const environment = {
     production: false,
-    ApiBaseUrl: 'https://haller-api-v2-main.herokuapp.com/api'
+    ApiBaseUrl: 'https://haller-api-v2-main.herokuapp.com/api/'
 };

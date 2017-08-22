@@ -29,22 +29,24 @@ export class FeedProvider {
 
     processFeed(post) {
         let _userLiked = post.liked.filter(l => {
-            return l.actedBy._id == this.userId;
+            return l.actedBy && l.actedBy._id == this.userId;
         })[0];
         post._userLiked = (_userLiked && _userLiked._id);
+        if (post._userLiked) post._userLikedAt = _userLiked.actedAt
 
         let _userGoing = post.going.filter(g => {
-            return g.actedBy._id == this.userId;
+            return g.actedBy && g.actedBy._id == this.userId;
         })[0];
         post._userGoing = (_userGoing && _userGoing._id);
 
         let _userStarred = post.starred.filter(s => {
-            return s.actedBy._id == this.userId;
+            return s.actedBy && s.actedBy._id == this.userId;
         })[0];
         post._userStarred = (_userStarred && _userStarred._id);
+        if (post._userStarred) post._userStarredAt = _userStarred.actedAt
 
         let _userFlagged = post.flagged.filter(f => {
-            return f.actedBy._id == this.userId;
+            return f.actedBy && f.actedBy._id == this.userId;
         })[0];
         post._userFlagged = (_userFlagged && _userFlagged._id);
 
@@ -55,10 +57,13 @@ export class FeedProvider {
         return this.httpClient.get('/posts/' + feedId).map(this.httpClient.extractData);
     }
 
+
     addFeed(feedObject) {
+        // console.log('feedObject', feedObject);
         return Observable.create(observer => {
-            if (this.cloudinaryProvider.imageLocalPath != null) {
-                this.cloudinaryProvider.uploadPicture('profile-covers')
+            // if (this.cloudinaryProvider.imageLocalPath != null) {
+            if (feedObject['cover'] && feedObject['cover'].length > 0 && feedObject['cover'] != null) {
+                this.cloudinaryProvider.uploadPictureWithData('profile-covers', feedObject['cover'])
                     .then((data: any) => {
                         let cloud_response = JSON.parse(data.response);
                         cloud_response.createdBy = this.userId;
@@ -74,7 +79,6 @@ export class FeedProvider {
                             }
                             observer.next(this.updateFeed(feedObject['_id'], body));
                         }
-
                     }, error => {
                         console.info('cloudinary error', error);
                     })
@@ -212,18 +216,21 @@ export class FeedProvider {
             .catch(this.httpClient.extractError);
     }
 
-    submitComment(feedId: String, comment: String, commentId: String = null) {
-        let commentObj = {
-            createdBy: this.userId,
-            body: comment,
-            createdAt: new Date()
-        };
-        if (this.cloudinaryProvider.gif['id']) {
-            commentObj['giphy'] = this.cloudinaryProvider.gif;
-        }
+    submitComment(feedId: String, commentObj: Object, commentId: String = null) {
+        // let commentObj = {
+        //     createdBy: this.userId,
+        //     createdAt: new Date()
+        // };
+        // if (comment) {
+        //     commentObj['body'] = comment;
+        // }
+        // if (this.cloudinaryProvider.gif['id']) {
+        //     commentObj['giphy'] = this.cloudinaryProvider.gif;
+        // }
+        // console.log('commentObj', commentObj)
         return Observable.create(observer => {
-            if (this.cloudinaryProvider.imageLocalPath) {
-                this.cloudinaryProvider.uploadPicture('profile-covers')
+            if (commentObj['image']) {
+                this.cloudinaryProvider.uploadPictureWithData('profile-covers', commentObj['image'])
                     .then((data: any) => {
                         let cloud_response = JSON.parse(data.response);
                         cloud_response.createdBy = this.userId;
@@ -235,6 +242,7 @@ export class FeedProvider {
                             observer.next(this.addComment(feedId, commentObj));
                     }, error => {
                         console.info('cloudinary error', error);
+                        observer.next(Observable.throw(error));
                     })
             } else {
                 if (commentId)

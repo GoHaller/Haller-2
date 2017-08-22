@@ -22,6 +22,7 @@ export class Profile {
   public userId: string = '';
   public uid: string = '';
   public userInfo: Object = {};
+  public loggedInUser: Object = {};
   public showMsgBtn: Boolean = false;
   public tagBorderColor: string = 'dark';
   public userAvatar = '';
@@ -33,6 +34,10 @@ export class Profile {
     this.showMsgBtn = this.navParams.data.allowMessage == false ? false : true;
     this.userAvatar = profileProvider.httpClient.userAvatar;
     this.local = new Storage('localstorage');
+    this.local.get('userInfo').then((val) => {
+      let userData = JSON.parse(val);
+      this.loggedInUser = userData;
+    });
   }
 
   goBack() {
@@ -51,6 +56,7 @@ export class Profile {
     if (this.uid) {
       this.local.get('userInfo').then((val) => {
         let userData = JSON.parse(val);
+        this.loggedInUser = userData;
         if (this.uid == userData._id) {
           this.userInfo = userData;
           this.tagBorderColor = 'primary';
@@ -64,6 +70,7 @@ export class Profile {
     this.event.subscribe('user-updated', () => {
       this.local.get('userInfo').then((val) => {
         let userData = JSON.parse(val);
+        this.loggedInUser = userData;
         if (this.uid == userData._id) {
           this.userInfo = userData;
         }
@@ -134,7 +141,18 @@ export class Profile {
   }
 
   getFbLikesObject(user) {
-    return user.facebook && user.facebook.likes ? user.facebook.likes.data : [];
+    // return user.facebook && user.facebook.likes ? user.facebook.likes.data : [];
+    let likes = [];
+    if (user.facebook && user.facebook.likes && this.loggedInUser['facebook'] && this.loggedInUser['facebook'].likes) {
+      this.loggedInUser['facebook'].likes.data.forEach(lgiuLikes => {
+        let commonLikes = user.facebook.likes.data.filter(puLikes => {
+          return puLikes.id == lgiuLikes.id || puLikes.name == lgiuLikes.name
+        });
+        if (commonLikes)
+          likes = likes.concat(commonLikes);
+      });
+    }
+    return likes;
   }
 
 }

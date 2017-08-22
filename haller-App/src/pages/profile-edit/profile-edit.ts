@@ -77,8 +77,6 @@ export class ProfileEdit {
     })
   }
 
-
-
   ionViewDidLoad() { }
 
   goBack() {

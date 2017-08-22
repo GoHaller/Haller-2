@@ -3,6 +3,18 @@ page-feed-detail {
         // border-bottom: 1px solid #f4f4f4;
         // margin: 0px 16px 0px 16px;
     }
+    .process-spinner{
+        ion-spinner{
+            margin: 0px 0px 0px 16px !important;
+        }
+        .label{
+            margin: 0px
+        }
+        min-height: 0px;
+        // position: fixed;
+        // z-index: 1;
+        max-width: 450px;
+    }
     .list > .item-block:first-child {
         border-top: 2px solid #f4f4f4;
     }

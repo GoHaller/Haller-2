@@ -3,6 +3,7 @@ import { ErrorHandler, NgModule } from '@angular/core';
 import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
+import { Keyboard } from "@ionic-native/keyboard";
 import { HttpModule } from '@angular/http';
 import { IonicStorageModule } from '@ionic/storage';
 import { Push } from '@ionic-native/push';
@@ -37,6 +38,7 @@ import { HttpClient } from '../shared/providers/http-client';
   providers: [
     StatusBar,
     SplashScreen,
+    Keyboard,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
     Push, LocalNotifications, HttpClient
   ]

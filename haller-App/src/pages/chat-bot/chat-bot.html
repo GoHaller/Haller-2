@@ -1,12 +1,10 @@
 <ion-header>
   <ion-navbar color="primary">
-    <ion-title>ChatBot</ion-title>
+    <ion-title>InfoBot</ion-title>
   </ion-navbar>
 </ion-header>
 
-<ion-content></ion-content>
-
-<ion-footer>
+<ion-content #content>
   <ion-grid *ngIf="conversation.messages && conversation.messages.length >0 ">
     <ion-row *ngFor="let msg of conversation.messages; let last = last" class="conversation" [ngClass]="(msg.createdBy == userInfo._id || msg.createdBy._id == userInfo._id)?'me':'them'">
       <ion-col col-12>
@@ -24,13 +22,16 @@
             <div *ngIf="bmsg.location || bmsg.address" style="margin-top:5px"><a (click)="openMap(bmsg)">{{bmsg.linkText || 'Show on map'}}</a></div>
           </div>
         </div>
+        {{last ? callFunction() : ''}}
       </ion-col>
     </ion-row>
   </ion-grid>
+</ion-content>
 
+<ion-footer>
   <ion-row class="sender-row">
     <ion-col col-10>
-      <ion-textarea [(ngModel)]="question" (input)="newMessageChange($event)" rows="1" class="new-msg" type="text" placeholder="Question..."></ion-textarea>
+      <ion-textarea autocomplete="on" spellcheck="on" autocorrect="on" [(ngModel)]="question" (input)="newMessageChange($event)" rows="1" class="new-msg" type="text" placeholder="Question..."></ion-textarea>
     </ion-col>
     <ion-col col-2 style="padding-left: 5px;"><button color="dark" small clear ion-button (click)="sendQuestion()">Ask</button></ion-col>
   </ion-row>

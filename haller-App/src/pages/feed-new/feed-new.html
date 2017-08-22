@@ -40,14 +40,15 @@
     <ion-row>
       <ion-col col-12>
         <ion-item>
-          <ion-textarea class="post-detail" [(ngModel)]="feed.details" rows="15" placeholder="What do you want to say?"></ion-textarea>
+          <ion-textarea autocomplete="on" spellcheck="on" autocorrect="on" class="post-detail" [(ngModel)]="feed.details" rows="10" placeholder="What do you want to say?"></ion-textarea>
         </ion-item>
       </ion-col>
     </ion-row>
-    <ion-row class="post-image" *ngIf="feedProvider.cloudinaryProvider && feedProvider.cloudinaryProvider.imageLocalPath">
+    <ion-row class="post-image" *ngIf="feedProvider.cloudinaryProvider && (feedProvider.cloudinaryProvider.imageLocalPath || this.feedProvider.cloudinaryProvider.gif['id'])">
       <ion-col col-12>
         <button ion-button icon-only color="dark" clear class="remove-image-btn" (click)="removeImage()"><ion-icon name="close"></ion-icon></button>
-        <img [src]="feedProvider.cloudinaryProvider.imageLocalPath" />
+        <img *ngIf="feedProvider.cloudinaryProvider.imageLocalPath" [src]="feedProvider.cloudinaryProvider.imageLocalPath" />
+        <img *ngIf="feedProvider.cloudinaryProvider.gif.gif" [src]="feedProvider.cloudinaryProvider.gif.gif.url">
       </ion-col>
     </ion-row>
     <ion-row class="post-image" *ngIf="feedProvider.cloudinaryProvider.imageLocalPath == null && feed.cover && feed.cover[0]">
@@ -58,13 +59,16 @@
   </ion-grid>
 </ion-content>
 
-<ion-footer>
-  <ion-row class="msg-attachment" style="padding: 5px;">
-    <ion-col center text-center>
+<ion-footer class="new-post">
+  <ion-row style="padding: 5px;">
+    <ion-col col-4 center text-center>
       <ion-icon (click)="takePictureFromCamera()" name="camera"></ion-icon>
     </ion-col>
-    <ion-col center text-center>
+    <ion-col col-4 center text-center>
       <ion-icon (click)="takePictureFromPhotoLibrary()" name="images"></ion-icon>
+    </ion-col>
+    <ion-col col-4 center text-center>
+      <ion-icon (click)="showGiphyGif()" class="icon gif-icon"></ion-icon>
     </ion-col>
   </ion-row>
 </ion-footer>

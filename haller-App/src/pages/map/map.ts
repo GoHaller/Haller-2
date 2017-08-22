@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Platform } from 'ionic-angular';
 import {
   GoogleMaps,
   GoogleMap,
@@ -23,10 +23,22 @@ import {
 export class MapPage {
 
   mapData: any;
-  constructor(public navCtrl: NavController, public navParams: NavParams, private googleMaps: GoogleMaps, private geocoder: Geocoder) {
+  position: any;
+  // title: string = '';
+  constructor(public navCtrl: NavController, public navParams: NavParams, private googleMaps: GoogleMaps, private geocoder: Geocoder, private platform: Platform) {
     this.mapData = this.navParams.data.mapData;
     console.log('this.mapData', this.mapData);
     // console.log('this.mapData', JSON.parse(this.mapData.location).location);
+  }
+
+  getDirection() {
+    let destination = this.position.lat + ',' + this.position.lng;
+    if (this.platform.is('ios')) {
+      window.open('maps://?q=' + destination, '_system');
+    } else {
+      let label = encodeURI('My Label');
+      window.open('geo:0,0?q=' + destination + '(' + (this.mapData.address || '') + ')', '_system');
+    }
   }
 
   ionViewDidLoad() {
@@ -41,14 +53,16 @@ export class MapPage {
     } else if (this.mapData.address) {
       //{ address: '1450 Jayhawk Blvd, Lawrence, KS 66045, USA' }
       this.geocoder.geocode({ address: this.mapData.address }).then((res: any) => {
-        console.log('res', res);
+        // console.log('res', res);
+        // this.title = res.extra ? (res.extra.name || '') : '';
+        this.position = res[0].position;
         this.createMap(res[0].position);
       })
     }
   }
 
   createMap(mapLoc) {
-    console.log('mapLoc', mapLoc);
+    // console.log('mapLoc', mapLoc);
     let element: HTMLElement = document.getElementById('gglchatmap');
     let map: GoogleMap = this.googleMaps.create(element);
     map.one(GoogleMapsEvent.MAP_READY).then(
@@ -69,6 +83,9 @@ export class MapPage {
         let markerOptions: MarkerOptions = {
           position: mapLoc
         };
+        if (this.mapData.address) {
+          markerOptions.title = this.mapData.address;
+        }
 
         map.addMarker(markerOptions)
           .then((marker: Marker) => {

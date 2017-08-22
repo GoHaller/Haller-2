@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { Camera } from '@ionic-native/camera';
 import { Transfer } from '@ionic-native/transfer';
+import { InAppBrowser } from "@ionic-native/in-app-browser";
 
 import { Message, PeerFilterPipe } from './message';
 import { ConvoProvider } from "../../shared/providers/convo.provider";
@@ -18,6 +19,6 @@ import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
   exports: [
     Message
   ],
-  providers: [ConvoProvider, HttpClient, CloudinaryProvider, Camera,Transfer],
+  providers: [ConvoProvider, HttpClient, CloudinaryProvider, Camera, Transfer, InAppBrowser],
 })
-export class MessageModule {}
+export class MessageModule { }

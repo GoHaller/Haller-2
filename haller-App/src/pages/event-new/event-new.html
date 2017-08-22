@@ -20,17 +20,21 @@
   <form [formGroup]="eventForm">
     <ion-list>
       <ion-item>
-        <ion-input placeholder="Title" formControlName="title"></ion-input>
+        <ion-input autocomplete="on" spellcheck="on" autocorrect="on" placeholder="Title" formControlName="title"></ion-input>
       </ion-item>
       <ion-item>
-        <ion-datetime placeholder="Date Time" pickerFormat="YYYY MMM DD HH mm" [min]="minDate" [max]="maxDate" displayFormat="H:m MMM D, YYYY"
+        <ion-datetime placeholder="Date" pickerFormat="YYYY MMM DD" [min]="minDate" [max]="maxDate" displayFormat="MMM D, YYYY"
           formControlName="date"></ion-datetime>
       </ion-item>
       <ion-item>
-        <ion-input placeholder="Location" formControlName="location"></ion-input>
+        <ion-datetime placeholder="Time" pickerFormat="hh mm a" [min]="minDate" [max]="maxDate" displayFormat="HH:mm a"
+          formControlName="date"></ion-datetime>
       </ion-item>
       <ion-item>
-        <ion-textarea placeholder="Description" row="4" formControlName="details"></ion-textarea>
+        <ion-input autocomplete="on" spellcheck="on" autocorrect="on" placeholder="Location" formControlName="location"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-textarea autocomplete="on" spellcheck="on" autocorrect="on" placeholder="Description" row="4" formControlName="details"></ion-textarea>
       </ion-item>
     </ion-list>
   </form>
@@ -49,7 +53,7 @@
   </ion-grid>
 </ion-content>
 
-<ion-footer>
+<ion-footer class="new-post">
   <ion-row class="msg-attachment" style="padding: 5px;">
     <ion-col center text-center>
       <ion-icon (click)="takePictureFromCamera()" name="camera"></ion-icon>

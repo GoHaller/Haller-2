@@ -204,6 +204,11 @@ router.route('/bot/:email')
     getToken
   }), userCtrl.getBotUser);
 
+router.route('/:userId/search')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.searchPeers);
 
 export default router;
 // : (req) => {

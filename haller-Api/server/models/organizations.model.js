@@ -7,18 +7,18 @@ import APIError from '../helpers/APIError';
 
 
 const OrganizationSchema = new mongoose.Schema({
-    _id: {
-        type: mongoose.Schema.ObjectId,
-        index: true,
-    },
-    name: {
-        type: String,
-        required: true,
-        text: true
-    },
-    detail: {
-        type: String
-    },
+  _id: {
+    type: mongoose.Schema.ObjectId,
+    index: true,
+  },
+  name: {
+    type: String,
+    required: true,
+    text: true
+  },
+  detail: {
+    type: String
+  },
 })
 
 
@@ -36,23 +36,30 @@ OrganizationSchema.method({
 });
 
 OrganizationSchema.statics = {
-    getAll() {
-        return this.find({}).exec()
-            .then((organozations) => {
-                return organozations;
-            });
-    },
-    getByName(name) {
-        return this.find({ name: { $regex: '^' + name, $options: 'i' } }).limit(10)
-            .exec()
-            .then((organozations) => {
-                if (organozations) {
-                    return organozations;
-                }
-                const err = new APIError('No such organization exists!', httpStatus.NOT_FOUND);
-                return Promise.reject(err);
-            });
-    },
+  getAll() {
+    return this.find({}).exec()
+      .then((organozations) => {
+        return organozations;
+      });
+  },
+  getByNameOnlyIds(name) {
+    return this.find({ name: { $regex: '^' + name, $options: 'i' } }, { _id: 1 })
+      .exec()
+      .then((organozations) => {
+        return organozations;
+      });
+  },
+  getByName(name) {
+    return this.find({ name: { $regex: '^' + name, $options: 'i' } }).limit(10)
+      .exec()
+      .then((organozations) => {
+        if (organozations) {
+          return organozations;
+        }
+        const err = new APIError('No such organization exists!', httpStatus.NOT_FOUND);
+        return Promise.reject(err);
+      });
+  },
 }
 
 export default mongoose.model('Organization', OrganizationSchema);

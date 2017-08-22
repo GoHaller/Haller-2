@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform, Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 
 import { ProfileProvider } from "../../shared/providers/profile.provider";
@@ -27,11 +27,14 @@ export class Peers {
   public searchText: String = '';
   private userAvatar = '';
   private chooseUser: boolean = false;
+  public infiniteScroll = null;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public profileProvider: ProfileProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public profileProvider: ProfileProvider, private viewCtrl: ViewController) {
     this.local = new Storage('localstorage');
     this.userAvatar = profileProvider.httpClient.userAvatar;
-    this.chooseUser = this.navParams.get('resolve') ? true : false;
+    // this.chooseUser = this.navParams.get('resolve') ? true : false;
+    this.chooseUser = this.navParams.get('selection') ? true : false;
+    this.selectedUser = this.navParams.get('selected') || [];
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
       // this.getPeersList();
@@ -44,7 +47,7 @@ export class Peers {
   ionViewDidLeave() {
     // console.log('ionViewDidLeave Peers');
     this.clearList = true;
-    this.peersList = [];
+    // this.peersList = [];
   }
 
   ionViewWillEnter() {
@@ -60,17 +63,68 @@ export class Peers {
   }
 
   goBack() {
-    if (this.chooseUser) {
-      this.navParams.get('resolve')(this.selectedUser);
-    }
+    // if (this.chooseUser) {
+    //   this.navParams.get('resolve')(this.selectedUser);
+    // }
     this.navCtrl.pop();
   }
 
+  doneChoosing() {
+    if (this.selectedUser.length)
+      this.navCtrl.push('Message', { selected: this.selectedUser }, { animate: true, direction: 'forward' })
+        .then(() => {
+          // first we find the index of the current view controller:
+          const index = this.viewCtrl.index;
+          // then we remove it from the navigation stack
+          this.navCtrl.remove(index);
+        });
+  }
+
+  onSearchChange(ev: any) {
+    if (!ev.target.value || ev.target.value.length == 0) {
+      this.searchText = '';
+      this.clearList = true;
+      this.getPeersList();
+    } else {
+      this.searchText = ev.target.value;
+    }
+  }
+
   getItems(ev: any) {
-    this.searchText = ev.target.value;
+    // console.log(ev);
+    // if (ev.target.value.length > 0) {
+    //   this.searchText = ev.target.value;
+    this.clearList = true;
+    this.getPeersList();
+    // }
   }
 
   getPeersList() {
+    let residenceSearch = this.selectedPeers == 'residents' ? this.userInfo['residence'] : null;
+    let searchKeyword = this.searchText.length > 0 ? this.searchText : null;
+    this.profileProvider.serachPeers(this.userInfo['_id'], this.skip, this.limit, residenceSearch, searchKeyword)
+      .subscribe((res: any) => {
+        if (this.clearList) {
+          this.peersList = res; this.clearList = false;
+        } else {
+          this.peersList = this.peersList.concat(res);
+        }
+        if (this.infiniteScroll) {
+          this.infiniteScroll.complete();
+          if (res.length == 0)
+            this.infiniteScroll.enable(false);
+          this.infiniteScroll = null;
+        }
+      }, error => {
+        console.info('error', error);
+        if (this.infiniteScroll) {
+          this.infiniteScroll.complete();
+          this.infiniteScroll = null;
+        }
+      })
+  }
+
+  getPeersList1() {
     let response = null;
     if (this.selectedPeers == 'residents') {
       response = this.profileProvider.getUserByResidence(this.userInfo['_id'], this.userInfo['residence'], this.skip, this.limit);
@@ -83,20 +137,31 @@ export class Peers {
       } else {
         this.peersList = this.peersList.concat(res);
       }
+      if (this.infiniteScroll) {
+        this.infiniteScroll.complete();
+        if (res.length == 0)
+          this.infiniteScroll.enable(false);
+        this.infiniteScroll = null;
+      }
     }, error => {
       console.info('error', error);
+      if (this.infiniteScroll) {
+        this.infiniteScroll.complete();
+        this.infiniteScroll = null;
+      }
     })
   }
 
   isUserSelected(peer) {
-    return this.selectedUser.indexOf(peer) > -1
+    return this.selectedUser.filter(sUser => { return sUser._id == peer._id }).length > 0;
+    // return this.selectedUser.indexOf(peer) > -1
   }
 
   viewProfile(peer) {
-    // console.info('peer', peer);
     if (this.chooseUser) {
-      if (this.selectedUser.indexOf(peer) > -1) {
-        let index = this.selectedUser.indexOf(peer);
+      let peerSelect = this.selectedUser.filter(sUser => { return sUser._id == peer._id })[0];
+      if (this.selectedUser.indexOf(peerSelect) > -1) {
+        let index = this.selectedUser.indexOf(peerSelect);
         this.selectedUser.splice(index, 1);
       } else {
         this.selectedUser.push(peer);
@@ -105,11 +170,11 @@ export class Peers {
       this.navCtrl.push('Profile', { userData: peer }, { animate: true, direction: 'forward' });
   }
 
-  doInfinite(): Promise<any> {
-    return new Promise((resolve) => {
-      this.skip += this.limit;
-      this.getPeersList();
-    })
+
+  doInfinite(infiniteScroll) {
+    this.infiniteScroll = infiniteScroll;
+    this.skip += this.limit;
+    this.getPeersList();
   }
 
   changeSegment(segment) {
@@ -129,13 +194,15 @@ export class Peers {
 export class PeerFilterPipe implements PipeTransform {
   transform(items: any, conditions: string[]): any {
     return items.filter(item => {
-      if (conditions[2] && conditions[2].length > 0) {
-        let name = item[conditions[0]] + ' ' + item[conditions[1]];
-        if (name.toUpperCase().startsWith(conditions[2].toUpperCase())) {
-          return true;
-        }
-        else return false;
-      } else return true;
+      if (item[conditions[0]]) {
+        if (conditions[2] && conditions[2].length > 0) {
+          let name = item[conditions[0]] + ' ' + item[conditions[1]];
+          if (name.toUpperCase().startsWith(conditions[2].toUpperCase())) {
+            return true;
+          }
+          else return false;
+        } else return true;
+      } else return false
     });
   };
 
