@@ -458,11 +458,9 @@ export default {
     }
   },
   userStatus: {
-    params: {
-      userId: Joi.string().hex().required()
-    },
     body: {
-      sataus: Joi.boolean().required()
+      sataus: Joi.boolean().required(),
+      userId: Joi.string().hex().required()
     }
   }
 };

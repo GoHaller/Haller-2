@@ -6,6 +6,7 @@ import eventRoutes from './event.route';
 import convoRoutes from './conversation.route';
 import notificationRoutes from './notification.route';
 import dev from '../controllers/bot.controller';
+import FCMSender from '../helpers/FCMSender';
 // import Demo from '../models/demo.model';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -16,13 +17,21 @@ router.get('/health-check', (req, res) =>
   res.send('OK')
 );
 
-router.get('/bot/:msg', (req, res) => {
-  console.log('req.params', req.params);
-  dev.sendText('58c88019f150f60004f0c040', req.params.msg, (error, response) => {
-    if (error) res.json(error);
-    else res.json(response);
+router.get('/demonotification', (req, res) =>
+  FCMSender.demoSend().then(response => {
+    res.json({ response: response });
+  }).catch(err => {
+    res.json({ err: err });
   })
-})
+);
+
+// router.get('/bot/:msg', (req, res) => {
+//   console.log('req.params', req.params);
+//   dev.sendText('58c88019f150f60004f0c040', req.params.msg, (error, response) => {
+//     if (error) res.json(error);
+//     else res.json(response);
+//   })
+// })
 // router.get('/demo-insert/:count', (req, res) => {
 //   var count = req.params.count || 100;
 //   console.info('start', new Date())

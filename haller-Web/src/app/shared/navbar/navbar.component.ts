@@ -21,9 +21,9 @@ export class NavbarComponent implements OnInit {
     private nativeElement: Node;
     private toggleButton;
     private sidebarVisible: boolean;
-    public email:any;
-    public username:any;
-    public role:any;
+    public email: any;
+    public username: any;
+    public role: any;
 
     @ViewChild("navbar-cmp") button;
 
@@ -93,7 +93,7 @@ export class NavbarComponent implements OnInit {
     getTitle() {
         var titlee = this.location.prepareExternalUrl(this.location.path());
         if (titlee.charAt(0) === '#') {
-            titlee = titlee.slice(2);
+            titlee = titlee.slice(1);
         }
         for (var item = 0; item < this.listTitles.length; item++) {
             if (this.listTitles[item].path === titlee) {
@@ -106,12 +106,12 @@ export class NavbarComponent implements OnInit {
         // console.log(this.location);
         return this.location.prepareExternalUrl(this.location.path());
     }
-    userDetails(){
+    userDetails() {
         var userInfo = localStorage.getItem('userInfo')
-        var userData=JSON.parse(JSON.stringify(eval("(" + userInfo + ")")));
-        this.email     = userData.email;
-        this.username  = userData.firstName + " " + userData.lastName;
-        this.role      = userData.role;
+        var userData = JSON.parse(JSON.stringify(eval("(" + userInfo + ")")));
+        this.email = userData.email;
+        this.username = userData.firstName + " " + userData.lastName;
+        this.role = userData.role;
     }
     logmeOut() {
         swal({

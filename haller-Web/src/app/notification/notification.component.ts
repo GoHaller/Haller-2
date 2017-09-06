@@ -15,16 +15,24 @@ declare var swal: any;
     styleUrls: ['./notification.component.css']
 })
 export class NotificationComponent implements OnInit {
-    public post: any = {};    
-    public notification:any = [];
-    public title:any;
-    public message:any;
+    public post: any = {};
+    public notification: any = [];
+    public notificationModal: any = {};
+    public title: any;
+    public message: any;
     public admin: boolean = false;
-    public recordStatus:boolean = false;
-    
+    public recordStatus: boolean = false;
+    public displayNotification: any = {};
+    usersForNotifications: any = [];
+    selectedUserList: any = [];
+    userInfo: any = [];
+    isCustomNotification: Boolean = false;
+    toAllstudent: Boolean = false;
+
+
     public posts = [];
     public postIndex: number = 0;
-   
+
     public isNotification: boolean = true;
 
     skip = 0;
@@ -32,51 +40,88 @@ export class NotificationComponent implements OnInit {
     beingRefresh = false;
 
     file: File;
-    constructor(private location: Location, private modalService: ModalService, private notificationService: NotificationService, private postService: PostService) {  }
+    constructor(private location: Location, private modalService: ModalService, private notificationService: NotificationService, private postService: PostService) {
+        this.userInfo = localStorage.getItem('userInfo');
+    }
 
     ngOnInit() {
-        
-        var userId =  localStorage.getItem('uid')
+        this.notificationService.getUsersForNotification()
+            .subscribe((res: any) => {
+                console.log('getUsersForNotification res', res);
+                this.usersForNotifications = res;
+                setTimeout(() => {
+                    $('.selectpicker').selectpicker('refresh');
+                }, 200);
+            })
+        var userId = localStorage.getItem('uid')
         this.notificationService.getNotification(userId).subscribe((res: any) => {
+            // console.log('res', res);
             if (res) {
-               if(res.allNotification.length== 0){
-                   this.recordStatus = true;
-               } else{
-                    if(res.admin){
-                        this.notification = res.allNotification;
+                if (res.length == 0) {
+                    this.recordStatus = true;
+                } else {
+                    if (res.admin) {
+                        this.notification = res;
                         this.admin = true;
-                    }else{
-                        this.notification = res.allNotification;
+                    } else {
+                        this.notification = res;
                     }
-               }
+                }
             }
         }, error => {
             console.log('getFeedByResidence error', error);
         })
-  }
+    }
 
-    
+
     addNotification(model, isValid, id) {
-    
+
         if (isValid) {
             this.modalService.close(id);
-            this.title   = model.title;
+            this.title = model.title;
             this.message = model.message;
             if (this.file && this.file.size) {
-                this.postService.cloudinaryUpload(this.file['result'], 'profile-covers')
-                    .subscribe((res: any) => {
-                        // console.info('cloudinaryUpload res', res);
-                         if(id == 'notification'){this.createNotificationApi(res);}
-                    }, error => {
-                        console.log('cloudinaryUpload error', error);
-                    });
+                if (this.file.type == 'application/pdf') {
+                    // Select the very first file from list
+                    var fileToLoad = this.file;
+                    // FileReader function for read the file.
+                    var fileReader = new FileReader();
+                    var base64;
+                    // Onload of file read the file content
+                    fileReader.onload = (fileLoadedEvent) => {
+                        // console.log('fileLoadedEvent', fileLoadedEvent);
+                        base64 = fileLoadedEvent.target['result'];
+                        // Print data in console
+                        // console.log(base64);
+                        this.postService.cloudinaryUpload(base64, 'profile-covers')
+                            .subscribe((res: any) => {
+                                // console.info('cloudinaryUpload res', res);
+                                if (id == 'notification') { this.createNotificationApi(res); }
+                            }, error => {
+                                console.log('cloudinaryUpload error', error);
+                            });
+                    };
+                    // Convert data to base64
+                    fileReader.readAsDataURL(fileToLoad);
+                } else {
+                    this.postService.cloudinaryUpload(this.file['result'], 'profile-covers')
+                        .subscribe((res: any) => {
+                            // console.info('cloudinaryUpload res', res);
+                            if (id == 'notification') { this.createNotificationApi(res); }
+                        }, error => {
+                            console.log('cloudinaryUpload error', error);
+                        });
+                }
             } else {
-                 if (id == 'notification') { this.createNotificationApi(null); }
+                if (id == 'notification') { this.createNotificationApi(null); }
             }
         }
     }
 
-
+    checkFileIfImageToDisplay(url) {
+        console.log(url.endsWith('.pdf'));
+        return !url.endsWith('.pdf');
+    }
 
     save(model, isValid, id) {
         this.closeModal(id);
@@ -87,7 +132,7 @@ export class NotificationComponent implements OnInit {
         this.modalService.close(id);
         this.file = null;
         this.post = { details: '', image: null };
-        
+
     }
 
     setImage(files) {
@@ -111,37 +156,46 @@ export class NotificationComponent implements OnInit {
         this.postIndex = index;
     }
 
-  
-    isEmptyObject(obj) { 
+
+    isEmptyObject(obj) {
         return (obj && (Object.keys(obj).length === 0));
     }
-    showNotification(){
-        this.modalService.open("notification"); 
+    showNotification() {
+        this.notificationModal = {};
+        $('#rm-notification-img').click();
+        this.modalService.open("notification");
     }
-    
-    
 
     createNotificationApi(cloudinaryResponse = null) {
         let notificationObj = {
             createdBy: localStorage.getItem('uid'),
-            title   : this.title,
-            message : this.message,
-            createdAt: new Date()
+            title: this.title,
+            message: this.message,
+            createdAt: new Date(),
+            isCustom: this.isCustomNotification
         };
-        if (cloudinaryResponse) {            
+        if (!this.toAllstudent) {
+            notificationObj['recipients'] = this.selectedUserList;
+        }
+        if (cloudinaryResponse) {
             cloudinaryResponse.createdBy = localStorage.getItem('uid');
             cloudinaryResponse.version = cloudinaryResponse.version.toString();
             notificationObj['file'] = cloudinaryResponse;
-        }else{
+        } else {
             notificationObj['file'] = "";
         }
         this.notificationService.createNotification(notificationObj)
             .subscribe((res: any) => {
-                console.log('createNotification res', res);
+                // console.log('createNotification res', res);
                 this.file = null;
-                this.posts[this.postIndex] = res;
+                this.userInfo = [];
+                this.isCustomNotification = false;
+                this.toAllstudent = false;
+                setTimeout(() => {
+                    $('.selectpicker').selectpicker('refresh');
+                }, 200);
+                // this.posts[this.postIndex] = res;
                 this.ngOnInit();
-               
             }, error => {
                 console.log('createNotification error', error);
             })
@@ -149,6 +203,11 @@ export class NotificationComponent implements OnInit {
 
     changeSegment() {
         this.posts = [];
+    }
+
+    openPopToDIsplay(item) {
+        this.displayNotification = item;
+        this.modalService.open("display-notification");
     }
 
 }

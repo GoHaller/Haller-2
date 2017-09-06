@@ -31,11 +31,18 @@ const checkInviteCode = (req, res, next) => {
     return res.json({ success: true });
   }
 
+  if (config.baCodes && req.body.code) {
+    if (config.baCodes.indexOf(req.body.code) > -1)
+      return res.json({ success: true });
+  }
+
   User.getByCode(req.body.code).then((referer) => {
     if (req.body.code && referer.isRA && req.body.code === referer.RAData.inviteCode) {
       referer.RAData.codeUsageCount++;
       referer.save();
       return res.json({ success: true });
+    } else {
+      next(new APIError('Bad Request -- invalid code', httpStatus.BAD_REQUEST))
     }
   })
     .catch(e => next(new APIError('Bad Request -- invalid code', httpStatus.BAD_REQUEST)));

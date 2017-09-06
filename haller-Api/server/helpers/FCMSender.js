@@ -2,22 +2,26 @@ var FCM = require('fcm-push');
 
 // var serverKey = 'AAAAL1rOLL4:APA91bFz-xlHqG64o8fw6UKJzvEUWMyF77Ut6jwnZpu3nMDvGJEezmc1_jzoJ35_iXyBLVdAAs4fBXKAnb65D6tZIUYZ54K1nl5RmMguicYf6IQZ_dCu5CN2ZhCd8eNDgS2cBEtKQnCa';
 // var serverKey = 'AIzaSyCAXcB-CMYvpndUZJpi4_yTECtwq-mc3wo';
-var serverKey = 'AAAANRrpQRE:APA91bGjf75IcnOQIueh6KKXRecfRVfTTZPKqU4Na2AyEKaWzwx92vlFpo3WmYyCZGN-L-iNR93JlQy5yEsS_5dPDpV_F7Ry05FXfNKqE78zAh5vIGyE9CJ8rdIkeWWVPIYmjFd5qpxm';
-// var serverKey = 'AIzaSyDaT3C_HnOb-kPjfGAhO0RrCitx6KMjDG4';
+// var serverKey = 'AAAANRrpQRE:APA91bGjf75IcnOQIueh6KKXRecfRVfTTZPKqU4Na2AyEKaWzwx92vlFpo3WmYyCZGN-L-iNR93JlQy5yEsS_5dPDpV_F7Ry05FXfNKqE78zAh5vIGyE9CJ8rdIkeWWVPIYmjFd5qpxm';
+var serverKey = 'AIzaSyDaT3C_HnOb-kPjfGAhO0RrCitx6KMjDG4';
 var fcm = new FCM(serverKey);
 
-// var paylods = {
-//     to: 'f-WoY-10gpU:APA91bGV6JVX0UnQSmkZqGIFlK_WnN4YMyuVuhnWrnn4-br7WdX1HeXvCg1f8msuULZMoXCATV06X6RAUo789h-qBWl4MRnJ2FkwsOcESbR-TWLivzHHi8vu2aYzDZ3Sswo9cRphGOU0', // required fill with device token or topics
-//     data: {
-//         your_custom_data_key: 'your_custom_data_value'
-//     },
-//     notification: {
-//         title: 'Title of your push notification',
-//         body: 'Body of your push notification',
-//         sound: 'default',
-//         icon: 'icon'
-//     }
-// };
+const demoSend = () => {
+  var demoPaylods = {
+    //     to: 'f-WoY-10gpU:APA91bGV6JVX0UnQSmkZqGIFlK_WnN4YMyuVuhnWrnn4-br7WdX1HeXvCg1f8msuULZMoXCATV06X6RAUo789h-qBWl4MRnJ2FkwsOcESbR-TWLivzHHi8vu2aYzDZ3Sswo9cRphGOU0', // required fill with device token or topics
+    registration_ids: ["e4BJVeV5TIo:APA91bHIjc11hA4w9-HeO87UgXCwM5zgT1uSqalpClym32_w5gG4LDoeYZQQEEKhzlM5XXPSE1mlL3WJUQEEuCEZliPMGEB3fvEF0iWcV29Noxc6o0inCi29pskuPEN4gcSQ3Inpp-00"],
+    data: {
+      your_custom_data_key: 'your_custom_data_value'
+    },
+    notification: {
+      title: 'Title of your push notification',
+      body: 'Body of your push notification',
+      sound: 'default',
+      icon: 'icon'
+    }
+  };
+  return fcm.send(demoPaylods);
+}
 
 const send = (token, message, os) => {
   message.message = message.body;
@@ -181,4 +185,4 @@ const sendUniversityNotification = (participants, message) => {
   });
 }
 
-export default { send, sendNotification, sendMsgNotification, sendUniversityNotification };
+export default { send, sendNotification, sendMsgNotification, sendUniversityNotification, demoSend };

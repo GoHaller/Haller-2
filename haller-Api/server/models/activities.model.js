@@ -25,7 +25,8 @@ const types = {
   17: 'Joined an event',
   18: 'Left an event',
   19: 'Message Sent',
-  20: 'University'
+  20: 'University',
+  21: 'Admin'
 }
 
 const populateMap = () =>

@@ -22,19 +22,20 @@ export class AppComponent implements OnInit {
         $.material.init();
         var titlee = this.location.prepareExternalUrl(this.location.path());
         var title = titlee.split("/")
+        // alert(title);
         var status = false;
-        for(var i=0; i<title.length;i++){
-            if(title[i] == "forgotpassword" && title[i+1]){
+        for (var i = 0; i < title.length; i++) {
+            if (title[i] == "forgotpassword" && title[i + 1]) {
                 status = true;
             }
         }
         if (localStorage.getItem('uid')) {
             if (titlee == 'login')
                 this.router.navigate(['/analitics-dashboard']);
-        }else if(status){
+        } else if (status) {
             this.router.navigate([titlee]);
         }
-         else {
+        else {
             this.router.navigate(['/login']);
         }
     }

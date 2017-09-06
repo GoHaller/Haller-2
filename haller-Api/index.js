@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import util from 'util';
 import config from './config/env';
 import app from './config/express';
+var http = require('https'); //importing http
 
 const debug = require('debug')('haller-api:index');
 
@@ -22,6 +23,29 @@ if (config.MONGOOSE_DEBUG) {
   mongoose.set('debug', (collectionName, method, query, doc) => {
     debug(`${collectionName}.${method}`, util.inspect(query, false, 20), doc);
   });
+}
+
+if (config.env == 'production' || config.env == 'staging') {
+  setInterval(function () {
+    console.log('I am up at ', new Date());
+    startKeepAlive();
+  }, 15 * 60 * 1000);
+}
+function startKeepAlive() {
+  http.request(config.rootUrl + 'health-check', (response) => {
+    var str = '';
+    response.on('data', function (chunk) {
+      str += chunk;
+    });
+    response.on('error', (err) => {
+      console.log('error', err);
+    })
+
+    //the whole response has been recieved, so we just print it out here
+    response.on('end', function () {
+      console.log('end', str);
+    });
+  }).end();
 }
 
 // module.parent check is required to support mocha watch

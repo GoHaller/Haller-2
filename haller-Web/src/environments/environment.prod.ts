@@ -3,5 +3,5 @@
 //ApiBaseUrl: 'https://haller-api-v2-main.herokuapp.com/api/'
 export const environment = {
     production: true,
-    ApiBaseUrl: 'https://haller-api-v2-main.herokuapp.com/api/'
+    ApiBaseUrl: 'http://10.0.0.23:4040/api/'
 };

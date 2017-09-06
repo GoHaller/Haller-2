@@ -207,6 +207,16 @@ const PostSchema = new mongoose.Schema({
     default: false,
     required: true
   },
+  deletedBy: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: false
+  },
+  deletedAt: {
+    type: Date,
+    default: new Date(),
+    required: false
+  },
   isHidden: {
     type: Boolean,
     default: false
@@ -238,6 +248,7 @@ PostSchema.method({
  * Statics
  */
 PostSchema.statics = {
+  populateMap: populateMap,
   /**
    * Get Post
    * @param {ObjectId} id - The objectId of post.
@@ -405,10 +416,24 @@ PostSchema.statics = {
     return this.find({ 'comments.createdBy': userId, $or: [{ deleted: { $exists: false } }, { deleted: false }] }).populate(populateMap()).sort({ 'comments.createdAt': -1 }).exec();
   },
 
-  listByResidenceForAdmin({ residence, skip = 0, limit = 50, event = false, sortBy = 'createdAt', asc = false } = {}) {
+  listByResidenceForAdmin({ residence, skip = 0, limit = 50, event = false, sortBy = 'createdAt', asc = false, search = null } = {}) {
     var sort = {};
     sort[sortBy] = asc ? 1 : -1;
-    return this.find({ authorResidence: residence, isEvent: event })
+    //new RegExp(country, 'i')
+    //{ $regex: residence + '^', $options: 'i' }
+    let q = {};
+    q.isEvent = event;
+    if (search) {
+      q.details = new RegExp(search, 'i');
+    }
+    if (['campus', 'university'].indexOf(residence.toLowerCase()) > -1) {
+      q.discoveryFeed = true;
+    } else {
+      q.discoveryFeed = false;
+      q.authorResidence = new RegExp(residence, 'i')
+    }//{ authorResidence: new RegExp(residence, 'i'), isEvent: event }
+    // console.log(q);
+    return this.find(q)
       .populate(populateMap())
       .sort(sort)
       .skip(parseInt(skip))
@@ -428,12 +453,11 @@ PostSchema.statics = {
   },
 
   findByCustomQuery({ q = {}, skip = 0, limit = 50 } = {}) {
-    console.info('q', q);
     return this.find(q)
       .populate(populateMap())
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
+      .skip(parseInt(skip))
+      .limit(parseInt(limit))
       .exec();
   },
 };

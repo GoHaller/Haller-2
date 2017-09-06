@@ -65,6 +65,12 @@ router.route('/:conversationId/users/:userId')
     getToken
   }), validate(paramValidation.updateConversation), conversationCtrl.update)
 
+router.route('/:conversationId/markasread')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), conversationCtrl.markConversationAsRead);
+
 router.route('/bot')
   .post(expressJwt({
     secret: config.jwtSecret,

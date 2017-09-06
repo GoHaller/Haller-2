@@ -178,6 +178,10 @@ const UserSchema = new mongoose.Schema({
   isBlocked: {
     type: Boolean,
     default: false
+  },
+  inviteCode: {
+    type: String,
+    required: false
   }
 }, {
     toObject: {
@@ -188,13 +192,14 @@ const UserSchema = new mongoose.Schema({
     }
   });
 
+//inviteCode: used on signup
 
 /**
- * Add your
- * - pre-save hooks
- * - validations
- * - virtuals
- */
+* Add your
+* - pre-save hooks
+* - validations
+* - virtuals
+*/
 // UserSchema.post('save', (doc) => {
 //   if (!doc.emailVerified && (!doc.verificationSent || doc.verificationSent === null)) {
 //     sendVerificationEmail(doc);
@@ -218,7 +223,7 @@ UserSchema.statics = {
    * @returns {Promise<User, APIError>}
    */
   get(id) {
-    console.info('getId', id);
+    // console.info('getId', id);
     try {
       if (id.toString().match(/^[0-9a-fA-F]{24}$/).length > 0) {
         const objectId = mongoose.Types.ObjectId(id); //eslint-disable-line
@@ -431,6 +436,12 @@ UserSchema.statics = {
     const err = new APIError('Invalid Id!', httpStatus.INTERNAL_SERVER_ERROR);
     return Promise.reject(err);
   },
+
+  getUserForNotification() {
+    this.find({ 'notifications.deviceToken': { $exists: true, $ne: "" } })
+      .then((users) => { res.json(users); })
+      .catch((e) => { return next(e); });
+  }
 };
 
 /**

@@ -104,97 +104,72 @@ function create(req, res, next) { //eslint-disable-line
   });
 }
 
+function createAdminNotification(req, res, next) {
+  var notiObje = { _id: mongoose.Types.ObjectId(), type: 21 };
+  if (!req.body.title && !req.body.message) { return res.json({ "message": " no data found " }); }
+  createNotification(req, res, next, notiObje);
+}
+
 function createUniversityNotification(req, res, next) {
-  var notiObje = { _id: mongoose.Types.ObjectId(), type: 20 };
-  if(!req.body.title && !req.body.message){res.json({"message":" no data found "});}
-  notiObje.body = { title: req.body.title || 'Haller University says',
-                    message: req.body.message || 'Hello friends, this is lorem ippsem.',
-                  };
-  console.log(req.body.file)
-  if(req.body.file){
-   const lib = new Library(_.extend(req.body.file, { _id: mongoose.Types.ObjectId() })); 
+  var notiObje = { _id: mongoose.Types.ObjectId(), type: req.body.isCustom ? 21 : 20 };
+  if (!req.body.title && !req.body.message) { return res.json({ "message": " no data found " }); }
+  createNotification(req, res, next, notiObje);
+}
+
+function createNotification(req, res, next, notiObje = {}) {
+  notiObje.body = {
+    title: req.body.title,// || 'Haller University says',
+    message: req.body.message,// || 'Hello friends, this is lorem ippsem.',
+  };
+  if (req.body.recipients && req.body.recipients.length > 0) {
+    notiObje.recipients = [];
+    req.body.recipients.forEach((value, index, array) => {
+      notiObje.recipients.push({ user: value });
+    })
+  }
+
+  if (req.body.file) {
+    const lib = new Library(_.extend(req.body.file, { _id: mongoose.Types.ObjectId() }));
     lib.save()
-    .then((libItem) => {
+      .then((libItem) => {
         notiObje.body.image = libItem._id
         notiObje.createdBy = req.body.createdBy;
         var notification = new Notification(notiObje);
         notification.save().then(savedNoti => {
           Notification.get(savedNoti._id)
-            .then(noti => {
-                res.json(noti);
-            }).catch(e => {
-              console.info('university savedNoti error', e);
-              next(e);
-            });
+            .then(noti => { res.json(noti); sendUniversityNotification(noti); })
+            .catch(e => { console.info('university savedNoti error', e); next(e); });
         });
-    })
-    .catch((e) => {
-      console.log(e); //eslint-disable-line
-      next(e);
-    });
-  }else{
-      notiObje.createdBy = req.body.createdBy;
-        var notification = new Notification(notiObje);
-        notification.save().then(savedNoti => {
-          Notification.get(savedNoti._id)
-            .then(noti => {
-              res.json(noti);
-            }).catch(e => {
-              console.info('university savedNoti error', e);
-              next(e);
-            });
-        });
+      })
+      .catch((e) => { console.log(e); next(e); });
+  } else {
+    notiObje.createdBy = req.body.createdBy;
+    var notification = new Notification(notiObje);
+    notification.save().then(savedNoti => {
+      Notification.get(savedNoti._id)
+        .then(noti => { res.json(noti); sendUniversityNotification(noti); })
+        .catch(e => { console.info('university savedNoti error', e); next(e); });
+    }).catch(e => { console.info('university savedNoti error', e); next(e); });
   }
 }
 
-function getNotifications(req, res, next){
-  if(!req.params.userId){res.json({"message":" no data found "});}
-  User.get(req.params.userId)
-    .then(user => {
-        var allNotification = [];
+function sendUniversityNotification(notification) {
+  if (notification.recipients && notification.recipients.length > 0) {
+    FCMSender.sendUniversityNotification(notification.recipients, notification);
+  } else {
+    User.getUserForNotification()
+      .then(users => {
+        FCMSender.sendUniversityNotification(users, notification);
+      });
+  }
+}
 
-        if(user.role != "admin" && user.role != "student"){
-          Notification.getUsersNotification(req.params.userId)
-          .then(notification =>{
-            for(var i = 0; i < notification.length ; i++){
-              // if(notification[i].body.image){
-              //   Library.get(notification[i].body.image).then(notImage=>{
-              //     notification[i].body.image = notImage
-              //   });
-
-              // }
-              if(notification[i].body.title && notification[i].body.message  ) {
-                allNotification.push(notification[i]);
-              }
-            }
-            return res.json({ allNotification});
-          });
-        }else if(user.role == "admin"){
-          Notification.getAllUsersNotification()
-          .then(notification =>{
-            for(var i = 0; i < notification.length ; i++){
-              var image = [];
-              if(notification[i].body.image){
-                
-                Library.get(notification[i].body.image)
-                .then(notiImage=>{
-                  image.push(notiImage)
-                });
-              }
-              if(notification[i].body.title && notification[i].body.title && notification[i].createdBy ){
-                allNotification.push(notification[i]);
-                notification[i].body.image = "hiii";
-              }
-            }
-            var admin = {"admin":"admin"}
-            return res.json({ allNotification,admin});
-          });
-        }
-    })
+function getNotifications(req, res, next) {
+  if (!req.params.userId) { res.json({ "message": " no data found " }); }
+  Notification.getUsersNotification(req.params.userId)
+    .then(notification => { return res.json(notification) })
     .error(e => next(e))
-    .catch((e) => {
-      next(e);
-    });
+    .catch(e => next(e));
 }
 
 
@@ -257,27 +232,48 @@ function readNotification(req, res, next) {
 }
 
 function getUnreadNotificationCount(req, res, next) {
+  // console.log('req.body', req.body.notificationId);
   var query = [{ 'recipients.user': req.params.userId }, { type: { $in: [10, 4, 17, 20] } }]
   if (req.body.notificationId) query.push({ _id: { $gt: mongoose.Types.ObjectId(req.body.notificationId) } });
-  Notification.find({ $and: query }).populate([{ path: 'post', model: 'Post' }]).skip(0).limit(50).exec().then(notifs => {
+  //.populate([{ path: 'post', model: 'Post' }])
+  Notification.find({ $and: query }).skip(0).limit(50).exec().then(notifs => {
     var notifyCount = 0;
-    notifs.forEach(function (noti) {
+    notifs.forEach((noti) => {
+      // console.log('noti', noti);
       if (noti.post) {
         notifyCount++;
       }
     }, this);
-    var qOr = [{ 'messages.readBy.user': { $ne: req.params.userId } }, { 'messages.createdBy': { $ne: req.params.userId } }];
-    var qAnd = [{ 'leftUser.user': { $ne: req.params.userId } }];
-    qAnd.push({ 'deletedFor.user': { $ne: req.params.userId } });
-    // qAnd.push({ $or: qOr, 'participants': req.params.userId });
-    qAnd.push({ 'participants': req.params.userId });
-    qAnd.push({ 'messages.readBy.user': { $ne: req.params.userId } });
-    qAnd.push({ 'messages.createdBy': { $ne: req.params.userId } });
-    Conversation.find({ $and: qAnd })
-      .exec().then(convo => {
-        res.json({ 'convo': convo.length, 'notiCount': notifyCount });
-      })
-      .catch((e) => {
+    User.userWhoBlockedMe(req.params.userId, req.query.bot || false)
+      .then(usersWhoBlockedMe => {
+        User.findOne({ '_id': req.params.userId }, { 'blocked.user': 1 }).exec()
+          .then(bu => {
+            if (bu.blocked) {
+              for (var i = 0; i < bu.blocked.length; i++) {
+                usersWhoBlockedMe.push({ _id: bu.blocked[i].user });
+              }
+            }
+            // var qOr = [{ 'messages.readBy.user': { $ne: req.params.userId } }, { 'messages.createdBy': { $ne: req.params.userId } }];
+            var qAnd = [{ 'leftUser.user': { $ne: req.params.userId } }];
+            qAnd.push({ 'deletedFor.user': { $ne: req.params.userId } });
+            // qAnd.push({ $or: qOr, 'participants': req.params.userId });
+            qAnd.push({ participants: req.params.userId });
+            qAnd.push({ 'messages.readBy.user': { $ne: req.params.userId } });
+            qAnd.push({ 'messages.createdBy': { $ne: req.params.userId } });
+            qAnd.push({ participants: { $nin: usersWhoBlockedMe } });
+            Conversation.find({ $and: qAnd })
+              .exec().then(convo => {
+                res.json({ 'convo': convo.length, 'notiCount': notifyCount });
+              })
+              .catch((e) => {
+                console.log(e); //eslint-disable-line
+                next(e);
+              });
+          }).catch((e) => {
+            console.log(e); //eslint-disable-line
+            next(e);
+          });
+      }).catch((e) => {
         console.log(e); //eslint-disable-line
         next(e);
       });
@@ -324,6 +320,7 @@ function getNotification(req, res, next) {
           notiesObj._id = item._id;
           notiesObj.type = item.type;
           notiesObj.title = item.body.title;
+          notiesObj.image = item.body.image;
           notiesObj.message = item.body.message;
           notiesObj.createdAt = item.createdAt;
           notiesObj.university = { logo: 'assets/img/user-group.png' };

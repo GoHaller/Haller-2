@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
+
 /**
  * Notification Schema
  * Represents the notification object to notify users of interactions on their content.
@@ -20,7 +21,10 @@ const NotificationSchema = new mongoose.Schema({
   body: {
     title: { type: String, default: '' },
     message: { type: String, default: '' },
-    image: { type: mongoose.Schema.Types.Mixed }
+    image: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Library',
+    }
   },
   objectId: {
     type: String,
@@ -59,6 +63,9 @@ const NotificationSchema = new mongoose.Schema({
 */
 const populateMap = () =>
   [{
+    path: 'body.image',
+    model: 'Library'
+  }, {
     path: 'recipients.user',
     model: 'User',
   }, {
@@ -133,7 +140,7 @@ NotificationSchema.statics = {
         if (university == 'true') q = { type: 20 };
         return this.find(q)
           .populate(populateMap())
-          .sort({ updatedAt: -1 })
+          .sort({ _id: -1 })
           .skip(skip)
           .limit(limit)
           .exec();
@@ -161,10 +168,10 @@ NotificationSchema.statics = {
     return names.join(', ') + (allNames.length > 3 ? (allNames.length - 3) : '');
   },
 
-getUsersNotification(userId ,skip = 0, limit = 10){
-    return this.find({'createdBy' : userId })
+  getUsersNotification(userId, skip = 0, limit = 10) {
+    return this.find({ 'createdBy': mongoose.Types.ObjectId(userId), type: { $in: [20, 21] } })
       .populate(populateMap())
-      .sort({ updatedAt: -1 })
+      .sort({ _id: -1 })
       .skip(skip)
       .limit(limit)
       .exec()
@@ -174,9 +181,9 @@ getUsersNotification(userId ,skip = 0, limit = 10){
         }
         else return null;
       });
-},
+  },
 
-getAllUsersNotification(skip = 0, limit = 10){
+  getAllUsersNotification(skip = 0, limit = 10) {
     return this.find()
       .populate(populateMap())
       .sort({ updatedAt: -1 })
@@ -189,7 +196,7 @@ getAllUsersNotification(skip = 0, limit = 10){
         }
         else return null;
       });
-}
+  }
 
 
 

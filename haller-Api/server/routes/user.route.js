@@ -16,7 +16,12 @@ router.route('/admin/:userId/list')
   .post(expressJwt({
     secret: config.jwtSecret,
     getToken
-  }), userCtrl.allUsersByFilter);
+  }), userCtrl.allUsersByFilter)
+
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.getAllUsersWithFilter);
 
 
 router.route('/admin/change-user-sataus')
@@ -25,6 +30,8 @@ router.route('/admin/change-user-sataus')
     getToken
   }), validate(paramValidation.userStatus), userCtrl.toggleUserStatus);
 
+router.route('/admin/users-for-notification')
+  .get(userCtrl.getUserForNotification)
 
 //App APIS
 router.route('/university/:id')

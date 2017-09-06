@@ -5,7 +5,9 @@ import Conversation from '../models/conversation.model';
 import FCMSender from '../helpers/FCMSender';
 import User from '../models/user.model';
 import APIError from '../helpers/APIError';
+import { load, getToken } from '../helpers/AuthorizationHelper';
 import devBot from '../controllers/bot.controller';
+import emailVerification from '../cronJobs/emailVerification';
 
 const activityType = 19;
 
@@ -64,8 +66,11 @@ function processConversation(conversation, userId, callback) {
     }
   }
   if (deletedFor) {
+    let deletedAt = new Date(deletedFor.at);
+    // console.log('deletedAt', deletedAt);
     for (var m = 0; m < conversation.messages.length; m++) {
-      if (new Date(conversation.messages[m].createdAt).getTime() < new Date(deletedFor.at).getTime()) {
+      // console.log('createdAt', new Date(conversation.messages[m].createdAt));
+      if (new Date(conversation.messages[m].createdAt).getTime() < deletedAt) {
         conversation.messages.splice(m, 1);
         m--;
       }
@@ -226,7 +231,10 @@ function update(req, res, next) { //eslint-disable-line
             if (req.body.message) {
               FCMSender.sendMsgNotification(req.body.message, convo2);
             }
-            return res.json(convo2);
+            processConversation(convo2, req.params.userId, function (processedConvo) {
+              return res.json(processedConvo);
+            });
+            // return res.json(convo2);
           }).catch(e => {
             console.info('Conversation.get error', e);
             const error = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);
@@ -353,7 +361,7 @@ function askToBot(req, res, next) {
           recipient: req.body.message.createdBy,
         }
         if (error) {
-          messagesObj['body'] = 'Sorry sir! Cherry need a doctor right now.';
+          messagesObj['body'] = 'Sorry sir! Bot need a doctor right now.';
         }
         else {
           messagesObj['botBody'] = response
@@ -377,6 +385,17 @@ function askToBot(req, res, next) {
             if (err) {
               return next(err);
             } else if (doc) {
+              console.log('response.result.action', response.result.action);
+              if (response.result.action == 'fallback') {
+                emailVerification.sendBotQuestionEmail(doc.createdBy, req.body.message['body'])
+                  .then((res) => {
+                    console.log('sendBotQuestionEmail res', res);
+                  }, error => {
+                    console.log('sendBotQuestionEmail error', error);
+                  }).catch(err => {
+                    console.log('sendBotQuestionEmail catch error', err);
+                  })
+              }
               return res.json(doc);
             }
           });
@@ -425,11 +444,17 @@ function updateMessage(req, res, next) { //eslint-disable-line
         savedConvo.save().then((sConvo) => {
           if (req.body.userId) {
             Conversation.get(req.params.conversationId, req.body.userId).then((gotConvo) => {
-              return res.json(gotConvo);
+              // return res.json(gotConvo);
+              processConversation(gotConvo, req.params.userId, function (processedConvo) {
+                return res.json(processedConvo);
+              });
             });
           } else {
             if (sConvo) {
-              return res.json(sConvo);
+              processConversation(sConvo, req.params.userId, function (processedConvo) {
+                return res.json(processedConvo);
+              });
+              // return res.json(sConvo);
             } else {
               const err = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);
               return next(err);
@@ -460,7 +485,10 @@ function removeMessage(req, res, next) { //eslint-disable-line
       convo.messages.id(req.params.messageId).remove();
       convo.save().then((sConvo) => {
         if (sConvo) {
-          return res.json(sConvo);
+          processConversation(sConvo, req.params.userId, function (processedConvo) {
+            return res.json(processedConvo);
+          });
+          // return res.json(sConvo);
         }
         const err = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);
         return next(err);
@@ -473,6 +501,49 @@ function removeMessage(req, res, next) { //eslint-disable-line
   }
 }
 
+function markConversationAsRead(req, res, next) {
+  Conversation.get(req.params.conversationId).then((convo) => {
+    const savedConvo = convo;
+    let activationToken = getToken(req);
+    // console.log('activationToken', activationToken);
+    User.findOne({ 'status.activeToken': activationToken })
+      .then((user) => {
+        // console.log('user', user);
+        if (user) {
+          savedConvo.messages.forEach(function (msg) {
+            if (msg.createdBy._id.toString() != user._id.toString()) {
+              let massagesRead = msg.readBy.filter(reader => {
+                return reader.user.toString() == user._id.toString();
+              })
+              if (!massagesRead || massagesRead.length == 0) {
+                msg.readBy.push({ user: user._id, at: new Date() });
+                msg.read = true;
+              }
+            }
+          });
+          // console.log('savedConvo.messages',savedConvo.messages)
+          savedConvo.save().then((sConvo) => {
+            Conversation.get(req.params.conversationId, user._id).then((gotConvo) => {
+              processConversation(gotConvo, req.params.userId, function (processedConvo) {
+                return res.json(processedConvo);
+              });
+            });
+          });
+        } else {
+          const error = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+          return next(error);
+        }
+      }).catch(e => {
+        console.info('markConversationAsRead error', e);
+        const error = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+        return next(error);
+      });
+  }).catch(e => {
+    console.info('markConversationAsRead error', e);
+    const error = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);
+    return next(error);
+  });
+}
 
 /**
  * Remove conversation.
@@ -549,4 +620,4 @@ function createNotification(actObj) {
     console.info('Post.get error', e);
   })
 }
-export default { get, list, create, update, updateMessage, remove, removeMessage, leaveConversation, createBotConversation, askToBot };
+export default { get, list, create, update, updateMessage, remove, removeMessage, leaveConversation, createBotConversation, askToBot, markConversationAsRead };

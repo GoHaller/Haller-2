@@ -16,14 +16,19 @@ declare var swal: any;
 export class FeedComponent implements OnInit {
 
     public isEvent: boolean = false;
+    public clearList: boolean = false;
     public post: any = {};
     public comment: any = {};
     public detail: any;
     public posts = [];
     public postIndex: number = 0;
-    public residence: any = { home: 'Oliver' };
-
-
+    public residence: string = 'Oliver';
+    public userInfo: any = {};
+    public isCampus: boolean = false;
+    public selectedResidence: string = '';
+    searchKeyword: string = '';
+    public residenceList = [{ name: 'Oliver Hall', value: 'Oliver' }, { name: 'Scholarship Hall', value: 'Scholarship Hall' }, { name: 'Oswald/Self Hall', value: 'Self Hall' }, { name: 'Ellsworth Halls', value: 'Ellsworth Halls' }, { name: 'Downs Hall', value: 'Downs Hall' }, { name: 'Campus', value: 'Campus' }];
+    public residenceListForPost = [{ name: 'Oliver Hall', value: 'Oliver' }, { name: 'Scholarship Hall', value: 'Scholarship Hall' }, { name: 'Oswald/Self Hall', value: 'Self Hall' }, { name: 'Ellsworth Halls', value: 'Ellsworth Halls' }, { name: 'Downs Hall', value: 'Downs Hall' }];
 
     skip = 0;
     limit = 10;
@@ -31,11 +36,21 @@ export class FeedComponent implements OnInit {
 
     file: File;
     ngOnInit() {
+
+    }
+    compareFn(c1: any, c2: any): boolean {
+        return c1 && c2 ? c1.value === c2.value : c1 === c2;
+    }
+
+    ngAfterViewInit() {
         // console.info('posts', this.posts);
         $('.comment-section').perfectScrollbar();
         this.getFeeds();
         if ($(".selectpicker").length != 0) {
             $(".selectpicker").selectpicker();
+            setTimeout(() => {
+                $('.selectpicker').selectpicker('refresh');
+            }, 200);
         }
         $('.ps-container').on('scroll', () => {
             let btm = $($('.ps-container .ps-scrollbar-y')[2]).css('bottom');
@@ -51,6 +66,10 @@ export class FeedComponent implements OnInit {
     constructor(private location: Location, private modalService: ModalService, public postService: PostService) {
         let title = this.location.prepareExternalUrl(this.location.path());
         this.isEvent = title.indexOf('event') > -1;
+        this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        //Campus
+        this.selectedResidence = this.userInfo['role'] == 'admin' ? 'Campus' : this.userInfo['residence'];
+
     }
 
     save(model, isValid, id) {
@@ -98,7 +117,6 @@ export class FeedComponent implements OnInit {
         let files: FileList = target.files;
         this.file = files[0];
         this.post['image'] = this.file['result'];
-        // console.log(this.file);
     }
 
     removeImage() {
@@ -109,12 +127,18 @@ export class FeedComponent implements OnInit {
         this.postIndex = index;
     }
 
+    makeSearch() {
+        this.changeSegment();
+    }
+
     getFeeds() {
         var userId = localStorage.getItem('uid');
-        this.postService.getFeedByResidence(userId, this.residence.home, this.isEvent, this.limit, this.skip).subscribe((res: any) => {
-            if (res) { this.posts = this.posts.concat(res); this.beingRefresh = false; }
-
-
+        this.postService.getFeedByResidence(userId, this.residence, this.isEvent, this.limit, this.skip, this.searchKeyword).subscribe((res: any) => {
+            if (res) {
+                if (this.clearList) { this.posts = res; this.clearList = false; }
+                else this.posts = this.posts.concat(res);
+                this.beingRefresh = false;
+            }
         }, error => {
             console.log('getFeedByResidence error', error);
         })
@@ -157,21 +181,22 @@ export class FeedComponent implements OnInit {
         }
         feedObject['createdAt'] = new Date();
         feedObject['createdBy'] = localStorage.getItem('uid');
-        feedObject['title'] = 'Haller';
-        feedObject['authorResidence'] = 'University';
-        feedObject['discoveryFeed'] = true;
-        feedObject['residentsFeed'] = false;
+        feedObject['title'] = this.isEvent ? this.post.title : 'Haller';
+        feedObject['authorResidence'] = this.userInfo['role'] == 'staff' ? this.userInfo['residence'] : this.selectedResidence; //'University';
+        feedObject['discoveryFeed'] = this.isCampus;
+        feedObject['residentsFeed'] = !this.isCampus;
         feedObject['details'] = this.detail;
         feedObject['isEvent'] = this.isEvent;
         if (this.isEvent) {
             feedObject['date'] = $('#eventDate').data("DateTimePicker").date()._d;
             feedObject['location'] = this.post.location;
-            feedObject['title'] = this.post.title;
+            // feedObject['title'] = this.post.title;
         }
         this.postService.createPost(feedObject)
             .subscribe((res: any) => {
-                console.log('createPOst res', res);
                 this.file = null;
+                this.clearList = true;
+                // this.posts = [];
                 this.post.detail = '';
                 this.getFeeds();
             }, error => {
@@ -194,7 +219,6 @@ export class FeedComponent implements OnInit {
 
         this.postService.createComment(this.posts[this.postIndex]._id, commentObj)
             .subscribe((res: any) => {
-                console.log('createComment res', res);
                 this.file = null;
                 this.posts[this.postIndex] = res;
             }, error => {
@@ -233,8 +257,16 @@ export class FeedComponent implements OnInit {
     }
 
     changeSegment() {
-        this.posts = [];
+        this.skip = 0;
+        this.clearList = true;
+        // this.posts = [];
         this.getFeeds();
+    }
+
+    processPosts(posts) {
+        return posts.filter(post => {
+            return post.createdBy && post.createdBy.firstName;
+        })
     }
 
 }

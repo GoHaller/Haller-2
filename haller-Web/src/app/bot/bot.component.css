@@ -1,0 +1,26 @@
+.bot .user-list{
+    margin-bottom: 0px;
+    padding: 5px 0px 5px 0px;
+    border-bottom: 1px solid #dedede;
+}
+
+.bot .user-image{
+    border-radius: 50%;
+    width:65px;
+    height:65px;
+}
+
+.bot .me .msg-container .bot-msgs{ max-width:85%;float: right;}
+
+.bot .them .msg-container .msg-time, .bot .me .msg-container .msg-time{ float: left; }
+.bot .them .msg-container div{ max-width:85%; float: left; }
+
+.bot .msg-container .bot-msgs, .bot .msg-container div{
+    border-radius: 5px; 
+    background-color: #ffffff; 
+    padding: 2px 5px;
+    margin-bottom: 5px;
+}
+.alert.alert-info i{
+    color: inherit;
+}

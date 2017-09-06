@@ -23,13 +23,18 @@ export class NotificationService {
     }
 
     createNotification(notificationObj: any) {
-        this.createAuthorizationHeader();        
-        return this.http.post(this.notificationApiUrl +'createnew', notificationObj, { headers: this.headers }).map(this.extractData)
+        this.createAuthorizationHeader();
+        return this.http.post(this.notificationApiUrl + 'createnew', notificationObj, { headers: this.headers }).map(this.extractData)
     }
 
-    getNotification(userId:string) {
+    getNotification(userId: string) {
         this.createAuthorizationHeader();
-        return this.http.get(this.notificationApiUrl + userId +'/list' , { headers: this.headers }).map(this.extractData);
+        return this.http.get(this.notificationApiUrl + userId + '/list', { headers: this.headers }).map(this.extractData);
+    }
+
+    getUsersForNotification() {
+        this.createAuthorizationHeader();
+        return this.http.get(environment.ApiBaseUrl + 'users/admin/users-for-notification', { headers: this.headers }).map(this.extractData);
     }
 
     private extractData(res: any) {

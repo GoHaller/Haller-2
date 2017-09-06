@@ -164,13 +164,13 @@ ConversationSchema.statics = {
   list({ userId, recipient, skip = 0, limit = 50, blocked = [] } = {}) {
     if (userId.toString().match(/^[0-9a-fA-F]{24}$/).length > 0) {
       try {
-        let deletedFor = { 'deletedFor.user': { $nin: [userId] } };
+        let deletedFor = { 'deletedFor.user': { $ne: userId } };
         // let q = { $and: [{ participants: { $in: [userId] } }, deletedFor] };
         // if (recipient) {
         //   q = { $and: [{ participants: userId }, { participants: recipient }, deletedFor], participants: { $size: 2 } };
         // }
         let blockMe = { participants: { $nin: blocked } };
-        let q = { $and: [{ participants: { $in: [userId] } }, blockMe] };//, { $where: "this.participants.length > 1" }] };
+        let q = { $and: [{ participants: userId }, blockMe] };//, { $where: "this.participants.length > 1" }] };
         if (recipient) {
           q = { $and: [{ participants: userId }, { participants: recipient }, blockMe], participants: { $size: 2 } };
         }

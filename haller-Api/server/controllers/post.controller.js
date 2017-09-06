@@ -9,6 +9,7 @@ import Notification from '../models/notification.model';
 import Library from '../models/library.model';
 import APIError from '../helpers/APIError';
 import FCMSender from '../helpers/FCMSender';
+import { load, getToken } from '../helpers/AuthorizationHelper';
 import { postsMap } from '../helpers/PopulateMaps';
 import { sendFlaggedEmailWithMailgun } from '../cronJobs/sendFlaggedPostEmail';
 var unique = require('array-unique');
@@ -328,15 +329,25 @@ function listByUser(req, res, next) {
 function remove(req, res, next) {
   Post.get(req.params.postId)
     .then((post) => {
-      post.deleted = true;
-      post.save()
-        .then((doc) => {
-          // var act = { _id: mongoose.Types.ObjectId(), post: doc._id, activityType: 3, createdBy: doc.createdBy._id };
-          // createActivityLog(act, function () {
-          return res.json(doc);
-          // });
-        })
-        .catch((e) => {
+      let activationToken = getToken(req);
+      User.findOne({ 'status.activeToken': activationToken })
+        .then((user) => {
+          if (user && user._id)
+            post.deletedBy = user._id.toString();
+          post.deletedAt = new Date();
+          post.deleted = true;
+          post.save()
+            .then((doc) => {
+              // var act = { _id: mongoose.Types.ObjectId(), post: doc._id, activityType: 3, createdBy: doc.createdBy._id };
+              // createActivityLog(act, function () {
+              return res.json(doc);
+              // });
+            })
+            .catch((e) => {
+              console.log(e); //eslint-disable-line
+              next(e);
+            });
+        }).catch((e) => {
           console.log(e); //eslint-disable-line
           next(e);
         });
@@ -1048,9 +1059,11 @@ function adminListByResidence(req, res, next) {
       //       next(e);
       //     });
       // } else if (user.role == "admin") {
-      const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false } = req.query;
-      Post.listByResidenceForAdmin({ residence: req.params.residence, limit, skip, event, sortBy, asc })
+      // console.log(req.params.residence)
+      const { limit = 50, skip = 0, event = false, sortBy = 'createdAt', asc = false, search = null } = req.query;
+      Post.listByResidenceForAdmin({ residence: req.params.residence, limit, skip, event, sortBy, asc, search })
         .then(posts => {
+          // console.log('posts', posts.length);
           // console.info('posts', posts[0].comments ? posts[0].comments[posts[0].comments.length - 1] : '');
           res.json(posts)
         })
@@ -1090,7 +1103,13 @@ function adminGetFlagedPost(req, res, next) {
   } else if (section == 'feed') {
     q['isEvent'] = false;
   }
-  const { limit = 50, skip = 0 } = req.query;
+  const { search = null, limit = 50, skip = 0 } = req.query;
+  if (search) {
+    q['$or'] = [{ details: new RegExp(search, 'i') }, { 'comments.body': new RegExp(search, 'i') }]
+    // q.details = new RegExp(search, 'i');
+    // q['comments.body'] = new RegExp(search, 'i');
+  }
+  console.log(q);
   Post.findByCustomQuery({ q: q, skip: skip, limit: limit })
     .then(posts => {
       res.json(posts);
@@ -1328,19 +1347,38 @@ function getStaffJoinDetails(req, res, next) {
 function deletePost(req, res, next) {
   Post.get(req.params.postId)
     .then((post) => {
-      post.flagged = [0];
-      post.deleted = true;
-      for (var i = 0; i < post.comments.length; i++) {
-        post.comments[i].isHidden = true;
-        post.comments[i].deleted = true;
+      let activationToken = getToken(req);
+      if (activationToken) {
+        User.findOne({ 'status.activeToken': activationToken })
+          .then((user) => {
+            updatepostToDelete(req, res, next, post, user_id);
+          });
+      } else {
+        updatepostToDelete(req, res, next, post);
       }
-      post.save()
-        .then((doc) => {
-          return res.json(doc);
-        })
-        .catch((e) => {
-          return res.json("error");
-        });
+    }).catch((e) => {
+      console.log('error', e);
+      return res.json("error");
+    });
+}
+
+function updatepostToDelete(req, res, next, post, userId = null) {
+  if (userId)
+    post.deletedBy = user._id;
+  post.deletedAt = new Date();
+  post.flagged = [0];
+  post.deleted = true;
+  for (var i = 0; i < post.comments.length; i++) {
+    post.comments[i].isHidden = true;
+    post.comments[i].deleted = true;
+  }
+  post.save()
+    .then((doc) => {
+      return res.json(doc);
+    })
+    .catch((e) => {
+      console.log('error', e);
+      return res.json("error");
     });
 }
 

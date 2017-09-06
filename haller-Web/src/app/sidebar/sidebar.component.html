@@ -1,13 +1,13 @@
 <div class="logo">
     <div class="logo-normal">
         <a href="#" class="simple-text">
-                    Haller
+                <img style="width: 100px" src="/assets/img/logo.png" />
                 </a>
     </div>
 
-    <div class="logo-img">
-        <img src="/assets/img/angular2-logo-white.png" />
-    </div>
+    <!-- <div class="logo-img">
+        <img style="width: 100px" src="/assets/img/logo.png" />
+    </div> -->
 </div>
 
 
@@ -70,13 +70,13 @@
     </div>
     <div class="nav-container">
         <ul class="nav">
-            <li routerLinkActive="active">
-                <a [routerLink]="[appMenuItems[0].path]">
-                            <i class="{{appMenuItems[0].icon}}">{{appMenuItems[0].iconName}}</i>
-                            <p>{{appMenuItems[0].title}}</p>
+            <li routerLinkActive="active" *ngFor="let menuItem of appMenuItems">
+                <a [routerLink]="[menuItem.path]">
+                            <i class="{{menuItem.icon}}">{{menuItem.iconName}}</i>
+                            <p>{{menuItem.title}}</p>
                         </a>
             </li>
-            <li routerLinkActive="active">
+            <!-- <li routerLinkActive="active">
                 <a [routerLink]="[appMenuItems[1].path]">
                             <i class="{{appMenuItems[1].icon}}">{{appMenuItems[1].iconName}}</i>
                             <p>{{appMenuItems[1].title}}</p>
@@ -101,14 +101,15 @@
                         </a>
             </li>
 
-             <li routerLinkActive="active">
+            <li routerLinkActive="active">
                 <a [routerLink]="[appMenuItems[5].path]">
                             <i class="{{appMenuItems[5].icon}}">{{appMenuItems[5].iconName}}</i>
                             <p>{{appMenuItems[5].title}}</p>
                         </a>
-            </li>
+            </li> -->
 
-           <!-- <li routerLinkActive="active">
+
+            <li routerLinkActive="active">
                 <a data-toggle="collapse" href="#componentsExamples">
                             <i class="material-icons">apps</i>
                             <p>Components
@@ -334,7 +335,8 @@
                     </ul>
                 </div>
             </li>
- -->
+            <!-- -->
+
         </ul>
     </div>
 

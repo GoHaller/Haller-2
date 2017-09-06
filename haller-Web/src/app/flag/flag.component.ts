@@ -19,6 +19,7 @@ export class FlagComponent implements OnInit {
     public success = '';
     public flagOfthree = false;
     public noFurtureAction = false;
+    searchKeyword: string = '';
 
     skip = 0;
     limit = 10;
@@ -31,6 +32,9 @@ export class FlagComponent implements OnInit {
         this.getFeeds();
         if ($(".selectpicker").length != 0) {
             $(".selectpicker").selectpicker();
+            setTimeout(() => {
+                $('.selectpicker').selectpicker('refresh');
+            }, 200);
         }
         $('.ps-container').on('scroll', () => {
             let btm = $($('.ps-container .ps-scrollbar-y')[2]).css('bottom');
@@ -44,8 +48,12 @@ export class FlagComponent implements OnInit {
         })
     }
 
+    makeSearch() {
+        this.changeSegment();
+    }
+
     getFeeds() {
-        this.postService.getFlagedData(this.section, this.sort, this.limit, this.skip).subscribe((res: any) => {
+        this.postService.getFlagedData(this.section, this.sort, this.limit, this.skip, this.searchKeyword).subscribe((res: any) => {
             // console.info('getFlagedData error', res);
             if (res)
                 this.posts = res;
@@ -215,6 +223,7 @@ export class FlagComponent implements OnInit {
     }
 
     changeSegment() {
+        this.skip = 0;
         this.posts = [];
         this.getFeeds();
     }

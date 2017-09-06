@@ -1,0 +1,41 @@
+<div class="main-content bot">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-4 user-section">
+                <div class="row user-list" *ngFor="let user of userList" [ngClass]="{'alert alert-info':user._id == selectedUser._id}">
+                    <div class="col-sm-3">
+                        <img class="user-image" *ngIf="user.currentProfile && user.currentProfile.secure_url" [src]="user.currentProfile.secure_url">
+                        <i *ngIf="!user.currentProfile || !user.currentProfile.secure_url" class="material-icons" style="font-size: 50px;padding: 3px 11px;">person</i>
+                    </div>
+                    <div class="col-sm-6">
+                        {{user.firstName + ' '+ user.lastName}}<br/> from {{user.residence}}<br/>{{user.email}}
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn btn-primary btn-simple btn-sm" (click)="selectUser(user)">View</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-1">&nbsp;</div>
+            <div class="col-sm-4 convo-section">
+                <div *ngIf="conversation.messages && conversation.messages.length >0 ">
+                    <div *ngFor="let msg of conversation.messages; let last = last" class="conversation row" [ngClass]="(msg.createdBy.role == 'bot')?'me':'them'">
+                        <div class="msg-container col-sm-12" *ngIf="msg.body">
+                            <div>{{msg.body}}</div>
+                        </div>
+                        <div *ngIf="msg.botBody" class="msg-container col-sm-12">
+                            <div *ngFor="let bmsg of msg.botBody1" class="bot-msgs">
+                                <div *ngIf="bmsg.body ">{{bmsg.body}}</div>
+                                <div *ngIf="bmsg.image " class="img-container "><img [src]="bmsg.image " /></div>
+                                <!-- <div *ngIf="bmsg.replies ">
+                                        <button ion-button round (click)="sendQuestion(r) " small *ngFor="let r of bmsg.replies ">{{r}}</button>
+                                    </div> -->
+                                <div *ngIf="bmsg.link " style="margin-top:5px "><a href="{{bmsg.link}} " target="_blank ">{{bmsg.linkText || 'Click here'}}</a></div>
+                                <div *ngIf="bmsg.location || bmsg.address " style="margin-top:5px "><a>{{bmsg.linkText || 'Show on map'}}</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

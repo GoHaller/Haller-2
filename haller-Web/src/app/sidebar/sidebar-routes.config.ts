@@ -1,13 +1,14 @@
 import { RouteInfo } from './sidebar.metadata';
 
 export const APPROUTES: RouteInfo[] = [
-    { path: '/analytics-dashboard', title: 'Dashboard', icon: 'material-icons', iconName:'dashboard' },
-    { path: '/feed', title: 'Feed', icon: 'material-icons', iconName:'rss_feed' },
-    { path: '/event', title: 'Event', icon: 'material-icons', iconName:'event' },
-    { path: '/flag-section', title: 'Flag Section', icon: 'material-icons', iconName:'flag' },
-    { path: '/users', title: 'Users', icon: 'material-icons', iconName:'person' },
-    { path: '/notification', title: 'Notification', icon: 'material-icons', iconName:'announcement' },
-    { path: '/forgotpassword', title: '', icon: '', iconName:'' },
+    { path: '/analytics-dashboard', title: 'Dashboard', icon: 'material-icons', iconName: 'dashboard' },
+    { path: '/general-newsfeed', title: 'General Newsfeed', icon: 'material-icons', iconName: 'rss_feed' },
+    { path: '/events-feed', title: 'Events Feed', icon: 'material-icons', iconName: 'event' },
+    { path: '/flag-content', title: 'Flagged Content', icon: 'material-icons', iconName: 'flag' },
+    { path: '/user-list', title: 'User List', icon: 'material-icons', iconName: 'person' },
+    { path: '/notifications', title: 'Notifications', icon: 'material-icons', iconName: 'announcement' },
+    { path: '/bot', title: 'Chat Bot', icon: 'material-icons', iconName: 'chat' },
+    // { path: '/forgotpassword', title: '', icon: '', iconName: '' },
 ]
 
 export const ROUTES: RouteInfo[] = [

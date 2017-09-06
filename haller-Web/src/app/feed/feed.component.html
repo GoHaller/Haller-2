@@ -1,4 +1,14 @@
 <div class="main-content">
+    <form class="navbar-form search-form" role="search">
+        <div class="form-group form-search is-empty">
+            <input type="text" class="form-control" name="searchKeyword" [(ngModel)]="searchKeyword" placeholder="Search">
+            <span class="material-input "></span>
+        </div>
+        <button type="submit" (click)="makeSearch()" class="btn btn-white btn-round btn-just-icon">
+                    <i class="material-icons">search</i>
+                    <div class="ripple-container"></div>
+                </button>
+    </form>
     <div class="container-fluid">
 
         <div class="row post-list">
@@ -6,14 +16,17 @@
             <div class="col-lg-8 col-md-6 col-sm-8">
                 <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
-                        <select class="selectpicker" [(ngModel)]="residence.home" (ngModelChange)="changeSegment()" data-style="btn btn-info btn-round"
-                            title="" data-size="4">
-                            <option value="Oliver" [attr.selected]="residence == 'Oliver'">Oliver Hall</option>
-                            <option value="Scholarship Halls" [attr.selected]="residence == 'Scholarship Halls'">Scholarship Hall</option>
-                            <option value="Self/Oswald Halls" [attr.selected]="residence == 'Self/Oswald Halls'">Self/Oswald Halls</option>
+                        <select class="selectpicker" [(ngModel)]="residence" (ngModelChange)="changeSegment()" data-style="btn btn-info btn-round"
+                            title="" data-size="6">
+                            <option *ngFor="let resident of residenceList" [ngValue]="resident.value">
+                                    {{resident.name}}
+                            </option>
+                            <!-- <option value="Oliver" [attr.selected]="residence == 'Oliver Hall' || residence == 'Oliver'">Oliver Hall</option>
+                            <option value="Scholarship Hall" [attr.selected]="residence == 'Scholarship Hall'">Scholarship Hall</option>
+                            <option value="Self Hall" [attr.selected]="residence == 'Self Hall'">Oswald/Self Hall</option>
                             <option value="Ellsworth Halls" [attr.selected]="residence == 'Ellsworth Halls'">Ellsworth Halls</option>
                             <option value="Downs Hall" [attr.selected]="residence == 'Downs Hall'">Downs Hall</option>
-                            <option value="University" [attr.selected]="residence == 'University'">University</option>
+                            <option value="University" [attr.selected]="residence == 'University'">Campus</option> -->
                         </select>
                     </div>
                     <div class="col-lg-4 col-md-4"></div>
@@ -23,13 +36,14 @@
 
                     </div>
                 </div>
-                <div class="row" *ngFor="let post of posts; let i = index">
+                <div class="row" *ngFor="let post of processPosts(posts); let i = index">
                     <div class="col-lg-10 col-sm-12">
                         <div class="card">
                             <div class="card-header card-header-icon" data-background-color="blue">
                                 <i *ngIf="!post.createdBy || !post.createdBy.currentProfile" class="material-icons">person</i>
-                                <img width="100px" *ngIf="post.createdBy && post.createdBy.currentProfile" [src]="post.createdBy.currentProfile.secure_url"
-                                />
+                                <div style="height:72px;overflow:hidden" *ngIf="post.createdBy && post.createdBy.currentProfile">
+                                    <img width="100px" [src]="post.createdBy.currentProfile.secure_url" />
+                                </div>
                             </div>
                             <div class="card-content">
                                 <h5 class="card-title">{{(post.createdBy?post.createdBy.firstName:'no-name')+' '+(post.createdBy?post.createdBy.lastName:'no-name')}}
@@ -61,7 +75,7 @@
                                     <button class="btn btn-info btn-simple" (click)="selectPost(i)" *ngIf="post.comments.length === 1">{{post.comments.length}}&nbsp;Comment</button>
 
                                     <button class="btn btn-info btn-simple" (click)="selectPost(i)" *ngIf="post.comments.length > 1 || post.comments.length === 0">{{post.comments.length}}&nbsp;Comments</button>
-                                    <button class="btn btn-info btn-simple">#Joined: {{post.going.length}}</button>
+                                    <button *ngIf="post.isEvent" class="btn btn-info btn-simple">#Joined: {{post.going.length}}</button>
 
                                 </div>
                             </div>
@@ -147,6 +161,33 @@
                     </div>
                     <div class="card-content">
                         <h4 class="card-title">{{isEvent?'Event':'Feed'}}</h4>
+                        <div class="col-lg-12">
+                            <div class="checkbox">Post to</div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="col-lg-6">
+                                <div class="checkbox">
+                                    <label>
+                                        Is campus post&nbsp;&nbsp;<input name="campus" type="checkbox" [(ngModel)]="isCampus">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <select class="selectpicker" [disabled]="userInfo.role!='admin'||isCampus" [(ngModel)]="selectedResidence" name="selectedResidence"
+                                    data-style="btn btn-info btn-round" title="" data-size="6">
+                                    <option *ngFor="let resident of residenceListForPost" [ngValue]="resident.value">
+                                            {{resident.name}}
+                                    </option>
+                                    <!-- [disabled]="userInfo.role!='admin'||isCampus" -->
+                                    <!-- <option value="Oliver Hall" [attr.selected]="selectedResidence == 'Oliver Hall'">Oliver Hall</option>
+                                    <option value="Scholarship Hall" [attr.selected]="selectedResidence == 'Scholarship Hall'">Scholarship Hall</option>
+                                    <option value="Self Hall" [attr.selected]="selectedResidence == 'Self Hall'">Oswald/Self Hall</option>
+                                    <option value="Ellsworth Halls" [attr.selected]="selectedResidence == 'Ellsworth Halls'">Ellsworth Halls</option>
+                                    <option value="Downs Hall" [attr.selected]="selectedResidence == 'Downs Hall'">Downs Hall</option> -->
+                                    <!-- <option value="University" [attr.selected]="selectedResidence == 'University'">Campus</option> -->
+                                </select>
+                            </div>
+                        </div>
                         <div class="col-lg-12" *ngIf="isEvent">
                             <div class="form-group col-lg-4">
                                 <input type="text" class="form-control" placeholder="Title" name="title" [(ngModel)]="post.title" />

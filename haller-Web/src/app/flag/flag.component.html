@@ -1,4 +1,14 @@
 <div class="main-content">
+    <form class="navbar-form search-form" role="search">
+        <div class="form-group form-search is-empty">
+            <input type="text" class="form-control" name="searchKeyword" [(ngModel)]="searchKeyword" placeholder="Search">
+            <span class="material-input "></span>
+        </div>
+        <button type="submit" (click)="makeSearch()" class="btn btn-white btn-round btn-just-icon">
+                            <i class="material-icons">search</i>
+                            <div class="ripple-container"></div>
+                        </button>
+    </form>
     <div class="container-fluid">
         <div class="row post-list">
             <!--Post Section Start-->
@@ -92,7 +102,7 @@
                         </div>
                         <div class="card-content">
                             <h5 class="card-title">{{(posts[postIndex].createdBy?posts[postIndex].createdBy.firstName:'no-name')+' '+(posts[postIndex].createdBy?posts[postIndex].createdBy.lastName:'no-name')}}
-                            <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden && !posts[postIndex].deleted">Hidden</span></p>
+                                <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].isHidden && !posts[postIndex].deleted">Hidden</span></p>
                                 <p class="category">{{posts[postIndex].createdAt | date:'short'}}<span class="pull-right btn-rose" *ngIf="posts[postIndex].deleted">Deleted</span></p>
                             </h5>
                         </div>

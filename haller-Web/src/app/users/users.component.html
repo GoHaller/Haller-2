@@ -10,49 +10,93 @@
                         <h4 class="card-title">User List</h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <select class="selectpicker" (change)="setFilter()" name="residence" [(ngModel)]="search.residence" data-style="btn btn-info btn-round"
+                                        title="All Residence" data-size="6">
+                                        <option *ngFor="let resident of residenceListForSearch" [ngValue]="resident.value"> {{resident.name}} </option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <select class="selectpicker" (change)="setFilter()" name="account" [(ngModel)]="search.account" data-style="btn btn-info btn-round"
+                                        title="All Account Type" data-size="6">
+                                            <option *ngFor="let acc of accountTypeList" [ngValue]="acc.value"> {{acc.name}} </option>
+                                        </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <select class="selectpicker" (change)="setFilter()" name="level" [(ngModel)]="search.level" data-style="btn btn-info btn-round"
+                                        title="All Student level" data-size="6">
+                                                <option *ngFor="let level of studentLevel" [ngValue]="level.value"> {{level.name}} </option>
+                                            </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group form-search is-empty">
+                                        <input type="text" class="form-control" (keyup.enter)="setFilter()" name="searchKeyword" [(ngModel)]="search.search" placeholder="Search">
+                                        <span class="material-input "></span>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1">
+                                    <button type="button" (click)="clearFilter()" class="btn btn-white btn-round btn-just-icon">
+                                        <i class="material-icons">close</i>
+                                        <div class="ripple-container"></div>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="material-datatables table-responsive">
-                            <table id="datatables" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
+                            <table id="datatables" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:99%">
                                 <thead>
                                     <tr>
-                                        <th>Profile Picture</th>
+                                        <th>Profile</th>
                                         <th>Name</th>
-                                        <th>Residence Hall</th>
-                                        <th>Student </th>
-                                        <th>Post Count </th>
-                                        <th>Event Count </th>
+                                        <th>Residence</th>
+                                        <th>Student</th>
+                                        <th>Post </th>
+                                        <th>Event </th>
                                         <th>Avg Comment</th>
-                                        <th>Image/Video Count</th>
-                                        <th>Type of Account</th>
-                                        <th class="disabled-sorting">Action</th>
+                                        <th>Image/Video</th>
+                                        <th>Account Type</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tfoot>
-                                    <tr>
-                                        <th>Profile Picture</th>
-                                        <th>Name</th>
-                                        <th>Residence Hall</th>
-                                        <th>Student </th>
-                                        <th>Post Count </th>
-                                        <th>Event Count </th>
-                                        <th>Avg Comment</th>
-                                        <th>Image/Video Count</th>
-                                        <th>Type of Account</th>
-                                        <th class="disabled-sorting">Action</th>
-                                    </tr>
-                                </tfoot>
                                 <tbody>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="text-right">
-
+                                    <tr *ngFor="let user of userData.data">
+                                        <td>
+                                            <img *ngIf="user.currentProfile && user.currentProfile.secure_url" style="width:75px" class="img" [src]="user.currentProfile.secure_url">
+                                            <i *ngIf="!user.currentProfile || !user.currentProfile.secure_url" class="material-icons" style="font-size: 50px;padding: 3px 11px;">person</i>
+                                        </td>
+                                        <td>{{user.firstName+ ' ' + user.lastName}}</td>
+                                        <td>{{user.role=='student'?user.residence:'N/A'}}</td>
+                                        <td>{{getStudentLevel(user.graduationYear)}}</td>
+                                        <td>{{user.postcount}}</td>
+                                        <td>{{user.eventcount}}</td>
+                                        <td>{{user.commentavg}}</td>
+                                        <td>{{user.covercount}}</td>
+                                        <td>{{getAccountType(user.isRA,user.role)}}</td>
+                                        <td>
+                                            <div class="row">
+                                                <div class="col-sm-6"><button type="button" rel="tooltip" (click)="blockUser(user)" class="btn block btn-sm"
+                                                        [ngClass]="user.isBlocked?'btn-success':'btn-danger'">{{user.isBlocked?'UnBlock':'Block'}}</button></div>
+                                                <div *ngIf="user.role == 'student'" class="col-sm-6"><button type="button" (click)="editUserFn(user)" rel="tooltip" class="btn btn-success edit btn-sm">Edit</button></div>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <table>
+                                    <tr>
+                                        <td><button class="btn btn-primary btn-simple btn-sm" [disabled]="skip==0" (click)="changeThePage(false,true)">Previous</button></td>
+                                        <td class="form-group"><input class="form-control" [(ngModel)]="limit" (keyup.enter)="pageCountChange()"
+                                                min=5 max=50 type="number" /></td>
+                                        <td>users on {{(skip/limit)+1}}/{{this.Math.ceil(userData.recordsTotal/limit)}} page</td>
+                                        <td><button class="btn btn-primary btn-simple btn-sm" [disabled]="(skip+limit)>=userData.recordsTotal"
+                                                (click)="changeThePage(true,false)">Next</button></td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <!-- end content-->
@@ -64,3 +108,114 @@
         <!-- end row -->
     </div>
 </div>
+
+<!--Edit User modal start -->
+<modal id="edit-user-form">
+    <div class="modal">
+        <div class="modal-body col-md-5 col-md-offset-3">
+            <div class="card card-profile">
+                <form #frmUser="ngForm" novalidate (ngSubmit)="save(frmUser.value, frmUser.valid,'new-feed-form')">
+                    <div class="card-avatar" style="background-color: #fff">
+                        <a>
+                            <i *ngIf="!editUser.currentProfile || !editUser.currentProfile.secure_url" class="material-icons" style="font-size: 116px;padding: 3px 0px;">person</i>
+                            <img *ngIf="editUser.currentProfile && editUser.currentProfile.secure_url" class="img" [src]="editUser.currentProfile.secure_url" />
+                        </a>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title">{{editUser.firstName +' ' +editUser.lastName}}<span *ngIf="editUser.role=='student'">&nbsp;from&nbsp;{{editUser.hometown || '_______'}}</span></h4>
+                        <div class="col-lg-12" style="text-align:left">
+                            <div class="form-group col-sm-6">
+                                <div class="checkbox">
+                                    <label>Class of {{editUser.graduationYear}}</label>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <div class="checkbox">
+                                    <label>Major: {{editUser.major}}</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12" style="text-align:left">
+                            <div class="col-sm-4">
+                                <select class="selectpicker" name="residence" [(ngModel)]="residence" data-style="btn btn-info btn-round" title="Residence"
+                                    data-size="6">
+                                    <option *ngFor="let resident of residenceListForUser" [ngValue]="resident.value">
+                                            {{resident.name}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-6">
+                                <div class="checkbox" *ngIf="editUser.role=='student'">
+                                    <label>
+                                        Is RA&nbsp;&nbsp;<input type="checkbox" name="optionsCheckboxes" [(ngModel)]="editUser.isRA">
+                                        &nbsp;&nbsp;&nbsp;Role: {{editUser.isRA?'RA':'Student'}}
+                                    </label>
+                                </div>
+                                <div class="checkbox" *ngIf="editUser.role!='student'">
+                                    Role: {{editUser.role}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12" style="text-align:left">
+                            <div>
+                                <label>Organizations</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-12" style="text-align:left">
+                            <div *ngFor="let org of editUser.organizations"><label>{{org.name}}</label></div>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" *ngIf="editUser.role=='student'" class="btn btn-info btn-fill btn-wd" (click)="updateUser()" [disabled]="!frmUser.valid">Edit</button>
+                            <button class="btn btn-default" type="button" (click)="closeModal('edit-user-form');">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-background"></div>
+</modal>
+<!--Edit User modal end -->
+
+<!-- <table id="datatables" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
+        <thead>
+            <tr>
+                <th>Profile</th>
+                <th>Name</th>
+                <th>Residence</th>
+                <th>Student </th>
+                <th>Post </th>
+                <th>Event </th>
+                <th>Avg Comment</th>
+                <th>Image/Video</th>
+                <th>Account Type</th>
+                <th class="disabled-sorting">Action</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>Profile Picture</th>
+                <th>Name</th>
+                <th>Residence Hall</th>
+                <th>Student </th>
+                <th>Post Count </th>
+                <th>Event Count </th>
+                <th>Avg Comment</th>
+                <th>Image/Video Count</th>
+                <th>Account Type</th>
+                <th class="disabled-sorting">Action</th>
+            </tr>
+        </tfoot>
+        <tbody>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="text-right">
+
+                </td>
+            </tr>
+        </tbody>
+    </table> -->

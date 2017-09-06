@@ -1,57 +1,109 @@
 <div class="main-content">
 
 
-<modal id="notification">
-    <div class="modal">
-        <div class="modal-body col-md-4 col-md-offset-4">
-            <div class="card">
-                <form #frmNotification="ngForm" novalidate>
-                    <div class="card-header card-header-icon" data-background-color="blue">
-                        <i class="material-icons">notification</i>
-                    </div>
-                    <div class="card-content">
-                        <h4 class="card-title">Push Notification</h4>
-                        <div class="form-group label-floating">
-                            <textarea type="text" class="form-control" placeholder="title...." name="title" [(ngModel)]="notification.title" #title="ngModel"></textarea>
+    <modal id="notification">
+        <div class="modal">
+            <div class="modal-body col-md-4 col-md-offset-4">
+                <div class="card">
+                    <form #frmNotification="ngForm" novalidate>
+                        <div class="card-header card-header-icon" data-background-color="blue">
+                            <i class="material-icons">notification</i>
                         </div>
-                        <div class="form-group label-floating">
-                            <textarea type="text" class="form-control" placeholder="Notification...." name="message" [(ngModel)]="notification.message" #message="ngModel"></textarea>
-                        </div>
-                        <div class="text-center">
-                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                                <div class="fileinput-new thumbnail">
-                                    <img src="../../assets/img/image_placeholder.jpg" alt="...">
-                                </div>
-                                <div class="fileinput-preview fileinput-exists thumbnail"></div>
-                                <div>
-                                    <span class="btn btn-rose btn-simple btn-file">
-                  <span class="fileinput-new">Add Image or Pdf</span>
-                                    <span class="fileinput-exists">Change</span>
-                                    <input type="file" [(ngModel)]="notification.image" (change)="handleInputFile($event)" name="notificationimage" />
-                                    </span>
-                                    <a href="#pablo" class="btn btn-danger btn-simple fileinput-exists" (click)="removeImage()" data-dismiss="fileinput">Remove</a>
+                        <div class="card-content">
+                            <h4 class="card-title">Push Notification</h4>
+                            <div class="form-group label-floating" *ngIf="userInfo.role == 'admin'">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="checkbox">
+                                            <label>
+                                                Is Custom:&nbsp;&nbsp;<input type="checkbox" name="optionsCheckboxes" [(ngModel)]="isCustomNotification">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="checkbox">
+                                            <label>
+                                                To All student:&nbsp;&nbsp;<input type="checkbox" name="optionsCheckboxes" [(ngModel)]="toAllstudent">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <select class="selectpicker" [disabled]="toAllstudent" name="recipent" [(ngModel)]="selectedUserList" multiple="multiple"
+                                            data-style="btn btn-info btn-round" title="Recipent" data-size="6">
+                                            <option *ngFor="let user of usersForNotifications" [ngValue]="user._id">
+                                                    {{user.firstName + ' ' + user.lastName}}
+                                            </option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
+                            <div class="form-group label-floating">
+                                <textarea type="text" class="form-control" placeholder="title...." name="title" [(ngModel)]="notificationModal.title" #title="ngModel"></textarea>
+                            </div>
+                            <div class="form-group label-floating">
+                                <textarea type="text" class="form-control" placeholder="Notification...." name="message" [(ngModel)]="notificationModal.message"
+                                    #message="ngModel" rows="5"></textarea>
+                            </div>
+                            <div class="text-center">
+                                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                                    <div class="fileinput-new thumbnail">
+                                        <img src="../../assets/img/image_placeholder.jpg" alt="...">
+                                    </div>
+                                    <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                                    <div>
+                                        <span class="btn btn-rose btn-simple btn-file">
+                                        <span class="fileinput-new">Add Image</span>
+                                        <span class="fileinput-exists">Change</span>
+                                        <input type="file" accept="application/pdf,image/png,image/jpeg,image/gif" [(ngModel)]="notification.image" (change)="handleInputFile($event)"
+                                            name="notificationimage" />
+                                        </span>
+                                        <a href="#pablo" id="rm-notification-img" class="btn btn-danger btn-simple fileinput-exists" (click)="removeImage()" data-dismiss="fileinput">Remove</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" (click)="addNotification(frmNotification.value, frmNotification.valid,'notification')" class="btn btn-info btn-fill btn-wd"
+                                    [disabled]="!((frmNotification.value.title && frmNotification.value.message) || notification.image)">Create</button>
+                                <button class="btn btn-default" (click)="closeModal('notification');">Close</button>
+                            </div>
                         </div>
-                        <div class="text-center">
-                            <button type="button" (click)="addNotification(frmNotification.value, frmNotification.valid,'notification')" class="btn btn-info btn-fill btn-wd"
-                                [disabled]="!((frmNotification.value.title && frmNotification.value.message) || notification.image)">Create</button>
-                            <button class="btn btn-default" (click)="closeModal('notification');">Close</button>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="modal-background"></div>
-</modal>
+        <div class="modal-background"></div>
+    </modal>
+
+    <modal id="display-notification">
+        <div class="modal">
+            <div class="modal-body col-md-4 col-md-offset-4">
+                <div class="card card-profile">
+                    <div class="card-content">
+                        <h4 class="card-title">{{displayNotification.body?displayNotification.body.title:''}}</h4>
+                        <h6 class="category text-gray">{{displayNotification.createdAt | date:'medium'}}</h6>
+                        <p class="description">
+                            {{displayNotification.body?displayNotification.body.message:''}}
+                        </p>
+                        <div class="text-center" *ngIf="displayNotification.body&&displayNotification.body.image">
+                            <img *ngIf="checkFileIfImageToDisplay(displayNotification.body.image.secure_url)" [src]="displayNotification.body.image.secure_url">
+                            <a *ngIf="!checkFileIfImageToDisplay(displayNotification.body.image.secure_url)" [href]="displayNotification.body.image.secure_url"
+                                target="_blank">Open pdf</a>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn btn-default" (click)="closeModal('display-notification');">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-background"></div>
+    </modal>
 
 
-
-  <div class="container-fluid">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <button class="btn btn-info" style="margin-left:80%;"(click)="showNotification()">Create Notification</button>
+                <button class="btn btn-info" style="margin-left:80%;" (click)="showNotification()">Create Notification</button>
 
                 <div class="card">
                     <div class="card-header card-header-icon" data-background-color="purple">
@@ -67,28 +119,33 @@
                                 <p id="noticenter">Notification not available</p>
                             </div>
 
-                            <table *ngIf="!recordStatus"  class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
+                            <table *ngIf="!recordStatus" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
                                 <thead>
                                     <tr>
-                                      <th></th>
-                                      <th>No.</th>
-                                      <th>Title</th>
-                                      <th>Message</th>
+                                        <th></th>
+                                        <th>No.</th>
+                                        <th>Title</th>
+                                        <th>Message</th>
                                         <th *ngIf="admin">Created By</th>
-                                      <th>Created At</th>
+                                        <th>Created At</th>
+                                        <th>Type</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr *ngFor="let item of notification;let i = index">
-                                      <!--  <template [ngIf]="i<10">  -->
+                                        <!--  <template [ngIf]="i<10">  -->
                                         <td></td>
                                         <td>{{i+1}}</td>
                                         <td>{{item.body.title}}</td>
-                                        <td><p class="restrictbody">{{item.body.message}}</p></td>
-                                         <td *ngIf="admin">{{item.createdBy.firstName}} {{item.createdBy.lastName}} </td>
-                                       
-                                        <td>{{item.createdAt  | date:'medium'}}</td>
-                                    <!--  </template> -->
+                                        <td>
+                                            <p class="restrictbody">{{item.body.message}}</p>
+                                        </td>
+                                        <td *ngIf="admin">{{item.createdBy.firstName}} {{item.createdBy.lastName}} </td>
+                                        <td>{{item.createdAt | date:'medium'}}</td>
+                                        <td>{{item.type==21?'Custom':'University'}}</td>
+                                        <td><button type="button" rel="tooltip" (click)="openPopToDIsplay(item)" class="btn btn-success btn-sm">View</button></td>
+                                        <!--  </template> -->
                                     </tr>
                                 </tbody>
                             </table>

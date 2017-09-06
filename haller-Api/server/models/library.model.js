@@ -64,14 +64,14 @@ LibrarySchema.statics = {
     try {
       if (id.toString().match(/^[0-9a-fA-F]{24}$/).length > 0) {
         const objectId = mongoose.Types.ObjectId(id); //eslint-disable-line
-        return this.findById(id)
+        return this.findById(objectId)
           .exec()
           .then((lib) => {
-            if (lib) {
-              return lib;
-            }
-            const err = new APIError('No such library item exists!', httpStatus.NOT_FOUND);
-            return Promise.reject(err);
+            // if (lib) {
+            return lib;
+            // }
+            // const err = new APIError('No such library item exists!', httpStatus.NOT_FOUND);
+            // return Promise.reject(err);
           })
           .error(err => Promise.reject(err))
           .catch(err => Promise.reject(err));

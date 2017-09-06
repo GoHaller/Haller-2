@@ -144,7 +144,7 @@ function changePassword(req, res, next) {
               res.json(updatedUser)
             });
           } else {
-            const error = new APIError('Authentication error-1', httpStatus.UNAUTHORIZED);
+            const error = new APIError('Password missmatch', httpStatus.UNAUTHORIZED);
             return next(error);
           }
         });

@@ -9,8 +9,9 @@ export const AppRoutes: Routes = [
         redirectTo: 'login',
         pathMatch: 'full',
     },
-    {     path: 'forgotpassword/:id',
-          loadChildren: './forgotpassword/forgot.module#ForgotModule'
+    {
+        path: 'forgotpassword/:id',
+        loadChildren: './forgotpassword/forgot.module#ForgotModule'
     },
     {
         path: '',
@@ -23,22 +24,24 @@ export const AppRoutes: Routes = [
                 path: 'analytics-dashboard',
                 loadChildren: './analytics-dashboard/analitics-dashboard.module#AnaliticsDashboardModule'
             }, {
-                path: 'feed',
+                path: 'general-newsfeed',
                 loadChildren: './feed/feed.module#FeedModule'
             }, {
-                path: 'event',
+                path: 'events-feed',
                 loadChildren: './feed/feed.module#FeedModule'
-                // loadChildren: './event/event.module#EventModule'
             }, {
-                path: 'flag-section',
+                path: 'flag-content',
                 loadChildren: './flag/flag.module#FlagModule'
             }, {
-                path: 'users',
+                path: 'user-list',
                 loadChildren: './users/users.module#UsersModule'
-            },{
-                path: 'notification',
+            }, {
+                path: 'notifications',
                 loadChildren: './notification/notification.module#NotificationModule'
-            },{
+            }, {
+                path: 'bot',
+                loadChildren: './bot/bot.module#BotModule'
+            }, {
                 path: 'components',
                 loadChildren: './components/components.module#ComponentsModule'
             }, {
@@ -81,9 +84,9 @@ export const AppRoutes: Routes = [
         }, {
             path: 'login',
             loadChildren: './authentication/login/login.module#LoginModule'
-        },{
-                path: 'forgotpassword',
-                loadChildren: './forgotpassword/forgot.module#ForgotModule'
+        }, {
+            path: 'forgotpassword',
+            loadChildren: './forgotpassword/forgot.module#ForgotModule'
         }]
     }
 ];

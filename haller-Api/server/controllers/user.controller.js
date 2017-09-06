@@ -203,11 +203,10 @@ function verifyOtp(req, res, next) {
  */
 
 function update(req, res, next) {
-  console.info('req.body.facebook', req.body.facebook);
   if (req.body.facebook) {
     User.getByFBId(req.body.facebook.id)
       .then((user) => {
-        if (user) {
+        if (user && req.params.userId != user._id.toString()) {
           const error = new APIError('Facebook account is already in use.', httpStatus.UNAUTHORIZED);
           next(error);
         } else {
@@ -379,6 +378,7 @@ function searchPeers(req, res, next) {
           if (search) {
             Organization.getByNameOnlyIds(search)
               .then(orgs => {
+                console.log('orgs', orgs.length);
                 //{ userId, residence = null, skip = 0, limit = 50, blocked = [], role = 'student', search = null, orglist = [] }
                 User.searchPeers({ userId: req.params.userId, residence: residence, skip: skip, limit: limit, blocked: user, role: 'student', search: search, orglist: orgs })
                   .then(users => res.json(users))
@@ -710,6 +710,106 @@ function sendNotification(req, res, next) {
     })
 }
 
+//Admin Api
+function getAllUsersWithFilter(req, res, next) {
+  let { skip = 0, limit = 25, search = null, residence = null, account = null, level = null } = req.query;
+  let q = { _id: { $ne: req.params.userId }, role: { $ne: 'bot' }, firstName: { $exists: true } };
+  if (residence) q.residence = new RegExp(residence, 'i');
+  if (account) {
+    if (account.toLowerCase() == 'ra') { q.role = 'student'; q.isRA = true; } else { q.role = account; }
+  }
+  if (search) {
+    q['$or'] = [{ firstName: { $regex: '^' + search, $options: 'i' } }, { lastName: { $regex: '^' + search, $options: 'i' } }]
+  }
+  if (level) {
+    var gYear = new Date().getFullYear();
+    if (level == 'senior') q.graduationYear = gYear + 1;
+    if (level == 'junior') q.graduationYear = gYear + 2;
+    if (level == 'sophomore') q.graduationYear = gYear + 3;
+    if (level == 'freshman') q.graduationYear = gYear + 4;
+  }
+  // console.log('q', q);
+  // let dbQuery = User.find(q);
+  User.find(q).count((error, count) => {
+    User.find(q).sort({ firstName: 1 }).skip(parseInt(skip)).limit(parseInt(limit)).populate(User.populateMap()).exec()
+      .then((users) => {
+        if (users) {
+          let userIds = [];
+          for (let u = 0; u < users.length; u++) {
+            userIds.push(users[u]._id);
+          };
+          Post.find({ createdBy: { $in: userIds } })//.populate(Post.populateMap())
+            .then(post => {
+              var userInfo = [];
+              for (var i = 0; i < users.length; i++) {
+                var userData = {};
+                //post count
+                var postCount = 0;
+                var eventCount = 0;
+                var commentCount = 0;
+                var commentAvg = 0;
+                var coverCount = 0;
+                for (var j = 0; j < post.length; j++) {
+                  var uId = (users[i]._id).toString();
+                  var pUId = post[j].createdBy.toString();
+                  if (uId == pUId) {
+                    postCount += 1;
+                    //event count
+                    if (post[j].isEvent) {
+                      eventCount += 1;
+                    }
+                    //comment avg
+                    if (post[j].comments.length > 0) {
+                      commentCount += post[j].comments.length;
+                    }
+                    //image count
+                    if ((post[j].cover).length > 0 && post[j].cover != "undefined") {
+                      coverCount += post[j].cover.length;
+                    }
+                  }
+                }
+                commentAvg = Math.round(commentCount / postCount);
+                userData._id = users[i]._id;
+                userData.currentProfile = users[i].currentProfile;
+                userData.firstName = users[i].firstName;
+                userData.isRA = users[i].isRA;
+                userData.lastName = users[i].lastName;
+                userData.major = users[i].major;
+                userData.hometown = users[i].hometown;
+                userData.email = users[i].email;
+                if (users[i].device) {
+                  userData.device = users[i].device;
+                  userData.device.token = '';
+                }
+                userData.facebook = users[i].facebook || {};
+                userData.organizations = users[i].organizations || [];
+                userData.graduationYear = users[i].graduationYear;
+                userData.residence = users[i].residence;
+                userData.role = users[i].role;
+                userData.isBlocked = users[i].isBlocked;
+                userData.postcount = postCount || 0;
+                userData.eventcount = eventCount || 0;
+                userData.commentavg = commentAvg || 0;
+                userData.covercount = coverCount || 0;
+                //push data
+                userInfo.push(userData);
+              }
+              return res.json({
+                "recordsTotal": count,
+                "recordsFiltered": users.length,
+                "data": userInfo
+              });
+            }).catch(err => {
+              console.log('err', err);
+              return next(err);
+            })
+        }
+      }, err => {
+        console.log('err', err);
+        return next(err);
+      })
+  })
+}
 //admin users list
 function allUsersByFilter(req, res, next) {
   var search = req.body.search.value || '';
@@ -722,7 +822,7 @@ function allUsersByFilter(req, res, next) {
         { lastName: { $regex: '^' + search, $options: 'i' } },
         { residence: { $regex: '^' + search, $options: 'i' } },
         { role: { $regex: '^' + search, $options: 'i' } }]
-    }, { _id: { $ne: req.params.userId } }]
+    }, { _id: { $ne: req.params.userId } }, { role: { $ne: 'bot' } }]
   }).count().exec().then(function (userCount) {
     User.find({
       $and: [{
@@ -731,11 +831,11 @@ function allUsersByFilter(req, res, next) {
           { lastName: { $regex: '^' + search, $options: 'i' } },
           { residence: { $regex: '^' + search, $options: 'i' } },
           { role: { $regex: '^' + search, $options: 'i' } }]
-      }, { _id: { $ne: req.params.userId } }]
-    }).select({ "currentProfile": 1, "firstName": 1, "_id": 1, "isRA": 1, "lastName": 1, "graduationYear": 1, "residence": 1, "role": 1, "isBlocked": 1 })
-      .sort({ createdAt: -1 })
+      }, { _id: { $ne: req.params.userId } }, { role: { $ne: 'bot' } }]
+    }).sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
+      .populate(User.populateMap())
       .exec()
       .then((Users) => {
         if (Users) {
@@ -777,14 +877,23 @@ function allUsersByFilter(req, res, next) {
                 userData.firstName = Users[i].firstName;
                 userData.isRA = Users[i].isRA;
                 userData.lastName = Users[i].lastName;
+                userData.major = Users[i].major;
+                userData.hometown = Users[i].hometown;
+                userData.email = Users[i].email;
+                if (Users[i].device) {
+                  userData.device = Users[i].device;
+                  userData.device.token = '';
+                }
+                userData.facebook = Users[i].facebook || {};
+                userData.organizations = Users[i].organizations || [];
                 userData.graduationYear = Users[i].graduationYear;
                 userData.residence = Users[i].residence;
                 userData.role = Users[i].role;
                 userData.isBlocked = Users[i].isBlocked;
-                userData.postcount = postCount;
-                userData.eventcount = eventCount;
-                userData.commentavg = commentAvg;
-                userData.covercount = coverCount;
+                userData.postcount = postCount || 0;
+                userData.eventcount = eventCount || 0;
+                userData.commentavg = commentAvg || 0;
+                userData.covercount = coverCount || 0;
                 //push data
                 userInfo[i] = userData
               }
@@ -802,6 +911,7 @@ function allUsersByFilter(req, res, next) {
       }).catch((e) => {//eslint-disable-line
         return next(e);
       });
+    //.select({ "currentProfile": 1, "firstName": 1, "_id": 1, "isRA": 1, "lastName": 1, "graduationYear": 1, "residence": 1, "role": 1, "isBlocked": 1 })
   });
 }
 
@@ -832,6 +942,12 @@ function getBotUser(req, res, next) {
   }
 }
 
+function getUserForNotification(req, res, next) {
+  User.find({ 'notifications.deviceToken': { $exists: true, $ne: "" } })
+    .then((users) => { res.json(users); })
+    .catch((e) => { return next(e); });
+}
+
 export default {
   get,
   getById,
@@ -858,7 +974,9 @@ export default {
   sendNotification,
   getAllOrganization,
   allUsersByFilter,
+  getAllUsersWithFilter,
   toggleUserStatus,
   getBotUser,
-  searchPeers
+  searchPeers,
+  getUserForNotification
 };

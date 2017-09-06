@@ -10,7 +10,8 @@ export class PostService {
     public activeToken: String;
     private userId: string = localStorage.getItem('uid');
     private cloudname: string = 'dsgcstnsx';
-    private clodinaryApi: string = `https://api.cloudinary.com/v1_1/${this.cloudname}/image/upload`;
+    private clodinaryApi: string = `https://api.cloudinary.com/v1_1/${this.cloudname}/auto/upload`;
+    // private clodinaryApi: string = `https://api.cloudinary.com/v1_1/${this.cloudname}/raw/upload`;
 
     constructor(private http: Http) {
         this.adminApiUrl = environment.ApiBaseUrl + this.adminApiUrl;
@@ -48,9 +49,11 @@ export class PostService {
             this.headers.append('Authorization', 'Bearer:' + this.activeToken);
     }
 
-    getFeedByResidence(userId:string,residence: string, event = false, limit = 50, skip = 0) {
+    getFeedByResidence(userId: string, residence: string, event = false, limit = 50, skip = 0, searchKeyword = null) {
         this.createAuthorizationHeader()
         let q = 'limit=' + limit + '&skip=' + skip + '&event=' + event;
+        if (searchKeyword)
+            q += '&search=' + searchKeyword;
         return this.http.get(this.adminApiUrl + userId + '/residence/' + residence + '?' + q, { headers: this.headers }).map(this.extractData);
     }
 
@@ -69,8 +72,8 @@ export class PostService {
     }
 
     createNotification(notificationObj: any) {
-        this.createAuthorizationHeader();        
-        return this.http.post(environment.ApiBaseUrl +'posts/' +'university/notification', notificationObj, { headers: this.headers }).map(this.extractData)
+        this.createAuthorizationHeader();
+        return this.http.post(environment.ApiBaseUrl + 'posts/' + 'university/notification', notificationObj, { headers: this.headers }).map(this.extractData)
     }
 
     likeFeed(feed, userId) {
@@ -105,10 +108,13 @@ export class PostService {
         return this.http.delete(environment.ApiBaseUrl + 'posts/' + postId + '/comments/' + commentId + '/likes/' + likeId, { headers: this.headers }).map(this.extractData)
     }
 
-    getFlagedData(section: string, sort: number, limit = 50, skip = 0) {
+
+    getFlagedData(section: string, sort: number, limit = 50, skip = 0, searchKeyword = null) {
         this.createAuthorizationHeader();
         let q = 'limit=' + limit + '&skip=' + skip;
-        return this.http.get(this.adminApiUrl + 'flagged/' + section + '/' + sort, { headers: this.headers }).map(this.extractData)
+        if (searchKeyword)
+            q += '&search=' + searchKeyword;
+        return this.http.get(this.adminApiUrl + 'flagged/' + section + '/' + sort + '?' + q, { headers: this.headers }).map(this.extractData)
     }
 
     flaggedAction(postId: string, obj: any) {
@@ -139,15 +145,15 @@ export class PostService {
         this.createAuthorizationHeader();
         return this.http.delete(this.adminApiUrl + postId + '/comments/' + commentId, { headers: this.headers }).map(this.extractData)
     }
-    
-    getPostAnalyticsData(postDays:string) {
+
+    getPostAnalyticsData(postDays: string) {
         this.createAuthorizationHeader();
-        return this.http.get(this.adminApiUrl + postDays +  '/getpostcount' , { headers: this.headers }).map(this.extractData)
+        return this.http.get(this.adminApiUrl + postDays + '/getpostcount', { headers: this.headers }).map(this.extractData)
     }
     private extractData(res: any) {
         return (typeof res == 'object') ? res.json() : res;
     }
-    getNotification(userId:string) {
+    getNotification(userId: string) {
         this.createAuthorizationHeader()
         return this.http.get(this.adminApiUrl + userId + '/notification/', { headers: this.headers }).map(this.extractData);
     }

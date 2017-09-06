@@ -19,7 +19,7 @@ import { AppRoutes } from './app.routing';
     imports: [
         BrowserModule,
         FormsModule,
-        RouterModule.forRoot(AppRoutes),
+        RouterModule.forRoot(AppRoutes, { useHash: true }),
         HttpModule,
         SidebarModule,
         NavbarModule,

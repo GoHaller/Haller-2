@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit {
     public sendMailStatus: Boolean = false;
     constructor(private authService: AuthService, private router: Router, private modalService: ModalService, private userService: UserService) {
         if (localStorage.getItem('uid'))
-            this.router.navigate(['/analitics-dashboard']);
+            this.router.navigate(['/analytics-dashboard']);
     }
 
     checkFullPageBackgroundImage() {
@@ -47,7 +47,7 @@ export class LoginComponent implements OnInit {
     onLogin() {
         this.authService.login(this.userObj)
             .subscribe((res: any) => {
-                console.info('login res', res);
+                // console.info('login res', res);
                 if (res.token) {
                     localStorage.setItem('auth', res.token);
                     localStorage.setItem('uid', res.user.id);
