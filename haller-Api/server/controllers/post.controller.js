@@ -495,10 +495,9 @@ function starPost(req, res, next) {
             if (err) {
               return next(err);
             }
-            // var act = { _id: mongoose.Types.ObjectId(), post: doc._id, activityType: 8, createdBy: req.body.actedBy };
-            // createActivityLog(act, function () {
             return res.json(doc);
-            // });
+            var act = { _id: mongoose.Types.ObjectId(), post: doc._id, activityType: 8, createdBy: req.body.actedBy };
+            createActivityLog(act, function () { });
           });
         })
         .catch((e) => {
@@ -682,10 +681,9 @@ function likeCommentOnPost(req, res, next) {
             if (err) {
               return next(err);
             }
-            // var act = { _id: mongoose.Types.ObjectId(), post: doc._id, activityType: 13, createdBy: req.body.actedBy };
-            // createActivityLog(act, function () {
             return res.json(doc);
-            // });
+            var act = { _id: mongoose.Types.ObjectId(), post: doc._id, activityType: 13, createdBy: req.body.actedBy };
+            createActivityLog(act, function () { });
           });
         })
         .catch((e) => {

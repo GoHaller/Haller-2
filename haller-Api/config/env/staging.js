@@ -7,6 +7,7 @@ export default {
     key: 'key-123e941659eb0511afc01ddf7b60df3a',
     domain: 'mg.gohaller.com'
   },
+  port: "4040",
   websiteUrl: 'portal.gohaller.com',
   inviteCode: 'gohallerku',
   baCodes: ['andsar',
@@ -60,5 +61,18 @@ export default {
     'mcncri',
     'breell',
     'rocava',
-    'galeri']
+    'galeri',
+    'mcstes',
+    'panjen',
+    'clecel',
+    'hefcar',
+    'wolmck',
+    'osthea',
+    'stolau',
+    'erioli',
+    'leigre',
+    'hownat',
+    'cotcam',
+    'cohsum',
+    'scogra']
 };

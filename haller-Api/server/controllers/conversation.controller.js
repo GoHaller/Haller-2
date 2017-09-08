@@ -413,6 +413,32 @@ function askToBot(req, res, next) {
   }
 }
 
+function replyAsBot(req, res, next) {
+  if (req.params.conversationId) {
+    Conversation.get(req.params.conversationId, null).then((convo) => {
+      const savedConvo = convo;
+      let messagesObj = {
+        createdBy: req.body.createdBy,
+        createdAt: new Date(),
+        recipient: req.body.recipient,
+        botBody: req.body.body
+      }
+      savedConvo.messages.push(messagesObj);
+      savedConvo.updatedAt = new Date();
+      savedConvo.save().then((sConvo) => {
+        sConvo.populate([{ path: 'createdBy', model: 'User' },
+        { path: 'messages.createdBy', model: 'User', },
+        { path: 'messages.recipient', model: 'User', },
+        { path: 'participants', model: 'User' }],
+          (err, doc) => { if (err) { return next(err); } else if (doc) { return res.json(doc); } });
+      })
+    })
+  } else {
+    const err = new APIError('Invalid Request - missing conversationId route param', httpStatus.BAD_REQUEST);
+    return next(err);
+  }
+}
+
 /*
   Update Message in Conversation
 *  @param {ObjectId} messageId - messageId to update
@@ -620,4 +646,4 @@ function createNotification(actObj) {
     console.info('Post.get error', e);
   })
 }
-export default { get, list, create, update, updateMessage, remove, removeMessage, leaveConversation, createBotConversation, askToBot, markConversationAsRead };
+export default { get, list, create, update, updateMessage, remove, removeMessage, leaveConversation, createBotConversation, askToBot, markConversationAsRead, replyAsBot };

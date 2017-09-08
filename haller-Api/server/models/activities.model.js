@@ -26,7 +26,8 @@ const types = {
   18: 'Left an event',
   19: 'Message Sent',
   20: 'University',
-  21: 'Admin'
+  21: 'Admin Notification',
+  22: 'Notification tab opented'
 }
 
 const populateMap = () =>
@@ -49,8 +50,7 @@ const ActivitiesSchema = new mongoose.Schema({
   },
   post: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Post',
-    required: true
+    ref: 'Post'
   },
   comment: {
     type: String,

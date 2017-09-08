@@ -189,7 +189,8 @@ const UserSchema = new mongoose.Schema({
     },
     toJSON: {
       virtuals: true
-    }
+    },
+    strict: false
   });
 
 //inviteCode: used on signup

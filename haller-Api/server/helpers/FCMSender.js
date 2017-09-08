@@ -9,7 +9,7 @@ var fcm = new FCM(serverKey);
 const demoSend = () => {
   var demoPaylods = {
     //     to: 'f-WoY-10gpU:APA91bGV6JVX0UnQSmkZqGIFlK_WnN4YMyuVuhnWrnn4-br7WdX1HeXvCg1f8msuULZMoXCATV06X6RAUo789h-qBWl4MRnJ2FkwsOcESbR-TWLivzHHi8vu2aYzDZ3Sswo9cRphGOU0', // required fill with device token or topics
-    registration_ids: ["e4BJVeV5TIo:APA91bHIjc11hA4w9-HeO87UgXCwM5zgT1uSqalpClym32_w5gG4LDoeYZQQEEKhzlM5XXPSE1mlL3WJUQEEuCEZliPMGEB3fvEF0iWcV29Noxc6o0inCi29pskuPEN4gcSQ3Inpp-00"],
+    registration_ids: ["cgNTA6-7oSA:APA91bGCCEpeyopmDWgRgVn-kccQdMKFVByXShAVx6pnplZEUPUPUFSQQkS321bqRqeepjDV-KuL1pToK45pG06N5zosvdv8x-vRtIge9rtBW97GxrCfZ5p2u1htTFNQGNBAeR7cBzWr"],
     data: {
       your_custom_data_key: 'your_custom_data_value'
     },

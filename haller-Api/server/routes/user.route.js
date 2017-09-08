@@ -32,7 +32,8 @@ router.route('/admin/change-user-sataus')
 
 router.route('/admin/users-for-notification')
   .get(userCtrl.getUserForNotification)
-
+// router.route('/analytics')
+//   .get(userCtrl.getUserAnalytics)
 //App APIS
 router.route('/university/:id')
   .get(universityCtrl.getById)
@@ -216,6 +217,12 @@ router.route('/:userId/search')
     secret: config.jwtSecret,
     getToken
   }), userCtrl.searchPeers);
+
+router.route('/:userId/getusesrwhotalkwith')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.getUsesrWhoTalkWith)
 
 export default router;
 // : (req) => {

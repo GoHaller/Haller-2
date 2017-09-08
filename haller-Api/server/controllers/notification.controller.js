@@ -2,6 +2,7 @@ import _ from 'lodash';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import User from '../models/user.model';
+import Activities from '../models/activities.model';
 import Notification from '../models/notification.model';
 import Conversation from '../models/conversation.model';
 import APIError from '../helpers/APIError';
@@ -281,7 +282,11 @@ function getUnreadNotificationCount(req, res, next) {
 }
 
 function getNotification(req, res, next) {
-  const { limit = 50, skip = 0, university = false } = req.query;
+  const { limit = 50, skip = 0, university = 'false' } = req.query;
+  if (university == 'true' && skip == 0) {
+    var act = { _id: mongoose.Types.ObjectId(), activityType: 22, createdBy: req.params.userId };
+    createActivityLog(act, function () { console.log('activity saved'); });
+  }
   Notification.list({ userId: req.params.userId, skip, limit, university })
     .then(noties => {
       var finalNoties = [];
@@ -346,6 +351,17 @@ function getNamesFromArray(nameList) {
     }
   }
   return names.join(', ') + (allNames.length > 3 ? (allNames.length - 3) : '');
+}
+
+function createActivityLog(actObj, callback) {
+  // var act = { _id: mongoose.Types.ObjectId(), post: savedPost._id, type: Activities.types['0'], createdBy: savedPost.createdBy._id };
+  const activities = new Activities(actObj);
+  activities.save().then((savedAct) => {
+    callback();
+  }).catch((err) => {
+    console.info('err', err);
+    callback();
+  })
 }
 
 export default { get, list, create, update, remove, getNotification, readNotification, getUnreadNotificationCount, getNotifications, createUniversityNotification };

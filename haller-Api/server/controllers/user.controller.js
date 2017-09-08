@@ -9,6 +9,7 @@ import Interest from '../models/interest.model';
 import Library from '../models/library.model';
 import Post from '../models/post.model';
 import Organization from '../models/organizations.model';
+import Conversation from '../models/conversation.model';
 import APIError from '../helpers/APIError';
 import FCMSender from '../helpers/FCMSender';
 import emailVerification from '../cronJobs/emailVerification';
@@ -361,12 +362,7 @@ function listByResidenceForUser(req, res, next) {
 }
 
 function searchPeers(req, res, next) {
-  console.log('req.query', req.query);
   const { limit = 50, skip = 0, search = null, residence = null, role = 'student' } = req.query;
-  // console.log('limit', skip);
-  // skip = parseInt(skip);
-  // console.log('limit', limit);
-  // limit = parseInt(limit);
   User.userWhoBlockedMe(req.params.userId)
     .then(user => {
       User.findOne({ '_id': req.params.userId }, { 'blocked.user': 1 }).exec()
@@ -402,6 +398,27 @@ function searchPeers(req, res, next) {
         });
     })
     .catch((e) => {//eslint-disable-line
+      return next(e);
+    });
+}
+
+function getUsesrWhoTalkWith(req, res, next) {
+  Conversation.find({ participants: req.params.userId }, { participants: 1 }).exec()
+    .then((convos) => {
+      let usersArray = [];
+      for (let i = 0; i < convos.length; i++) {
+        usersArray = usersArray.concat(convos[i].participants);
+      }
+      User.find({ $and: [{ _id: { $in: usersArray } }, { _id: { $ne: req.params.userId } }] }).exec()
+        .then((users) => {
+          res.json(users)
+        }, error => {
+          return next(error);
+        })
+        .catch((e) => {//eslint-disable-line
+          return next(e);
+        });
+    }).catch((e) => {//eslint-disable-line
       return next(e);
     });
 }
@@ -948,6 +965,47 @@ function getUserForNotification(req, res, next) {
     .catch((e) => { return next(e); });
 }
 
+function getUserAnalytics(req, res, next) {
+  var email = 'dev.bot@ku.edu';// + domain;
+  User.findOne({ email: email, role: 'bot' })
+    .then(bot => {
+      User.find({ role: 'student' }, { _id: 1, firstName: 1, lastName: 1, residence: 1, graduationYear: 1, facebook: 1 }).lean().exec().then((users) => {
+        let count = 1;
+        users.forEach((user, index, array) => {
+          let userId = user._id;
+          Conversation.aggregate([{ $match: { $and: [{ participants: userId }, { participants: { $ne: bot._id } }] } },
+          { $group: { msgCount: { $sum: { $size: '$messages' } }, convoCount: { $sum: 1 }, _id: null } }], (err, totalCount) => {
+            Conversation.find({ $and: [{ participants: userId }, { participants: { $size: 2 } }, { participants: { $ne: bot._id } }] })
+              .count((error1msg, oneToOneCount) => {
+                Conversation.aggregate([{
+                  $match: {
+                    $and: [{ participants: userId }, { participants: { $ne: bot._id } }]
+                  }
+                }, {
+                  "$project": {
+                    "sentmsgs": { $filter: { input: '$messages', as: 'msg', cond: { $eq: ["$$msg.createdBy", userId] } } },
+                    // "recivemsgs": { $filter: { input: '$messages', as: 'msg', cond: { $ne: ["$$msg.createdBy", userId] } } }
+                    //, reciveCount: { $sum: { $size: '$recivemsgs' } }
+                  }
+                }, { $group: { count: { $sum: { $size: '$sentmsgs' } }, _id: null } }], (errorsent, sentCount) => {
+                  Conversation.find({ $and: [{ participants: userId }, { participants: { $size: 2 } }, { participants: bot._id }] },
+                    { _id: 1, 'messages.createdBy': 1, 'messages.createdAt': 1 }).lean().exec().then((botConvo) => {
+                      user['analyticsMsg'] = { userId: userId, totalCount: totalCount, oneToOneCount: oneToOneCount, sentCount: sentCount, bot: botConvo };
+                      if (count == array.length) {
+                        res.json(users);
+                        //res.json({ userId: userId, totalCount: totalCount, oneToOneCount: oneToOneCount, sentCount: sentCount[0].count });
+                      } else {
+                        count += 1;
+                      }
+                    })
+                })
+              })
+          })
+        })
+      }, error => { }).catch((e) => { return next(e); });
+    }).catch((e) => { return next(e); });
+}
+
 export default {
   get,
   getById,
@@ -978,5 +1036,7 @@ export default {
   toggleUserStatus,
   getBotUser,
   searchPeers,
-  getUserForNotification
+  getUserForNotification,
+  getUsesrWhoTalkWith,
+  getUserAnalytics
 };
