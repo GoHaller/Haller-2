@@ -21,18 +21,18 @@ export class AuthProvider {
   }
 
   logout(userId: String) {
-    return this.httpClient.get('/auth/logout/' + userId)
+    return this.httpClient.get('/auth/logout/' + userId).map(this.httpClient.extractData);
     // .catch(this.httpClient.extractError);
   }
 
   changePassword(userId: string, oldPwd: string, newPwd: string) {
     return this.httpClient.put('/auth/' + userId + '/password', { 'password': oldPwd, 'newPassword': newPwd })
-    // .map(this.httpClient.extractData);
+    .map(this.httpClient.extractData);
   }
 
   createPassword(userId: string, Pwd: string) {
     return this.httpClient.put('/auth/' + userId + '/create-password', { 'password': Pwd })
-    // .map(this.httpClient.extractData);
+    .map(this.httpClient.extractData);
   }
 
   create(userData: Object) {
@@ -54,7 +54,7 @@ export class AuthProvider {
   }
 
   loginToFB() {
-    return this.fb.login(['public_profile', 'user_hometown', 'user_location', 'email', 'user_likes', 'user_birthday'])
+    return this.fb.login(['user_hometown', 'user_location', 'user_likes', 'user_birthday'])
   }
 
   logoutFromFB() {
@@ -65,11 +65,15 @@ export class AuthProvider {
     // console.info('fb userID', this.fbAuthDetail);
     // this.fb.api(this.fbAuthDetail['userID'] + '/?field=id,email,first_name,last_name', [])
     // this.fb.api(this.fbAuthDetail['userID'] + '/movies', [])
-    return this.fb.api(fbUserID + '/?fields=id,name,picture.type(large),email,hometown,birthday,location,likes', [])
+    return this.fb.api(fbUserID + '/?fields=id,name,picture.type(large),email,hometown,birthday,location,likes.limit(500)', [])
   }
 
   getUserslikes(fbUserID: string) {
     return this.fb.api(fbUserID + '/likes.limit(500)', [])
+  }
+
+  getUsersPermission(fbUserID:string){
+    return this.fb.api(fbUserID + '/permissions', [])
   }
 
   getUniversityData() {

@@ -7,9 +7,16 @@
 <ion-content #content>
   <ion-grid *ngIf="conversation.messages && conversation.messages.length >0 ">
     <ion-row *ngFor="let msg of conversation.messages; let last = last" class="conversation" [ngClass]="(msg.createdBy == userInfo._id || msg.createdBy._id == userInfo._id)?'me':'them'">
-      <ion-col col-12>
+      <ion-col col-2 *ngIf="msg.createdBy._id != userInfo._id && msg.createdBy != userInfo._id" class="user-image">
+        <!-- <img class="user-image" [src]="msg.createdBy.currentProfile ? msg.createdBy.currentProfile.secure_url : userAvatar"> -->
+        <img [src]="convoProvider.httpClient.getProfileImageToDisplay(msg.createdBy)">
+      </ion-col>
+      <ion-col col-10>
         <div class="msg-container" *ngIf="msg.body">
           <div>{{msg.body}}</div>
+          <ion-note class="msg-time">
+            {{msg.createdAt | date:getMessageDateFormate(msg.createdAt)}}
+          </ion-note>
         </div>
         <div *ngIf="msg.botBody" class="msg-container">
           <div *ngFor="let bmsg of msg.botBody1">
@@ -21,17 +28,24 @@
             <div *ngIf="bmsg.link" style="margin-top:5px"><a (click)="openExternalLink(bmsg.link)">{{bmsg.linkText || 'Click here'}}</a></div>
             <div *ngIf="bmsg.location || bmsg.address" style="margin-top:5px"><a (click)="openMap(bmsg)">{{bmsg.linkText || 'Show on map'}}</a></div>
           </div>
+          <ion-note class="msg-time">
+            {{msg.createdAt | date:getMessageDateFormate(msg.createdAt)}}
+          </ion-note>
         </div>
-        {{last ? callFunction() : ''}}
       </ion-col>
+      <ion-col col-2 *ngIf="msg.createdBy._id == userInfo._id || msg.createdBy == userInfo._id" class="user-image right">
+        <!-- <img class="user-image" [src]="msg.createdBy.currentProfile ? msg.createdBy.currentProfile.secure_url : userAvatar"> -->
+        <img [src]="convoProvider.httpClient.getProfileImageToDisplay(msg.createdBy)">
+      </ion-col>
+      {{last ? callFunction() : ''}}
     </ion-row>
   </ion-grid>
 </ion-content>
-
 <ion-footer>
   <ion-row class="sender-row">
     <ion-col col-10>
-      <ion-textarea autocomplete="on" spellcheck="on" autocorrect="on" [(ngModel)]="question" (input)="newMessageChange($event)" rows="1" class="new-msg" type="text" placeholder="Question..."></ion-textarea>
+      <ion-textarea autocomplete="on" spellcheck="on" autocorrect="on" [(ngModel)]="question" (input)="newMessageChange($event)"
+        rows="1" class="new-msg" type="text" placeholder="Question..."></ion-textarea>
     </ion-col>
     <ion-col col-2 style="padding-left: 5px;"><button color="dark" small clear ion-button (click)="sendQuestion()">Ask</button></ion-col>
   </ion-row>

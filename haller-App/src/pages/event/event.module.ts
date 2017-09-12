@@ -6,6 +6,7 @@ import { HttpClient } from '../../shared/providers/http-client';
 import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
 import { Camera } from '@ionic-native/camera';
 import { Transfer } from '@ionic-native/transfer';
+import { InAppBrowser } from "@ionic-native/in-app-browser";
 
 @NgModule({
   declarations: [
@@ -17,6 +18,6 @@ import { Transfer } from '@ionic-native/transfer';
   exports: [
     EventPage
   ],
-  providers: [HttpClient, FeedProvider, CloudinaryProvider, Camera, Transfer]
+  providers: [HttpClient, FeedProvider, CloudinaryProvider, Camera, Transfer, InAppBrowser]
 })
-export class EventPageModule {}
+export class EventPageModule { }

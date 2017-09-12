@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform, Component, ViewChild, NgZone } from '@angular/core';
 import { Events, Content, ModalController, IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
-import { AlertController } from 'ionic-angular';
+import { AlertController, ActionSheetController } from 'ionic-angular';
 
 import { TabsPage } from "../tabs/tabs";
 import { ConvoProvider } from "../../shared/providers/convo.provider";
@@ -39,10 +39,12 @@ export class Message {
   private cloudinaryImageData: Object = null;
   private userAvatar = '';
   private autoscrollToBottomOnLoad: boolean = false;
+  public shouldFocus: boolean = true;
 
   constructor(public modalCtrl: ModalController, public navCtrl: NavController, public navParams: NavParams,
     public convoProvider: ConvoProvider, public cloudinaryProvider: CloudinaryProvider, private event: Events,
-    public loadingCtrl: LoadingController, private zone: NgZone, public alertCtrl: AlertController, private iab: InAppBrowser) {
+    public loadingCtrl: LoadingController, private zone: NgZone, public alertCtrl: AlertController,
+    private iab: InAppBrowser, storage: Storage, public actionSheetCtrl: ActionSheetController) {
     this.conversationId = this.navParams.data.conversationId;
 
     this.recipients = this.navParams.data.recipients ? [this.navParams.data.recipients] : [];
@@ -51,7 +53,7 @@ export class Message {
 
     this.recipients = this.navParams.get('selected') || this.recipients;
 
-    this.local = new Storage('localstorage');
+    this.local = storage;
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
       if (this.conversationId) {
@@ -113,10 +115,10 @@ export class Message {
   }
 
   ionViewWillEnter() {
-    if (this.conversationId && this.userInfo['_id']) {
-      this.isNewConvo = false;
-      this.getConversation();
-    }
+    // if (this.conversationId && this.userInfo['_id']) {
+    //   this.isNewConvo = false;
+    //   this.getConversation();
+    // }
   }
 
 
@@ -201,7 +203,7 @@ export class Message {
       this.recipients = this.conversation['participants'].filter(part => {
         return part._id !== this.userInfo['_id'];
       });
-      this.content.scrollTo(0, 100000);
+      this.content.scrollToBottom(0);
       this.markMessageAsRead();
     }, error => {
       console.info('usres error', error);
@@ -260,10 +262,12 @@ export class Message {
   addMessage() {
     if (((this.msgContent && this.msgContent.length > 0) || this.cloudinaryImageData != null || this.cloudinaryProvider.gif['id']) && this.recipients.length > 0) {
       let messagesObj: Object = {
-        body: this.msgContent || '',
         createdBy: this.userInfo['_id'],
         createdAt: new Date(),
         recipient: this.recipients[0]['_id'],
+      }
+      if (this.msgContent) {
+        messagesObj['body'] = this.msgContent
       }
       if (this.cloudinaryImageData) messagesObj['image'] = this.cloudinaryImageData;
       if (this.cloudinaryProvider.gif['id']) {
@@ -278,7 +282,7 @@ export class Message {
             this.localImage = '';
             this.cloudinaryImageData = null;
             this.cloudinaryProvider.gif = {};
-            this.content.scrollTo(0, 100000);
+            this.content.scrollToBottom(0);
           }, error => {
             console.info('putMessage error', error);
           });
@@ -300,7 +304,7 @@ export class Message {
           this.localImage = '';
           this.cloudinaryImageData = null;
           this.cloudinaryProvider.gif = {};
-          this.content.scrollTo(0, 100000);
+          this.content.scrollToBottom(0);
         }, error => {
           console.info('createConversation error', error);
         });
@@ -308,7 +312,7 @@ export class Message {
     } else {
       let notificationMsg = "";
       if (this.recipients.length == 0) notificationMsg = "Please select at least one recipients";
-      else if (!this.msgContent) notificationMsg = "Please enter massage";
+      else if (!this.msgContent) notificationMsg = "Please enter message.";
       this.alertCtrl.create({ subTitle: notificationMsg, buttons: ['OK'] }).present();
     }
   }
@@ -320,6 +324,17 @@ export class Message {
       row += 1;
     }
     ele.rows = row;
+  }
+
+  public presentPhotoActionSheet() {
+    let actionSheet = this.actionSheetCtrl.create({
+      buttons: [
+        { text: 'Choose gif', handler: () => { this.showGiphyGif(); } },
+        { text: 'Load from Library', handler: () => { this.cloudinaryProvider.takePictureFromLibraryCommon(); } },
+        { text: 'Use Camera', handler: () => { this.cloudinaryProvider.takePictureFromCameraCommon(); } }
+      ]
+    });
+    actionSheet.present();
   }
 
   takePicture() {
@@ -336,27 +351,38 @@ export class Message {
 
   markMessageAsRead() {
     if (this.conversation && this.conversation['messages']) {
-      let intervalId = setInterval(() => {
-        let msg = this.conversation['messages'].filter(msg => {
-          if (msg.readBy) {
-            let userMsg = msg.readBy.filter(readBy => {
-              return readBy.user == this.userInfo['_id'];
-            });
-            return userMsg.length == 0;
-          } else return true;
-          // return (!msg.read && msg.recipient['_id'] == this.userInfo['_id'])
-        })[0];
-        if (msg) {
-          this.convoProvider.updateMessage(this.conversationId, msg['_id'], { message: { read: true }, userId: this.userInfo['_id'] })
-            .subscribe((res: any) => {
-              this.conversation = res;
-            }, error => {
-              console.info('updateMessage error', error);
-            });
-        }
-        else { clearTimeout(intervalId); this.event.publish('notification:count'); }
-      }, 2000);
+      this.convoProvider.markConversationAsRead(this.conversation['_id'])
+        .subscribe((res: any) => {
+          this.conversation = res;
+          this.event.publish('notification:count');
+        }, error => {
+          console.info('updateMessage error', error);
+        });
     }
+    // if (this.conversation && this.conversation['messages']) {
+    //   let intervalId = setInterval(() => {
+    //     let msg = this.conversation['messages'].filter(msg => {
+    //       if (msg.createdBy != this.userInfo['_id']) {
+    //         if (msg.readBy) {
+    //           let userMsg = msg.readBy.filter(readBy => {
+    //             return readBy.user == this.userInfo['_id'];
+    //           });
+    //           return userMsg.length == 0;
+    //         } else return true;
+    //       } else return false;
+    //       // return (!msg.read && msg.recipient['_id'] == this.userInfo['_id'])
+    //     })[0];
+    //     if (msg) {
+    //       this.convoProvider.updateMessage(this.conversationId, msg['_id'], { message: { read: true }, userId: this.userInfo['_id'] })
+    //         .subscribe((res: any) => {
+    //           this.conversation = res;
+    //         }, error => {
+    //           console.info('updateMessage error', error);
+    //         });
+    //     }
+    //     else { clearTimeout(intervalId); this.event.publish('notification:count'); }
+    //   }, 2000);
+    // }
   }
 
   showGiphyGif() {
@@ -429,6 +455,12 @@ export class Message {
     // let exp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
     let exp = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?");
     return exp.test(detail)
+  }
+
+  blurMessageInput(event: any) {
+    if (this.shouldFocus)
+      event.preventDefault();
+    // event.target.focus();
   }
 }
 

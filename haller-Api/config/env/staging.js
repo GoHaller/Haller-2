@@ -7,7 +7,6 @@ export default {
     key: 'key-123e941659eb0511afc01ddf7b60df3a',
     domain: 'mg.gohaller.com'
   },
-  port: "4040",
   websiteUrl: 'portal.gohaller.com',
   inviteCode: 'gohallerku',
   baCodes: ['andsar',

@@ -7,7 +7,7 @@ import { Storage } from '@ionic/storage';
 // import { Push, PushToken } from '@ionic/cloud-angular';
 import { Push, PushObject, PushOptions } from "@ionic-native/push";
 import { LocalNotifications } from "@ionic-native/local-notifications";
-import { TabsPage } from "../pages/tabs/tabs";
+// import { Landing } from "../pages/landing/landing";
 
 declare var PushNotification;
 @Component({
@@ -20,24 +20,25 @@ export class MyApp {
   @ViewChild(Nav) nav: Nav;
 
   constructor(private platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen,
-    public menu: MenuController, private push: Push, private localNotifications: LocalNotifications, private event: Events) {
-    this.local = new Storage('localstorage');
+    public menu: MenuController, private push: Push, private localNotifications: LocalNotifications, private event: Events, storage: Storage) {
+    this.local = storage;
 
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       this.initPushNotification();
-      this.local.get('userInfo').then((val) => {
-        if (val) {
-          this.rootPage = TabsPage;
-        } else {
-          this.rootPage = 'Registration';
-        }
-      });
+      this.rootPage = 'Landing';
+      // this.local.get('userInfo').then((val) => {
+      //   if (val) {
+      //     this.rootPage = Landing;
+      //   } else {
+      //     this.rootPage = 'Registration';
+      //   }
+      // });
       //Registration
-      // statusBar.styleDefault();
-      // splashScreen.hide();
-      console.log('connection', navigator.onLine);
+      statusBar.styleDefault();
+      splashScreen.hide();
+      // console.log('connection', navigator.onLine);
     });
 
   }

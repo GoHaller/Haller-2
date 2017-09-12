@@ -6,6 +6,7 @@ import Activities from '../models/activities.model';
 import Notification from '../models/notification.model';
 import Conversation from '../models/conversation.model';
 import APIError from '../helpers/APIError';
+import FCMSender from '../helpers/FCMSender';
 import Library from '../models/library.model';
 
 /**
@@ -138,9 +139,9 @@ function createNotification(req, res, next, notiObje = {}) {
         var notification = new Notification(notiObje);
         notification.save().then(savedNoti => {
           Notification.get(savedNoti._id)
-            .then(noti => { res.json(noti); sendUniversityNotification(noti); })
+            .then(noti => { res.json(noti); sendUniversityNotification(noti, next); })
             .catch(e => { console.info('university savedNoti error', e); next(e); });
-        });
+        }).catch((e) => { console.log(e); next(e); });
       })
       .catch((e) => { console.log(e); next(e); });
   } else {
@@ -148,20 +149,20 @@ function createNotification(req, res, next, notiObje = {}) {
     var notification = new Notification(notiObje);
     notification.save().then(savedNoti => {
       Notification.get(savedNoti._id)
-        .then(noti => { res.json(noti); sendUniversityNotification(noti); })
+        .then(noti => { res.json(noti); sendUniversityNotification(noti, next); })
         .catch(e => { console.info('university savedNoti error', e); next(e); });
     }).catch(e => { console.info('university savedNoti error', e); next(e); });
   }
 }
 
-function sendUniversityNotification(notification) {
+function sendUniversityNotification(notification, next) {
   if (notification.recipients && notification.recipients.length > 0) {
-    FCMSender.sendUniversityNotification(notification.recipients, notification);
+    FCMSender.sendCustomUniversityNotification(notification.recipients, notification);
   } else {
     User.getUserForNotification()
       .then(users => {
         FCMSender.sendUniversityNotification(users, notification);
-      });
+      }).catch(e => { console.info('university savedNoti error', e); next(e); });
   }
 }
 
@@ -249,7 +250,7 @@ function getUnreadNotificationCount(req, res, next) {
       .then(usersWhoBlockedMe => {
         User.findOne({ '_id': req.params.userId }, { 'blocked.user': 1 }).exec()
           .then(bu => {
-            if (bu.blocked) {
+            if (bu && bu.blocked) {
               for (var i = 0; i < bu.blocked.length; i++) {
                 usersWhoBlockedMe.push({ _id: bu.blocked[i].user });
               }
@@ -283,6 +284,7 @@ function getUnreadNotificationCount(req, res, next) {
 
 function getNotification(req, res, next) {
   const { limit = 50, skip = 0, university = 'false' } = req.query;
+  console.log('university', university);
   if (university == 'true' && skip == 0) {
     var act = { _id: mongoose.Types.ObjectId(), activityType: 22, createdBy: req.params.userId };
     createActivityLog(act, function () { console.log('activity saved'); });

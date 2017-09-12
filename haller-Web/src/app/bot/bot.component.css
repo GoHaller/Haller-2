@@ -9,13 +9,35 @@
     width:65px;
     height:65px;
 }
+.selected-user .user-image{
+    border-radius: 50%;
+    width:45px;
+    height:45px;
+}
+
+.convo-section{
+    height: calc(100vh - 171px);
+    padding: 0px;
+}
+.convo-section .row{
+    margin: 0px;
+}
+.user-section{
+    height: calc(100vh - 121px);
+}
 
 .bot .me .msg-container .bot-msgs{ max-width:85%;float: right;}
+.bot .me .msg-container .msg-name{ text-align: right}
+.msg-time, .msg-name { 
+    color: #b5b5b5; 
+    margin: 0px; 
+    font-size: 10px;
+    line-height: 1; 
+}
 
-.bot .them .msg-container .msg-time, .bot .me .msg-container .msg-time{ float: left; }
-.bot .them .msg-container div{ max-width:85%; float: left; }
-
-.bot .msg-container .bot-msgs, .bot .msg-container div{
+.bot .them .msg-container .user-msgs{ max-width:85%; float: left; }
+.user-msgs .msg-time { float: right}
+.bot .msg-container .bot-msgs, .bot .msg-container .user-msgs{
     border-radius: 5px; 
     background-color: #ffffff; 
     padding: 2px 5px;

@@ -43,27 +43,37 @@
         One')}}
       </h2>
       <ion-note>{{event.createdAt | date: getDateFormatr(event.createdAt)}}</ion-note>
+      <ion-note item-right *ngIf="event._userFlagged"><ion-icon name="flag" color="danger"></ion-icon></ion-note>
       <button ion-button icon-only item-right clear small color="newlight" (click)="presentEventActionSheet(event)"><ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon></button>
     </ion-item>
     <ion-card-content center text-center>
-      <div (click)="gototEventDetail(event)" class="ev-detail">
-        <h2><b>{{event.title}}</b>&nbsp;
+      <div class="ev-detail">
+        <h2 (click)="gototEventDetail(event)"><b>{{event.title}}</b>&nbsp;
           <ion-icon *ngIf="event.createdBy.isRA" style="color:green" name="md-checkmark-circle-outline"></ion-icon>
         </h2>
-        <h3>{{getlocalTime(event.date) | date: 'h:mm a'}}&nbsp;{{getlocalTime(event.date) | date: 'MMMM d, yyyy '}}</h3>
-        <p>{{event.location}}</p>
-        <p style="margin-top:10px">{{event.details}}</p>
+        <h3 (click)="gototEventDetail(event)">{{getlocalTime(event.date) | date: 'h:mm a'}}&nbsp;{{getlocalTime(event.date) | date: 'MMMM d, yyyy '}}</h3>
+        <p (click)="gototEventDetail(event)">{{event.location}}</p>
+        <!-- <p>{{event.details}}</p> -->
+        <div (click)="gototEventDetail(event)" style="margin-top:10px" *ngIf="event.details && !event.linkData">
+          <p>{{event.details}}</p>
+        </div>
+        <div style="margin-top:10px" *ngIf="event.details && event.linkData">
+          <span *ngFor="let link of event.linkData">
+            <span *ngIf="link.text" (click)="gototEventDetail(event)">{{link.text}}</span>
+            <span class="link-text" (click)="openExternalLink(link.link)" *ngIf="link.link">{{link.link}}</span>
+          </span>
+        </div>
       </div>
       <img *ngIf="event.cover.length > 0" (click)="gototEventDetail(event)" [src]="event.cover[event.cover.length - 1].secure_url">
       <p style="margin-top:10px"><b>{{event.going.length}} people are going</b></p>
-      <button class="ev-join" *ngIf="!event._userGoing" (click)="joinEvent(event)" ion-button>Join</button>
-      <button class="ev-join" *ngIf="event._userGoing" (click)="leaveEvent(event)" ion-button outline>Joined</button>
+      <button class="ev-join" *ngIf="!event._userGoing" (click)="joinEvent(event)" ion-button>Go</button>
+      <button class="ev-join" *ngIf="event._userGoing" (click)="leaveEvent(event)" ion-button outline>Going</button>
       <!-- (click)="confirmEventLeaveAction(event)"-->
     </ion-card-content>
     <ion-row>
       <ion-col *ngIf="event.liked.length > 0 || event.comments.length > 0">
         <button style="float:left" ion-button color="dark" clear small (click)="openLikeModel(event.liked,null)">{{event.liked.length +' '}}{{event.liked.length>1||event.liked.length==0?'Likes':'Like'}}</button>
-        <button style="float:right" ion-button color="dark" clear small (click)="openLikeModel(null,event.comments)">{{event.comments.length + ' '}}{{event.comments.length>1||event.comments.length==0?'Comments':'Comment'}}</button>
+        <button style="float:right" ion-button color="dark" clear small (click)="gototEventDetail(event)">{{event.comments.length + ' '}}{{event.comments.length>1||event.comments.length==0?'Comments':'Comment'}}</button>
         <!-- <span style="float:left" *ngIf="event.liked.length > 0" (click)="openLikeModel(event.liked,null)">{{event.liked.length +' Likes'}}</span>
         <span style="float:right" *ngIf="event.comments.length > 0" (click)="openLikeModel(null,event.comments)">{{event.comments.length + ' Comments'}}</span> -->
       </ion-col>

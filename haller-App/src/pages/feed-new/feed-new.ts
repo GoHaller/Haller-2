@@ -33,9 +33,9 @@ export class FeedNew {
   private userAvatar = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public feedProvider: FeedProvider,
-    public loadingCtrl: LoadingController, public alertCtrl: AlertController, public modalCtrl: ModalController) {
+    public loadingCtrl: LoadingController, public alertCtrl: AlertController, public modalCtrl: ModalController, storage: Storage) {
     this.feed = this.navParams.get('feed') || this.feed;
-    this.local = new Storage('localstorage');
+    this.local = storage;
     this.userAvatar = feedProvider.httpClient.userAvatar;
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);

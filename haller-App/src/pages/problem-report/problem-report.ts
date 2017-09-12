@@ -23,8 +23,8 @@ export class ProblemReport {
   private uid: String;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private formBuilder: FormBuilder,
-    private httpClient: HttpClient, public toastCtrl: ToastController) {
-    this.local = new Storage('localstorage');
+    private httpClient: HttpClient, public toastCtrl: ToastController, storage: Storage) {
+    this.local = storage;
     this.problemForm = this.formBuilder.group({
       title: ['', Validators.compose([Validators.maxLength(50), Validators.required])],
       description: ['', Validators.compose([Validators.maxLength(500), Validators.required])]

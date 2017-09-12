@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, AfterViewChecked, AfterContentInit } from '@angular/core';
-import { ROUTES, APPROUTES } from './sidebar-routes.config';
+import { ROUTES, APPROUTES, ADMINAPPROUTES } from './sidebar-routes.config';
+import { Router } from "@angular/router";
 
 declare var $: any;
 var sidebarTimer;
@@ -13,6 +14,13 @@ var sidebarTimer;
 export class SidebarComponent implements OnInit {
     public menuItems: any[];
     public appMenuItems: any[];
+    public adminMenuItems: any[];
+    userInfo: any = {};
+
+    constructor(private router: Router) {
+        this.userInfo = localStorage.getItem('userInfo');
+        this.userInfo = JSON.parse(this.userInfo);
+    }
 
     isNotMobileMenu() {
         if ($(window).width() > 991) {
@@ -29,6 +37,10 @@ export class SidebarComponent implements OnInit {
             $sidebar.perfectScrollbar();
         }
         this.appMenuItems = APPROUTES.filter(menuItem => menuItem);
+        if (this.userInfo.role == 'admin') {
+            // this.appMenuItems.splice(this.appMenuItems.length - 1, 1);
+            this.adminMenuItems = ADMINAPPROUTES.filter(menuItem => menuItem);
+        }
         this.menuItems = ROUTES.filter(menuItem => menuItem);
         isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
 

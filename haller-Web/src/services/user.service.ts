@@ -62,7 +62,37 @@ export class UserService {
         return this.http.get(environment.ApiBaseUrl + 'conversations/users/' + userId + q, { headers: this.headers }).map(this.extractData)
     }
 
+    getUsesrWhoTalkWith(userId: string) {
+        this.createAuthorizationHeader();
+        return this.http.get(environment.ApiBaseUrl + 'users/' + userId + '/getusesrwhotalkwith', { headers: this.headers }).map(this.extractData);
+    }
+    ///:userId/getusesrwhotalkwith
+
+    replyAsBot(conversationId, recipient, createdBy, body) {
+        let obj = { recipient: recipient, createdBy: createdBy, body: body };
+        this.createAuthorizationHeader();
+        return this.http.post(environment.ApiBaseUrl + 'conversations/' + conversationId + '/bot', obj, { headers: this.headers }).map(this.extractData)
+    }
+
+    getStudentAnalytics() {
+        return this.http.get(environment.ApiBaseUrl + 'users/analytics', { headers: this.headers }).map(this.extractData)
+    }
+
     private extractData(res: any) {
         return (typeof res == 'object') ? res.json() : res;
+    }
+
+    getDateFormate(date) {
+        let d = new Date(date);
+        let today = new Date();
+        let yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (today.toDateString() == d.toDateString())
+            return 'shortTime';
+        else if (yesterday.toDateString() == d.toDateString())
+            return "'Yesterday' h:m a";// h:m a";
+        else
+            return 'MM/dd/yyyy h:m a';
     }
 }

@@ -34,7 +34,7 @@ function logout(req, res, next) { //eslint-disable-line
         userCpy.lastOnline = new Date();
         // userCpy.device.updatedAt = new Date();
         userCpy.notifications.deviceToken = '';
-        userCpy.save().then(() => res.sendStatus(httpStatus.OK)).catch(e => next(e));
+        userCpy.save().then(() => res.json({ 'response': httpStatus.OK })).catch(e => next(e));
       }
     });
   } else {
@@ -59,6 +59,13 @@ function login(req, res, next) {
     return User.getByEmail(req.body.email)
       .then((user) => { //eslint-disable-line
         if (user && user.role == 'student') {
+          // const token = jwt.sign({
+          //   email: user.email
+          // }, config.jwtSecret);
+          // res.json({
+          //   token,
+          //   user: user,
+          // })
           bcrypt.compare(req.body.password, user.password, (err, same) => { //eslint-disable-line
             if (same) {
               const token = jwt.sign({

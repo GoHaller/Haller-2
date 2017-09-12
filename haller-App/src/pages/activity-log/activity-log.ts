@@ -21,8 +21,8 @@ export class ActivityLog {
   private uid: String = '';
   private activityList = [];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private httpClient: HttpClient) {
-    this.local = new Storage('localstorage');
+  constructor(public navCtrl: NavController, public navParams: NavParams, private httpClient: HttpClient, storage: Storage) {
+    this.local = storage;
   }
 
   ionViewDidLoad() {

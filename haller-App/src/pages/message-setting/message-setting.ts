@@ -25,8 +25,8 @@ export class MessageSetting {
   private notificationBtn: Boolean = true;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private convoProvider: ConvoProvider,
-    public toastCtrl: ToastController, public actionSheetCtrl: ActionSheetController, public alertCtrl: AlertController) {
-    this.local = new Storage('localstorage');
+    public toastCtrl: ToastController, public actionSheetCtrl: ActionSheetController, public alertCtrl: AlertController, storage: Storage) {
+    this.local = storage;
     this.conversation = this.navParams.data['conversation'] || {};
     this.participants = this.conversation['participants'] || [];
     this.local.get('userInfo').then((val) => {

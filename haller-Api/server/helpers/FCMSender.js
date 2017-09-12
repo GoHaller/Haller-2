@@ -39,7 +39,7 @@ const send = (token, message, os) => {
     paylods.content_available = true;
     paylods.priority = 'high';
   }
-  console.log('paylods', paylods);
+  // console.log('paylods', paylods);
   return fcm.send(paylods);
 }
 
@@ -107,7 +107,6 @@ const sendMsgNotification = (message, convo) => {
     if (participant._id.toString() == message.createdBy.toString())
       createdBy = participant;
   });
-  // console.info('createdBy', createdBy);
   if (createdBy) {
     convo.participants.forEach((participant) => {
       var token = [];
@@ -121,7 +120,6 @@ const sendMsgNotification = (message, convo) => {
           os = participant.notifications.os;
         }
       }
-
       if (token.length > 0) {
         var notiesObj = {};
         notiesObj.title = 'Haller';
@@ -134,8 +132,8 @@ const sendMsgNotification = (message, convo) => {
         if (convo.participants.length > 2)
           notiesObj.body += ' has posted in ' + (convo.groupName || '') + ' group chat';
         else
-          notiesObj.body += ' has sent you a message';
-        console.info('msg notiesObj', notiesObj.notId);
+          notiesObj.body += ' has sent you a new message';
+        console.info('msg notiesObj', notiesObj);
         send(token, notiesObj, os)
           .then(function (response) {
             console.log("Successfully sent with response");//, JSON.stringify(response));
@@ -185,4 +183,38 @@ const sendUniversityNotification = (participants, message) => {
   });
 }
 
-export default { send, sendNotification, sendMsgNotification, sendUniversityNotification, demoSend };
+const sendCustomUniversityNotification = (participants, message) => {
+  participants.forEach((participant) => {
+    var token = [];
+    var os = 'ios';
+    if (participant.user.notifications.deviceToken) {
+      token.push(participant.user.notifications.deviceToken);
+      os = participant.user.notifications.os;
+    }
+    if (token.length > 0) {
+      var notiesObj = {};
+      notiesObj.title = message.body.title;
+      notiesObj.message = message.body.message;
+      notiesObj.body = message.body.message;
+      notiesObj.uni_msg = message.body;
+      notiesObj._id = message._id;
+      notiesObj.type = 20;
+      notiesObj.notId = message._id.toString().substr(-4) + notiesObj.type;
+      // console.info('msg notiesObj', notiesObj.notId);
+      send(token, notiesObj, os)
+        .then(function (response) {
+          console.log('=======================success===========================');
+          console.log("Successfully sent with response");//, JSON.stringify(response));
+          console.log('=========================================================');
+        })
+        .catch(function (err) {
+          console.log('========================error============================');
+          console.log("Something has gone wrong!");
+          console.info('err', err);
+          console.log('=========================================================');
+        })
+    }
+  });
+}
+
+export default { send, sendNotification, sendMsgNotification, sendUniversityNotification, demoSend, sendCustomUniversityNotification };

@@ -2,20 +2,16 @@ import { Injectable } from '@angular/core';
 import { Http, Headers } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { Storage } from '@ionic/storage';
+import { Events } from "ionic-angular";
 
-/*
-  Generated class for the HttpClient provider.
-
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular 2 DI.
-*/
 @Injectable()
 export class HttpClient {
   private local: Storage;
   public activeToken: String;
-  // private ApiBaseUrl = 'http://10.0.0.20:4040/api';
-  // private ApiBaseUrl = 'https://haller-api-v2.herokuapp.com/api';//stage
-  private ApiBaseUrl = 'https://haller-api-v2-main.herokuapp.com/api';//prod
+  // private ApiBaseUrl = 'http://10.0.0.11:4040/api';
+  // private ApiBaseUrl = 'http://192.168.0.104:4040/api';
+  private ApiBaseUrl = 'https://haller-api-v2.herokuapp.com/api';//stage
+  // private ApiBaseUrl = 'https://haller-api-v2-main.herokuapp.com/api';//prod
   //private ApiBaseUrl = 'https://haller-api-app-stage.herokuapp.com/api';
   //private ApiBaseUrl = 'https://haller-app-api.herokuapp.com/api';
   public emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -25,8 +21,18 @@ export class HttpClient {
 
   private headers = new Headers();
 
-  constructor(public http: Http) {
-    this.local = new Storage('localstorage');
+  constructor(public http: Http, storage: Storage, private event: Events) {
+    this.local = storage;
+    this.getActivationToken();
+    this.event.subscribe('user-updated', () => {
+      this.local.get('userInfo').then((val) => {
+        let user = JSON.parse(val);
+        this.activeToken = val ? user.status.activeToken : '';
+      });
+    });
+  }
+
+  getActivationToken() {
     this.local.get('userInfo').then((val) => {
       let user = JSON.parse(val);
       this.activeToken = val ? user.status.activeToken : '';
@@ -40,23 +46,39 @@ export class HttpClient {
   }
 
   get(url) {
+    // this.local.get('userInfo').then((val) => {
+    //   let user = JSON.parse(val);
+    //   this.activeToken = val ? user.status.activeToken : '';
     this.createAuthorizationHeader();
     return this.http.get(this.ApiBaseUrl + url, { headers: this.headers });
+    // });
   }
 
   post(url, data) {
+    // this.local.get('userInfo').then((val) => {
+    //   let user = JSON.parse(val);
+    //   this.activeToken = val ? user.status.activeToken : '';
     this.createAuthorizationHeader();
     return this.http.post(this.ApiBaseUrl + url, data, { headers: this.headers });
+    // });
   }
 
   put(url, data) {
+    // this.local.get('userInfo').then((val) => {
+    //   let user = JSON.parse(val);
+    //   this.activeToken = val ? user.status.activeToken : '';
     this.createAuthorizationHeader();
     return this.http.put(this.ApiBaseUrl + url, data, { headers: this.headers });
+    // });
   }
 
   delete(url) {
+    // this.local.get('userInfo').then((val) => {
+    //   let user = JSON.parse(val);
+    //   this.activeToken = val ? user.status.activeToken : '';
     this.createAuthorizationHeader();
     return this.http.delete(this.ApiBaseUrl + url, { headers: this.headers });
+    // });
   }
 
   extractData(res: any) {

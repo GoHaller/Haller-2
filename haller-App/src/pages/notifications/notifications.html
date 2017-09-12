@@ -12,7 +12,13 @@
   </ion-navbar>
 </ion-header>
 
+
 <ion-content>
+  <ion-refresher (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content pullingIcon="ios-arrow-down-outline" pullingText="Pull to refresh" refreshingSpinner="bubbles" refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+
   <ion-list *ngIf="!userMessage">
     <ion-item *ngFor="let noti of notifications" [ngClass]="{'unread': !noti.read }" (click)="gototFeedDetail(noti)">
       <ion-avatar item-left>
@@ -20,9 +26,11 @@
         <img *ngIf="noti.lastObj && noti.lastObj.actedBy" [src]="httpClient.getProfileImageToDisplay(noti.lastObj.actedBy)">
         <img *ngIf="noti.university" [src]="noti.university.logo || userAvatar" />
       </ion-avatar>
-      <h3>{{noti.title}}</h3>
+      <h3>{{noti.title}} <br/>
+        <ion-note class="note"> {{noti.createdAt | date: getDateFormate(noti.createdAt)}}</ion-note>
+      </h3>
       <p *ngIf="noti.message" [ngClass]="noti.type!=20?'unwrap-text':''">{{noti.message}}</p>
-      <ion-note class="note" item-right> {{noti.createdAt | date: getDateFormate(noti.createdAt)}}</ion-note>
+      <p *ngIf="noti.image" class="link-text" (click)="openUrl(noti.image.secure_url)">{{checkIfPdf(noti.image.secure_url)?'Open pdf':'Open image'}} </p>
     </ion-item>
   </ion-list>
   <ion-list *ngIf="userMessage">

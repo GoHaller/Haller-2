@@ -34,9 +34,9 @@ export class EventNew {
   myDate = new Date();
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private feedProvider: FeedProvider,
-    public loadingCtrl: LoadingController, private formBuilder: FormBuilder) {
+    public loadingCtrl: LoadingController, private formBuilder: FormBuilder, storage: Storage) {
     this.event = this.navParams.get('event') || this.event;
-    this.local = new Storage('localstorage');
+    this.local = storage;
 
     var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
     var localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0,-1);

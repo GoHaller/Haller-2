@@ -48,6 +48,14 @@ export class CloudinaryProvider {
     actionSheet.present();
   }
 
+  takePictureFromCameraCommon() {
+    this.takePicture(this.camera.PictureSourceType.CAMERA);
+  }
+
+  takePictureFromLibraryCommon() {
+    this.takePicture(this.camera.PictureSourceType.PHOTOLIBRARY);
+  }
+
   public takePicture(sourceType) {
     // Create options for the Camera Dialog
     var options = {
@@ -57,6 +65,10 @@ export class CloudinaryProvider {
       correctOrientation: true
     };
 
+    if (sourceType == this.camera.PictureSourceType.CAMERA) {
+      options.quality = 50;
+    }
+
     // Get the data of an image
     this.camera.getPicture(options).then((imagePath) => {
       // Special handling for Android library
@@ -64,7 +76,7 @@ export class CloudinaryProvider {
       this.event.publish('image-loaded');
     }, (err) => {
       console.info('err', err);
-      if (["no image selected", "Selection cancelled"].indexOf(err) == -1)
+      if (["no image selected", "Selection cancelled."].indexOf(err) == -1)
         this.presentToast('Error while selecting image.');
     });
   }
@@ -80,7 +92,7 @@ export class CloudinaryProvider {
     };
 
     // Get the data of an image
-    return this.camera.getPicture(options);
+    return this.camera.getPicture(options)
   }
 
   public takePictureFromLibrary() {

@@ -26,8 +26,8 @@ export class FeedDetail {
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public feedProvider: FeedProvider,
     private alertCtrl: AlertController, public actionSheetCtrl: ActionSheetController, public modalCtrl: ModalController,
-    private event: Events, private iab: InAppBrowser, public loadingCtrl: LoadingController) {
-    this.local = new Storage('localstorage');
+    private event: Events, private iab: InAppBrowser, public loadingCtrl: LoadingController, storage: Storage) {
+    this.local = storage;
     this.userAvatar = feedProvider.httpClient.userAvatar;
 
     this.feed = navParams.get('feed') || {};

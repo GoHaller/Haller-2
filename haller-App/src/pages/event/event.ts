@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ToastController, AlertController, ActionSheetController, Events, ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { FeedProvider } from '../../shared/providers/feed.provider';
+import { InAppBrowser } from "@ionic-native/in-app-browser";
 
 /**
  * Generated class for the Event page.
@@ -30,8 +31,8 @@ export class EventPage {
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController,
     public feedProvider: FeedProvider, private alertCtrl: AlertController, public actionSheetCtrl: ActionSheetController,
-    private event: Events, private modalCtrl: ModalController) {
-    this.local = new Storage('localstorage');
+    private event: Events, private modalCtrl: ModalController, private iab: InAppBrowser, storage: Storage) {
+    this.local = storage;
     this.userAvatar = feedProvider.httpClient.userAvatar;
   }
 
@@ -192,9 +193,10 @@ export class EventPage {
     toast.present();
   }
 
+
   presentEventActionSheet(event) {
     let options = [];
-    options.push({ text: event._userFlagged ? 'Unflag' : 'Flag', handler: () => { } });
+    options.push({ text: event._userFlagged ? 'Unflag' : 'Flag', handler: () => { this.flagFeed(event) } });
     if (event.createdBy._id == this.userInfo['_id']) {
       options.push({ text: 'Edit', handler: () => { this.gotoEditFeed(event); } });
       options.push({ text: 'Delete', handler: () => { this.confirmEventDeletion(event) } });
@@ -204,6 +206,29 @@ export class EventPage {
       buttons: options
     });
     actionSheet.present();
+  }
+
+  flagFeed(event) {
+    if (event['_userFlagged']) {
+      let flagObj = event['flagged'].filter(flag => {
+        return (flag.actedBy._id == this.userInfo['_id']) || (flag.actedBy === this.userInfo['_id']);
+      })[0];
+      this.feedProvider.deleteFlagPost(event['_id'], flagObj._id)
+        .subscribe((res: any) => {
+          // console.info('deleteFlagPost res', res);
+          this.updateFeed(event, this.feedProvider.processFeed(res));
+        }, error => {
+          console.info('deleteFlagPost error', error);
+        })
+    } else {
+      this.feedProvider.flagPost(event['_id'], { actedBy: this.userInfo['_id'], actionType: 'flag' })
+        .subscribe((res: any) => {
+          // console.info('flagPost res', res);
+          this.updateFeed(event, this.feedProvider.processFeed(res));
+        }, error => {
+          console.info('flagPost error', error);
+        })
+    }
   }
 
   confirmEventDeletion(event) {
@@ -260,6 +285,20 @@ export class EventPage {
       console.info('data', data);
     });
     modal.present();
+  }
+
+  openExternalLink(link) {
+    if (this.checkLink(link)) {
+      if (link.indexOf('http') > 5 || link.indexOf('http') == -1)
+        link = 'http://' + link;
+      this.iab.create(link, '_system');
+    }
+  }
+
+  checkLink(detail) {
+    // let exp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+    let exp = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?");
+    return exp.test(detail)
   }
 
 }

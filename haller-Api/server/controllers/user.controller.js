@@ -966,10 +966,10 @@ function getUserForNotification(req, res, next) {
 }
 
 function getUserAnalytics(req, res, next) {
-  var email = 'dev.bot@ku.edu';// + domain;
+  var email = 'dev.bot@ku.edu';// + domain;, facebook: 1
   User.findOne({ email: email, role: 'bot' })
     .then(bot => {
-      User.find({ role: 'student' }, { _id: 1, firstName: 1, lastName: 1, residence: 1, graduationYear: 1, facebook: 1 }).lean().exec().then((users) => {
+      User.find({ role: 'student' }, { _id: 1, firstName: 1, lastName: 1, residence: 1, graduationYear: 1 }).lean().exec().then((users) => {
         let count = 1;
         users.forEach((user, index, array) => {
           let userId = user._id;
@@ -983,20 +983,21 @@ function getUserAnalytics(req, res, next) {
                   }
                 }, {
                   "$project": {
-                    "sentmsgs": { $filter: { input: '$messages', as: 'msg', cond: { $eq: ["$$msg.createdBy", userId] } } },
-                    // "recivemsgs": { $filter: { input: '$messages', as: 'msg', cond: { $ne: ["$$msg.createdBy", userId] } } }
-                    //, reciveCount: { $sum: { $size: '$recivemsgs' } }
+                    "sentmsgs": { $filter: { input: '$messages', as: 'msg', cond: { $eq: ["$$msg.createdBy", userId] } } }
                   }
                 }, { $group: { count: { $sum: { $size: '$sentmsgs' } }, _id: null } }], (errorsent, sentCount) => {
                   Conversation.find({ $and: [{ participants: userId }, { participants: { $size: 2 } }, { participants: bot._id }] },
                     { _id: 1, 'messages.createdBy': 1, 'messages.createdAt': 1 }).lean().exec().then((botConvo) => {
-                      user['analyticsMsg'] = { userId: userId, totalCount: totalCount, oneToOneCount: oneToOneCount, sentCount: sentCount, bot: botConvo };
-                      if (count == array.length) {
-                        res.json(users);
-                        //res.json({ userId: userId, totalCount: totalCount, oneToOneCount: oneToOneCount, sentCount: sentCount[0].count });
-                      } else {
-                        count += 1;
-                      }
+                      Activities.find({ createdBy: userId }).sort({ 'createdAt': -1 }).exec((error, notiTab) => {
+                        user['analyticsMsg'] = { userId: userId, totalCount: totalCount[0] ? totalCount[0] : null, oneToOneCount: oneToOneCount, sentCount: sentCount[0] ? sentCount[0].count : 0, bot: botConvo };
+                        user['activities'] = notiTab;
+                        if (count == array.length) {
+                          res.setHeader('Content-Type', 'application/json');
+                          res.send(JSON.stringify({ 'users': users, 'activityType': Activities.types }, null, 4));
+                        } else {
+                          count += 1;
+                        }
+                      })
                     })
                 })
               })

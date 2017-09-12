@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
+import { InAppBrowser } from "@ionic-native/in-app-browser";
 import { Notifications } from './notifications';
 import { HttpClient } from '../../shared/providers/http-client';
 
@@ -13,6 +14,6 @@ import { HttpClient } from '../../shared/providers/http-client';
   exports: [
     Notifications
   ],
-  providers: [HttpClient]
+  providers: [HttpClient, InAppBrowser]
 })
 export class NotificationsModule { }

@@ -37,7 +37,7 @@ export class MapPage {
       window.open('maps://?q=' + destination, '_system');
     } else {
       let label = encodeURI('My Label');
-      window.open('geo:0,0?q=' + destination + '(' + (this.mapData.address || '') + ')', '_system');
+      window.open('geo:0,0?q=' + destination + '(' + label + ')', '_system');
     }
   }
 

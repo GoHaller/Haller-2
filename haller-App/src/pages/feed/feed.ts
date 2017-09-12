@@ -30,8 +30,8 @@ export class Feed {
     public feedProvider: FeedProvider, private loadingCtrl: LoadingController,
     private popoverCtrl: PopoverController, public actionSheetCtrl: ActionSheetController,
     private alertCtrl: AlertController, private event: Events, private modalCtrl: ModalController,
-    private iab: InAppBrowser) {
-    this.local = new Storage('localstorage');
+    private iab: InAppBrowser, storage: Storage) {
+    this.local = storage;
     this.userAvatar = feedProvider.httpClient.userAvatar;
   }
 
@@ -45,6 +45,7 @@ export class Feed {
     this.event.subscribe('user-updated', () => {
       this.local.get('userInfo').then((val) => {
         this.userInfo = JSON.parse(val);
+        this.cleanList = true;
         this.getFeeds();
       });
     });

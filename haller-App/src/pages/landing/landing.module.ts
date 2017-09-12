@@ -1,6 +1,10 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { Landing } from './landing';
+import { Facebook } from '@ionic-native/facebook';
+
+import { ProfileProvider } from "../../shared/providers/profile.provider";
+import { AuthProvider } from "../../shared/providers/auth.provider";
 
 @NgModule({
   declarations: [
@@ -11,6 +15,7 @@ import { Landing } from './landing';
   ],
   exports: [
     Landing
-  ]
+  ],
+  providers: [ProfileProvider, AuthProvider, Facebook]
 })
-export class LandingModule {}
+export class LandingModule { }

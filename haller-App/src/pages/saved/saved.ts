@@ -22,8 +22,8 @@ export class Saved {
   private refresher = null;
   private userAvatar = '';
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public feedProvider: FeedProvider) {
-    this.local = new Storage('localstorage');
+  constructor(public navCtrl: NavController, public navParams: NavParams, public feedProvider: FeedProvider, storage: Storage) {
+    this.local = storage;
     this.userAvatar = feedProvider.httpClient.userAvatar;
   }
 

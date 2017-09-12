@@ -14,6 +14,7 @@ export class Lists {
   public showOrg = [];
   limit = 50;
   skip = 0;
+  isSearchGoingOn: boolean = false;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public viewCtrl: ViewController, private profileProvider: ProfileProvider) {
     this.selectedList = navParams.get('orgList');
@@ -43,21 +44,27 @@ export class Lists {
   }
 
   doInfinite(infiniteScroll) {
-    if (this.showOrg.length < this.orgList.length) {
-
+    if (this.showOrg.length < this.orgList.length && !this.isSearchGoingOn) {
       setTimeout(() => {
-
         this.skip = this.showOrg.length;// + this.limit;
         let end = (this.skip + this.limit) < this.orgList.length ? (this.showOrg.length + this.limit) : this.orgList.length;
-        
-        for (let i = this.skip; i < end; i++) {
-          this.showOrg.push(this.orgList[i]);
-        }
-
+        for (let i = this.skip; i < end; i++) { this.showOrg.push(this.orgList[i]); }
         infiniteScroll.complete();
-      }, 500);
+      }, 200);
     } else {
       infiniteScroll.complete();
+    }
+  }
+
+  onSearchChange(event) {
+    if (event.target.value) {
+      this.isSearchGoingOn = true;
+      this.showOrg = this.orgList.filter(org => {
+        return org.name.toLowerCase().startsWith(event.target.value.toLowerCase())
+      })
+    } else {
+      this.isSearchGoingOn = false;
+      this.showOrg = this.orgList.slice(this.skip, this.limit);
     }
   }
 

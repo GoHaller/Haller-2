@@ -304,33 +304,82 @@ function createBotConversation(req, res, next) { //eslint-disable-line
     }
     req.body.messages.push(messagesObj);
 
-    const convo = new Conversation(_.extend(req.body, {
-      _id: id, //eslint-disable-line
-      createdAt: new Date()
-    }));
-    convo.save().then((savedConvo) => {
-      savedConvo.populate([{
-        path: 'createdBy',
-        model: 'User'
-      }, {
-        path: 'messages.createdBy',
-        model: 'User',
-      }, {
-        path: 'messages.recipient',
-        model: 'User',
-      }, {
-        path: 'participants',
-        model: 'User'
-      }], (err, doc) => {
-        if (err) {
-          return next(err);
-        } else if (doc) {
-          return res.json(doc);
+    Conversation.list({ userId: message.createdBy, recipient: message.recipient, skip: 0, limit: 50, blocked: [] })
+      .then((convos) => {
+        const convoExist = convos[0];
+        if (convoExist) {
+          for (let i = 0; i < req.body.messages.length; i++) {
+            convoExist.messages.push(req.body.messages[i]);
+          }
+
+          convoExist.updatedAt = new Date();
+          convoExist.save().then((sConvo) => {
+            sConvo.populate([{
+              path: 'createdBy',
+              model: 'User'
+            }, {
+              path: 'messages.createdBy',
+              model: 'User',
+            }, {
+              path: 'messages.recipient',
+              model: 'User',
+            }, {
+              path: 'participants',
+              model: 'User'
+            }], (err, doc) => {
+              if (err) {
+                return next(err);
+              } else if (doc) {
+                if (response.result.action == 'fallback') {
+                  emailVerification.sendBotQuestionEmail(doc.createdBy, req.body.message['body'])
+                    .then((res) => {
+                      console.log('sendBotQuestionEmail res', res.success);
+                    }, error => {
+                      console.log('sendBotQuestionEmail error', error);
+                    }).catch(err => {
+                      console.log('sendBotQuestionEmail catch error', err);
+                    })
+                }
+                return res.json(doc);
+              }
+            });
+            // return res.json(sConvo);
+          }).catch(e => {
+            console.info('Conversation.get error', e);
+            const error = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);
+            return next(error);
+          });
         }
-        const error = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);
-        return next(error);
+        else {
+          const convo = new Conversation(_.extend(req.body, {
+            _id: id, //eslint-disable-line
+            createdAt: new Date()
+          }));
+          convo.save().then((savedConvo) => {
+            savedConvo.populate([{
+              path: 'createdBy',
+              model: 'User'
+            }, {
+              path: 'messages.createdBy',
+              model: 'User',
+            }, {
+              path: 'messages.recipient',
+              model: 'User',
+            }, {
+              path: 'participants',
+              model: 'User'
+            }], (err, doc) => {
+              if (err) {
+                return next(err);
+              } else if (doc) {
+                return res.json(doc);
+              }
+              const error = new APIError('No such conversation exists!', httpStatus.NOT_FOUND);
+              return next(error);
+            });
+          });
+        }
       });
-    });
   });
 }
 
@@ -389,7 +438,7 @@ function askToBot(req, res, next) {
               if (response.result.action == 'fallback') {
                 emailVerification.sendBotQuestionEmail(doc.createdBy, req.body.message['body'])
                   .then((res) => {
-                    console.log('sendBotQuestionEmail res', res);
+                    console.log('sendBotQuestionEmail res', res.success);
                   }, error => {
                     console.log('sendBotQuestionEmail error', error);
                   }).catch(err => {
@@ -416,22 +465,39 @@ function askToBot(req, res, next) {
 function replyAsBot(req, res, next) {
   if (req.params.conversationId) {
     Conversation.get(req.params.conversationId, null).then((convo) => {
-      const savedConvo = convo;
-      let messagesObj = {
-        createdBy: req.body.createdBy,
-        createdAt: new Date(),
-        recipient: req.body.recipient,
-        botBody: req.body.body
+      if (convo) {
+        const savedConvo = convo;
+        let messagesObj = {
+          createdBy: req.body.createdBy,
+          createdAt: new Date(),
+          recipient: req.body.recipient,
+          botBody: req.body.body
+        }
+        savedConvo.messages.push(messagesObj);
+        savedConvo.updatedAt = new Date();
+        savedConvo.save().then((sConvo) => {
+          sConvo.populate([{ path: 'createdBy', model: 'User' },
+          { path: 'messages.createdBy', model: 'User', },
+          { path: 'messages.recipient', model: 'User', },
+          { path: 'participants', model: 'User' }],
+            (err, doc) => {
+              if (err) { return next(err); } else if (doc) {
+                res.json(doc);
+                doc.participants.forEach((participant) => {
+                  if (participant.email == 'dev.bot@ku.edu')
+                    messagesObj.createdBy = participant._id;
+                });
+                FCMSender.sendMsgNotification(messagesObj, doc);
+              }
+            });
+        })
+      } else {
+        const err = new APIError('Invalid Request - missing conversationId route param', httpStatus.BAD_REQUEST);
+        return next(err);
       }
-      savedConvo.messages.push(messagesObj);
-      savedConvo.updatedAt = new Date();
-      savedConvo.save().then((sConvo) => {
-        sConvo.populate([{ path: 'createdBy', model: 'User' },
-        { path: 'messages.createdBy', model: 'User', },
-        { path: 'messages.recipient', model: 'User', },
-        { path: 'participants', model: 'User' }],
-          (err, doc) => { if (err) { return next(err); } else if (doc) { return res.json(doc); } });
-      })
+    }).catch(error => {
+      const err = new APIError('Invalid Request - missing conversationId route param', httpStatus.BAD_REQUEST);
+      return next(err);
     })
   } else {
     const err = new APIError('Invalid Request - missing conversationId route param', httpStatus.BAD_REQUEST);

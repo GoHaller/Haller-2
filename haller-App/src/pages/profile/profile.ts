@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { ModalController, IonicPage, NavController, NavParams, Events, ToastController, ActionSheetController } from 'ionic-angular';
+import { ModalController, IonicPage, NavController, NavParams, Events, ToastController, ActionSheetController, LoadingController, AlertController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { ProfileProvider } from "../../shared/providers/profile.provider";
 
 import { ImageFullComponent } from '../../shared/pages/image.full';
-import { TabsPage } from "../tabs/tabs";
+import { AuthProvider } from "../../shared/providers/auth.provider";
 /**
  * Generated class for the Profile page.
  *
@@ -26,14 +26,18 @@ export class Profile {
   public showMsgBtn: Boolean = false;
   public tagBorderColor: string = 'dark';
   public userAvatar = '';
+  loaderObj: any = {};
+  fbAuthDetail: any = {};
 
   constructor(public modalCtrl: ModalController, public navCtrl: NavController, public navParams: NavParams,
-    private event: Events, public profileProvider: ProfileProvider, public toastCtrl: ToastController, public actionSheetCtrl: ActionSheetController) {
+    private event: Events, public profileProvider: ProfileProvider, public toastCtrl: ToastController,
+    public actionSheetCtrl: ActionSheetController, storage: Storage, private authProvider: AuthProvider,
+    private loadingCtrl: LoadingController, public alertCtrl: AlertController) {
     this.uid = this.navParams.data.uid || null;
     this.userInfo = this.navParams.data.userData || {};
     this.showMsgBtn = this.navParams.data.allowMessage == false ? false : true;
     this.userAvatar = profileProvider.httpClient.userAvatar;
-    this.local = new Storage('localstorage');
+    this.local = storage;
     this.local.get('userInfo').then((val) => {
       let userData = JSON.parse(val);
       this.loggedInUser = userData;
@@ -44,7 +48,7 @@ export class Profile {
     if (this.navCtrl.length() > 1) {
       this.navCtrl.pop();
     } else {
-      this.navCtrl.setRoot(TabsPage);
+      this.navCtrl.setRoot('TabsPage');
     }
   }
 
@@ -153,6 +157,73 @@ export class Profile {
       });
     }
     return likes;
+  }
+
+  checkIfOtherUserHasFacebook(user) {
+    if (!this.loggedInUser['facebook'] && user.facebook) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  getFbLogin() {
+    this.loaderObj = this.loadingCtrl.create({
+      content: "Please wait...",
+      // duration: 3000,
+      dismissOnPageChange: true
+    });
+    this.loaderObj.present();
+    this.authProvider.logoutFromFB().then((response) => {
+      this.authProvider.loginToFB()
+        .then((res: any) => {
+          // console.log('Logged into Facebook!', res);
+          if (res.status == 'connected') {
+            this.fbAuthDetail = res.authResponse;
+            this.getFbDetail();
+          } else {
+            if (this.loaderObj.dismiss) this.loaderObj.dismiss();
+          }
+        })
+        .catch(e => { console.log('Error logging into Facebook', e); if (this.loaderObj.dismiss) this.loaderObj.dismiss(); });
+    }).catch(e => { console.log('Error logging out Facebook', e); if (this.loaderObj.dismiss) this.loaderObj.dismiss(); });
+  }
+
+  getFbDetail() {
+    this.authProvider.getFBUserDetail(this.fbAuthDetail['userID'])
+      .then((res: any) => {
+        this.loggedInUser['hometown'] = (!this.loggedInUser['hometown'] && res.hometown) ? res.hometown.name : '';
+
+        let facebookData = res;
+        facebookData['auth'] = this.fbAuthDetail;
+        this.updateUser(facebookData);
+      }).catch(e => {
+        console.info('fb api error', e);
+        if (this.loaderObj.dismiss) this.loaderObj.dismiss();
+      });
+  }
+
+  updateUser(facebook) {
+    this.profileProvider.updateUser(this.loggedInUser['_id'], { facebook: facebook })
+      .subscribe((res: any) => {
+        this.loggedInUser = res;
+        if (this.loaderObj.dismiss) this.loaderObj.dismiss();
+        this.local.set('userInfo', JSON.stringify(res)).then(() => {
+          // this.event.publish('user-updated');
+        });
+      }, error => {
+        if (this.loaderObj.dismiss) this.loaderObj.dismiss();
+        console.info('updateUser error', error);
+        if (error.status == 401 || error._body.indexOf('No such user exists') > -1 || error._body.indexOf("Facebook account is already in use.") > -1) {
+          let msg = 'Facebook account is already in use.';
+          if (error._body.indexOf('No such user exists') > -1) msg = 'No such user exists';
+          let prompt = this.alertCtrl.create({
+            title: msg,
+            buttons: [{ text: 'Ok', handler: data => { } }]
+          });
+          prompt.present();
+        }
+      });
   }
 
 }

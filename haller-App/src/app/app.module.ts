@@ -10,13 +10,13 @@ import { Push } from '@ionic-native/push';
 import { LocalNotifications } from "@ionic-native/local-notifications";
 
 import { MyApp } from './app.component';
-import { TabsPage } from "../pages/tabs/tabs";
+// import { Landing } from "../pages/landing/landing";
 import { ImageFullComponent } from '../shared/pages/image.full';
 import { HttpClient } from '../shared/providers/http-client';
 
 @NgModule({
   declarations: [
-    MyApp, TabsPage, ImageFullComponent
+    MyApp, ImageFullComponent
   ],
   imports: [
     BrowserModule, HttpModule,
@@ -27,13 +27,18 @@ import { HttpClient } from '../shared/providers/http-client';
       modalEnter: 'modal-slide-in',
       modalLeave: 'modal-slide-out',
       tabsPlacement: 'bottom',
-      pageTransition: 'ios-transition'
+      pageTransition: 'ios-transition',
+      tabsHideOnSubPages:"true",
+      scrollAssist: false
     }),
-    IonicStorageModule.forRoot()
+    IonicStorageModule.forRoot({
+      name: '__hallerdb',
+      driverOrder: ['sqlite', 'websql']
+    })
   ],
   bootstrap: [IonicApp],
   entryComponents: [
-    MyApp, TabsPage, ImageFullComponent
+    MyApp, ImageFullComponent
   ],
   providers: [
     StatusBar,

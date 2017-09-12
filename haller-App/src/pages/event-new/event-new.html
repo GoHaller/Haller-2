@@ -8,7 +8,7 @@
 
   <ion-navbar color="primary" hideBackButton>
     <ion-buttons left><button ion-button (click)="goBack()">Cancel</button></ion-buttons>
-    <ion-title>{{headerText}}</ion-title>
+    <!-- <ion-title>{{headerText}}</ion-title> -->
     <ion-buttons right>
       <button ion-button [disabled]="!eventForm.valid" (click)="addEditEvent(eventForm.value)">{{saveButtonText}}</button>
     </ion-buttons>
@@ -23,12 +23,10 @@
         <ion-input autocomplete="on" spellcheck="on" autocorrect="on" placeholder="Title" formControlName="title"></ion-input>
       </ion-item>
       <ion-item>
-        <ion-datetime placeholder="Date" pickerFormat="YYYY MMM DD" [min]="minDate" [max]="maxDate" displayFormat="MMM D, YYYY"
-          formControlName="date"></ion-datetime>
+        <ion-datetime placeholder="Date" pickerFormat="YYYY MMM DD" [min]="minDate" [max]="maxDate" displayFormat="MMM D, YYYY" formControlName="date"></ion-datetime>
       </ion-item>
       <ion-item>
-        <ion-datetime placeholder="Time" pickerFormat="hh mm a" [min]="minDate" [max]="maxDate" displayFormat="HH:mm a"
-          formControlName="date"></ion-datetime>
+        <ion-datetime placeholder="Time" pickerFormat="hh mm a" [min]="minDate" [max]="maxDate" displayFormat="HH:mm a" formControlName="date"></ion-datetime>
       </ion-item>
       <ion-item>
         <ion-input autocomplete="on" spellcheck="on" autocorrect="on" placeholder="Location" formControlName="location"></ion-input>
@@ -54,12 +52,14 @@
 </ion-content>
 
 <ion-footer class="new-post">
-  <ion-row class="msg-attachment" style="padding: 5px;">
+  <ion-row class="msg-attachment">
     <ion-col center text-center>
-      <ion-icon (click)="takePictureFromCamera()" name="camera"></ion-icon>
+      <button color="dark" small clear ion-button (click)="takePictureFromCamera()"><ion-icon name="camera"></ion-icon></button>
+      <!-- <ion-icon (click)="takePictureFromCamera()" name="camera"></ion-icon> -->
     </ion-col>
     <ion-col center text-center>
-      <ion-icon (click)="takePictureFromPhotoLibrary()" name="images"></ion-icon>
+      <button color="dark" small clear ion-button (click)="takePictureFromPhotoLibrary()"><ion-icon name="images"></ion-icon></button>
+      <!-- <ion-icon (click)="takePictureFromPhotoLibrary()" name="images"></ion-icon> -->
     </ion-col>
   </ion-row>
 </ion-footer>

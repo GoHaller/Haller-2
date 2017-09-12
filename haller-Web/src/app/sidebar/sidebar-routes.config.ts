@@ -7,9 +7,13 @@ export const APPROUTES: RouteInfo[] = [
     { path: '/flag-content', title: 'Flagged Content', icon: 'material-icons', iconName: 'flag' },
     { path: '/user-list', title: 'User List', icon: 'material-icons', iconName: 'person' },
     { path: '/notifications', title: 'Notifications', icon: 'material-icons', iconName: 'announcement' },
-    { path: '/bot', title: 'Chat Bot', icon: 'material-icons', iconName: 'chat' },
     // { path: '/forgotpassword', title: '', icon: '', iconName: '' },
 ]
+
+export const ADMINAPPROUTES: RouteInfo[] = [
+    { path: '/bot', title: 'Bot Conversations', icon: 'material-icons', iconName: 'chat' },
+    { path: '/analytics', title: 'Analytics', icon: 'material-icons', iconName: 'chat' },
+];
 
 export const ROUTES: RouteInfo[] = [
     { path: '/dashboard', title: 'Dashboard', icon: 'material-icons' },

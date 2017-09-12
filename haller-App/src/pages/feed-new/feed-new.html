@@ -10,7 +10,7 @@
     <ion-buttons left>
       <button ion-button (click)="goBack()">Cancel</button>
     </ion-buttons>
-    <ion-title>{{headerText}}</ion-title>
+    <!-- <ion-title>{{headerText}}</ion-title> -->
     <ion-buttons right>
       <button ion-button (click)="addEditFeed()">{{saveButtonText}}</button>
     </ion-buttons>
@@ -40,7 +40,8 @@
     <ion-row>
       <ion-col col-12>
         <ion-item>
-          <ion-textarea autocomplete="on" spellcheck="on" autocorrect="on" class="post-detail" [(ngModel)]="feed.details" rows="10" placeholder="What do you want to say?"></ion-textarea>
+          <ion-textarea autocomplete="on" spellcheck="on" autocorrect="on" class="post-detail" [(ngModel)]="feed.details" rows="10"
+            placeholder="What do you want to say?"></ion-textarea>
         </ion-item>
       </ion-col>
     </ion-row>
@@ -60,15 +61,17 @@
 </ion-content>
 
 <ion-footer class="new-post">
-  <ion-row style="padding: 5px;">
+  <ion-row>
     <ion-col col-4 center text-center>
-      <ion-icon (click)="takePictureFromCamera()" name="camera"></ion-icon>
+      <button color="dark" small clear ion-button (click)="takePictureFromCamera()"><ion-icon name="camera"></ion-icon></button>
     </ion-col>
     <ion-col col-4 center text-center>
-      <ion-icon (click)="takePictureFromPhotoLibrary()" name="images"></ion-icon>
+        <button color="dark" small clear ion-button (click)="takePictureFromPhotoLibrary()"><ion-icon name="images"></ion-icon></button>
+      <!-- <ion-icon (click)="takePictureFromPhotoLibrary()" name="images"></ion-icon> -->
     </ion-col>
     <ion-col col-4 center text-center>
-      <ion-icon (click)="showGiphyGif()" class="icon gif-icon"></ion-icon>
+        <button color="dark" small clear ion-button (click)="showGiphyGif()"><ion-icon class="icon gif-icon"></ion-icon></button>
+      <!-- <ion-icon (click)="showGiphyGif()" class="icon gif-icon"></ion-icon> -->
     </ion-col>
   </ion-row>
 </ion-footer>

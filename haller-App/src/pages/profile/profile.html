@@ -48,10 +48,11 @@
       <p *ngIf="userInfo.organizations && userInfo.organizations.length > 0">
         <button *ngFor="let org of userInfo.organizations" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{org.name}}</span></button>
       </p>
-      <ion-card-title><b>Interests</b></ion-card-title>
+      <ion-card-title><b>{{loggedInUser._id == userInfo._id? 'Interests' : 'Common Interests'}}</b></ion-card-title>
       <p>
         <!-- <button *ngFor="let interest of userInfo.interests" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{interest.name}}</span></button> -->
         <button *ngFor="let interest of getFbLikesObject(userInfo)" color="{{tagBorderColor}}" ion-button small outline><span class="tag-text">{{interest.name}}</span></button>
+        <button *ngIf="checkIfOtherUserHasFacebook(userInfo)" (click)="getFbLogin()" color="primary" ion-button small>Link to facebook to see common interests</button>
       </p>
       <ion-card-title><b>Pronouns</b></ion-card-title>
       <p>{{userInfo.genderPronouns.join(', ') || ''}}</p>

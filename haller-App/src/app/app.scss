@@ -32,6 +32,7 @@ ion-title {
 }
   .link-text{
     color: color($colors,primary) !important;
+    text-decoration: underline;
   }
 .scroll-content{
     overflow-y: auto !important;

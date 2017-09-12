@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { PostService } from '../../services/post.services';
+import { PostService } from '../../services/post.service';
 import { Ng2PaginationModule } from 'ng2-pagination';
 
 declare var $: any;

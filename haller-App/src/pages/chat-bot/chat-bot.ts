@@ -33,8 +33,8 @@ export class ChatBot {
   // @ViewChild('mapCanvas') mapElement: ElementRef;
   @ViewChild(Content) content: Content;
   constructor(public navCtrl: NavController, private elementRef: ElementRef, public navParams: NavParams,
-    private convoProvider: ConvoProvider, private iab: InAppBrowser, private loadingCtrl: LoadingController) {
-    this.local = new Storage('localstorage');
+    private convoProvider: ConvoProvider, private iab: InAppBrowser, private loadingCtrl: LoadingController, storage: Storage) {
+    this.local = storage;
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
       // console.log('this.userInfo', this.userInfo);
@@ -54,10 +54,11 @@ export class ChatBot {
   getBotUser() {
     this.convoProvider.getBotUser(this.userInfo['email'])
       .subscribe((res: any) => {
-        if (res)
+        if (res) {
           this.botInfo = res;
-        // console.log('this.botInfo', this.botInfo);
-        this.getConversationForRecipient();
+          // console.log('this.botInfo', this.botInfo);
+          this.getConversationForRecipient();
+        }
       }, error => {
         console.log('this.botInfo error', error);
       })
@@ -90,6 +91,12 @@ export class ChatBot {
   //actual message
   sendQuestion(followupconfirmation = null) {
     if ((followupconfirmation || this.question) && this.userInfo['_id']) {
+      let loader = this.loadingCtrl.create({
+        content: "Please wait...",
+        // duration: 3000,
+        dismissOnPageChange: true
+      });
+      loader.present();
       let convoObj: Object = {};
       let messageObj: Object = {
         body: followupconfirmation || this.question,
@@ -116,8 +123,10 @@ export class ChatBot {
           this.conversation = res;
           this.conversationId = res['_id'];
           this.parseConversation();
+          loader.dismiss();
           // this.parseResponse(res);
         }, error => {
+          loader.dismiss();
           console.log('error', error);
         })
     }
@@ -167,19 +176,22 @@ export class ChatBot {
   extractLink(body, botConvo, id) {
     let exp = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?");
     let links = exp.exec(body);
-    if (links && links[0]) {
-      let urls = links[0].split(' ');
-      urls.forEach(url => {
-        // body = body.replace(url, '');
-        let bs = body.split(url);
-        botConvo.push({ id: id, body: bs[0] });
-        body = bs[1];
-        botConvo.push({ id: id, link: url, linkText: url });
-      });
-      // botConvo.push({ id: id, body: body });
-    } else {
-      botConvo.push({ id: id, body: body });
-    }
+    do {
+      links = exp.exec(body);
+      if (links && links[0]) {
+        let urls = links[0].split(' ');
+        urls.forEach(url => {
+          if (url.trim()) {
+            let bs = body.split(url);
+            botConvo.push({ id: id, body: bs[0] });
+            body = bs[1].trim();
+            botConvo.push({ id: id, link: url, linkText: url });
+          }
+        });
+      } else {
+        botConvo.push({ id: id, body: body });
+      }
+    } while (links);
   }
 
   // private linkify(plainText): string {
@@ -204,6 +216,8 @@ export class ChatBot {
   // }
 
   openExternalLink(link) {
+    if (link.indexOf('http') > 5 || link.indexOf('http') == -1)
+      link = 'http://' + link;
     this.iab.create(link, '_system');
   }
 
@@ -220,7 +234,7 @@ export class ChatBot {
     loader.present();
     this.convoProvider.getConversationForRecipient(this.userInfo['_id'], this.botInfo['_id'], true)
       .subscribe((res: any) => {
-        loader.dismiss();
+
         if (res[0])
           this.conversation = res[0];
         if (this.conversation) {
@@ -228,6 +242,7 @@ export class ChatBot {
           // console.log(this.conversationId);
           this.parseConversation();
         }
+        loader.dismiss();
       }, error => {
         loader.dismiss();
         console.info('usres error', error);
@@ -244,6 +259,10 @@ export class ChatBot {
 
   openMap(location) {
     this.navCtrl.push('MapPage', { mapData: location }, { animate: true, direction: 'forward' });
+  }
+
+  getMessageDateFormate(date) {
+    return this.convoProvider.httpClient.getDateFormate(date);
   }
 
 }

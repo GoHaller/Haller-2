@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, ToastController, LoadingController, AlertController } from 'ionic-angular';
+import { IonicPage, NavController, ToastController, LoadingController, AlertController, Events } from 'ionic-angular';
 import { Validators, FormBuilder } from '@angular/forms';
 import { Storage } from '@ionic/storage';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
-import { TabsPage } from "../tabs/tabs";
 import { AuthProvider } from '../../shared/providers/auth.provider';
 import { ProfileProvider } from "../../shared/providers/profile.provider";
 
@@ -28,12 +27,13 @@ export class Login {
   // private fbAuthDetail: Object;
   constructor(public navCtrl: NavController, public authProvider: AuthProvider,
     private ProfileProvider: ProfileProvider, private formBuilder: FormBuilder, public toastCtrl: ToastController,
-    statusBar: StatusBar, splashScreen: SplashScreen, private loadingCtrl: LoadingController, public alertCtrl: AlertController) {
+    statusBar: StatusBar, splashScreen: SplashScreen, private loadingCtrl: LoadingController,
+    public alertCtrl: AlertController, storage: Storage, private event: Events) {
     this.authForm = this.formBuilder.group({
       email: ['', Validators.compose([Validators.maxLength(30), Validators.required])],
       password: ['', Validators.compose([Validators.maxLength(30), Validators.required])]
     });
-    this.local = new Storage('localstorage');
+    this.local = storage;
     statusBar.styleDefault();
     splashScreen.hide();
     // email: ['m196f845@ku.edu', Validators.compose([Validators.maxLength(30), Validators.required])],
@@ -59,7 +59,6 @@ export class Login {
     if (data.email)
       data.email = data.email.trim();
     this.authProvider.login(data).subscribe((res: any) => {
-      console.log('login res', res);
       if (res.isBlocked) {
         let prompt = this.alertCtrl.create({
           title: 'Blocked',
@@ -78,8 +77,8 @@ export class Login {
         this.local.set('auth', res.token);
         this.local.set('uid', res.user._id);
         this.local.set('userInfo', JSON.stringify(res.user)).then(() => {
+          this.event.publish('user-updated');
           this.local.get('fcm-data').then((val) => {
-            console.log('fcm-data val', val);
             if (val) {
               let fcmData = JSON.parse(val);
               if (fcmData.deviceData) {
@@ -114,12 +113,6 @@ export class Login {
       }
       let toast = this.toastCtrl.create({ message: message, duration: 3000, position: 'top' });
       toast.present();
-      // let prompt = this.alertCtrl.create({
-      //   subTitle: ,
-      //   buttons: ['Ok']
-      // });
-      // prompt.present();
-
     });
   }
 
@@ -145,16 +138,18 @@ export class Login {
       dismissOnPageChange: true
     });
     loader.present();
-    this.authProvider.loginToFB()
-      .then((res: any) => {
-        console.log('Logged into Facebook!', res);
-        if (res.status == 'connected') {
-          this.fbAuthDetail = res.authResponse;
-          loader.dismiss();
-          this.loginToHaller({ facebookId: this.fbAuthDetail.userID });
-        }
-      })
-      .catch(e => { console.log('Error logging into Facebook', e); loader.dismiss(); });
+    this.authProvider.logoutFromFB().then((response) => {
+      this.authProvider.loginToFB()
+        .then((res: any) => {
+          console.log('Logged into Facebook!', res);
+          if (res.status == 'connected') {
+            this.fbAuthDetail = res.authResponse;
+            loader.dismiss();
+            this.loginToHaller({ facebookId: this.fbAuthDetail.userID });
+          }
+        })
+        .catch(e => { console.log('Error logging into Facebook', e); loader.dismiss(); });
+    }).catch(e => { console.log('Error logging out Facebook', e); loader.dismiss(); });
   }
 
   logoutFacebook() {
@@ -163,7 +158,40 @@ export class Login {
     });
   }
 
-  gotoTabsPage() { this.navCtrl.setRoot(TabsPage, {}, { animate: true, direction: 'forward' }); }
+  checkUsersFacebookLikes(user) {
+    // console.log("user['facebook']", user['facebook']);
+    if (user['facebook']) {
+      let loader = this.loadingCtrl.create({
+        content: "Please wait...",
+        // duration: 3000,
+        dismissOnPageChange: true
+      });
+      loader.present();
+      this.authProvider.getFBUserDetail(user['facebook'].id).then((res) => {
+        console.log('tab facebook res', res);
+        if (user['facebook'].id == res.id) {
+          user['facebook'].likes = res.likes;
+          this.ProfileProvider.updateUser(user._id, { 'facebook': user['facebook'] })
+            .subscribe((re: any) => {
+              loader.dismiss();
+              this.gotoTabsPage();
+            }, error => {
+              loader.dismiss();
+              console.info('updateUser error', error);
+            });
+        } else {
+          this.gotoTabsPage();
+          loader.dismiss();
+        }
+      }).catch(error => {
+        console.log('tab facebook error', error);
+        this.gotoTabsPage();
+        loader.dismiss();
+      })
+    }
+  }
+
+  gotoTabsPage() { this.navCtrl.setRoot('TabsPage', {}, { animate: true, direction: 'forward' }); }
   gotoLandingPage() { this.navCtrl.setRoot('Landing', {}, { animate: true, direction: 'forward' }); }
   gotoRegPage() { this.navCtrl.setRoot('Registration', {}, { animate: true, direction: 'forward' }); }
 }

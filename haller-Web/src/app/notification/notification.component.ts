@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { ModalService } from '../../services/modal.service';
 import { NotificationService } from '../../services/notification.service';
-import { PostService } from '../../services/post.services';
+import { PostService } from '../../services/post.service';
 import { Ng2PaginationModule } from 'ng2-pagination';
 
 
@@ -28,6 +28,7 @@ export class NotificationComponent implements OnInit {
     userInfo: any = [];
     isCustomNotification: Boolean = false;
     toAllstudent: Boolean = false;
+    selectOneRecipient: Boolean = false;
 
 
     public posts = [];
@@ -42,30 +43,29 @@ export class NotificationComponent implements OnInit {
     file: File;
     constructor(private location: Location, private modalService: ModalService, private notificationService: NotificationService, private postService: PostService) {
         this.userInfo = localStorage.getItem('userInfo');
+        this.userInfo = JSON.parse(this.userInfo);
     }
 
     ngOnInit() {
         this.notificationService.getUsersForNotification()
             .subscribe((res: any) => {
-                console.log('getUsersForNotification res', res);
+                // console.log('getUsersForNotification res', res);
                 this.usersForNotifications = res;
                 setTimeout(() => {
                     $('.selectpicker').selectpicker('refresh');
                 }, 200);
             })
-        var userId = localStorage.getItem('uid')
-        this.notificationService.getNotification(userId).subscribe((res: any) => {
-            // console.log('res', res);
+        this.getAllNotification();
+    }
+
+    getAllNotification() {
+        this.notificationService.getNotification(this.userInfo._id).subscribe((res: any) => {
             if (res) {
+                this.notification = res;
                 if (res.length == 0) {
                     this.recordStatus = true;
                 } else {
-                    if (res.admin) {
-                        this.notification = res;
-                        this.admin = true;
-                    } else {
-                        this.notification = res;
-                    }
+                    this.recordStatus = false;
                 }
             }
         }, error => {
@@ -73,47 +73,52 @@ export class NotificationComponent implements OnInit {
         })
     }
 
-
     addNotification(model, isValid, id) {
-
         if (isValid) {
-            this.modalService.close(id);
-            this.title = model.title;
-            this.message = model.message;
-            if (this.file && this.file.size) {
-                if (this.file.type == 'application/pdf') {
-                    // Select the very first file from list
-                    var fileToLoad = this.file;
-                    // FileReader function for read the file.
-                    var fileReader = new FileReader();
-                    var base64;
-                    // Onload of file read the file content
-                    fileReader.onload = (fileLoadedEvent) => {
-                        // console.log('fileLoadedEvent', fileLoadedEvent);
-                        base64 = fileLoadedEvent.target['result'];
-                        // Print data in console
-                        // console.log(base64);
-                        this.postService.cloudinaryUpload(base64, 'profile-covers')
+            if (this.isCustomNotification && !this.toAllstudent && this.selectedUserList.length == 0) {
+                // alert('Please select sudent from dropdown');
+                this.selectOneRecipient = true;
+                return;
+            } else {
+                this.selectOneRecipient = false;
+                this.modalService.close(id);
+                this.title = model.title;
+                this.message = model.message;
+                if (this.file && this.file.size) {
+                    if (this.file.type == 'application/pdf') {
+                        // Select the very first file from list
+                        var fileToLoad = this.file;
+                        // FileReader function for read the file.
+                        var fileReader = new FileReader();
+                        var base64;
+                        // Onload of file read the file content
+                        fileReader.onload = (fileLoadedEvent) => {
+                            // console.log('fileLoadedEvent', fileLoadedEvent);
+                            base64 = fileLoadedEvent.target['result'];
+                            // Print data in console
+                            // console.log(base64);
+                            this.postService.cloudinaryUpload(base64, 'profile-covers')
+                                .subscribe((res: any) => {
+                                    // console.info('cloudinaryUpload res', res);
+                                    if (id == 'notification') { this.createNotificationApi(res); }
+                                }, error => {
+                                    console.log('cloudinaryUpload error', error);
+                                });
+                        };
+                        // Convert data to base64
+                        fileReader.readAsDataURL(fileToLoad);
+                    } else {
+                        this.postService.cloudinaryUpload(this.file['result'], 'profile-covers')
                             .subscribe((res: any) => {
                                 // console.info('cloudinaryUpload res', res);
                                 if (id == 'notification') { this.createNotificationApi(res); }
                             }, error => {
                                 console.log('cloudinaryUpload error', error);
                             });
-                    };
-                    // Convert data to base64
-                    fileReader.readAsDataURL(fileToLoad);
+                    }
                 } else {
-                    this.postService.cloudinaryUpload(this.file['result'], 'profile-covers')
-                        .subscribe((res: any) => {
-                            // console.info('cloudinaryUpload res', res);
-                            if (id == 'notification') { this.createNotificationApi(res); }
-                        }, error => {
-                            console.log('cloudinaryUpload error', error);
-                        });
+                    if (id == 'notification') { this.createNotificationApi(null); }
                 }
-            } else {
-                if (id == 'notification') { this.createNotificationApi(null); }
             }
         }
     }
@@ -174,7 +179,7 @@ export class NotificationComponent implements OnInit {
             createdAt: new Date(),
             isCustom: this.isCustomNotification
         };
-        if (!this.toAllstudent) {
+        if (!this.toAllstudent && this.selectedUserList.length > 0) {
             notificationObj['recipients'] = this.selectedUserList;
         }
         if (cloudinaryResponse) {
@@ -188,14 +193,14 @@ export class NotificationComponent implements OnInit {
             .subscribe((res: any) => {
                 // console.log('createNotification res', res);
                 this.file = null;
-                this.userInfo = [];
+                // this.userInfo = [];
                 this.isCustomNotification = false;
                 this.toAllstudent = false;
                 setTimeout(() => {
                     $('.selectpicker').selectpicker('refresh');
                 }, 200);
                 // this.posts[this.postIndex] = res;
-                this.ngOnInit();
+                this.getAllNotification();
             }, error => {
                 console.log('createNotification error', error);
             })

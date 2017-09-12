@@ -25,8 +25,8 @@ export class Messages {
   private groupAvatar = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public convoProvider: ConvoProvider,
-    public actionSheetCtrl: ActionSheetController, private event: Events, private zone: NgZone) {
-    this.local = new Storage('localstorage');
+    public actionSheetCtrl: ActionSheetController, private event: Events, private zone: NgZone, storage: Storage) {
+    this.local = storage;
     // this.userAvatar = convoProvider.httpClient.userAvatar;
     this.groupAvatar = convoProvider.httpClient.groupAvatar;
     this.local.get('userInfo').then((val) => {

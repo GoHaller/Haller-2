@@ -1,14 +1,7 @@
-<ion-content padding class="app-background">
-  <div class="login-div">
-    <div class="logo-image">
-      <img src="/assets/img/logo.png" width="40%" height="40%">
-    </div>
-    <p class="logo-subtext">The opportunities are endless</p>
-    <div>
-      <button ion-button block color="light" (click)="gotoRegistrationPage(1)">Sign up with Facebbok</button>
-      <button ion-button block color="light" (click)="gotoRegistrationPage(0)" style="margin-top:10px">Sign up with Email</button>
-      <button ion-button block (click)="gotoLoginPage()" clear color="light" style="margin-top:30px">Already have an account? Login</button>
-    </div>
-    <button [ngClass]="'help-btn'" ion-button block clear color="light">Help</button>
+<ion-content class="app-background" center text-center>
+  <ion-spinner *ngIf="internetConnected" name="circles"></ion-spinner>
+  <div class="kepp-center" *ngIf="!internetConnected">
+    <h3> No internet connection </h3>
+    <div> <button ion-button color="light" (click)="setUpTheApp()">Try again</button> </div>
   </div>
 </ion-content>

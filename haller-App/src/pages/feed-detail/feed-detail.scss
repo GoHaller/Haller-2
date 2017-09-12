@@ -92,7 +92,7 @@ page-feed-detail {
     }
     .footer{
         background-color: #fff;
-        padding: 5px;        
+        padding: 5px 0px;        
         ion-col.comment-attachment{
             text-align: center;
             ion-icon{
@@ -103,8 +103,11 @@ page-feed-detail {
             border-top: 1px solid #e4e4e4;
             ion-col{
                 text-align: center;
-                padding-top: 10px;
-                padding-bottom: 10px;
+                // padding-top: 10px;
+                // padding-bottom: 10px;
+                button{
+                    margin: 0px;
+                }
             }
         }
         .image-to-upload{

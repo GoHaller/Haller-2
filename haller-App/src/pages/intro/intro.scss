@@ -1,0 +1,45 @@
+page-intro {
+    .content{
+        text-align: center;
+        align-content: center;
+        background-color: #ffffff;
+        ion-slides{
+            max-width:414px;
+            max-height:736px;
+            margin: 0 auto;
+        }
+        .swiper-pagination-bullet-active{
+            background-color: color($colors,primary);
+        }
+        .btn-finish{
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        .slides{
+            ion-icon{
+                font-size: 2.2em;
+                color: #b5b5b5;
+            }
+            .txt-name{
+                margin: 0px;
+                color: #b5b5b5;
+            }
+            .txt-detail{
+                margin: 0px;
+                color: color($colors,primary);
+            }
+            .img-detail{
+                height: 73vh;
+                overflow: hidden;
+                .img-mock{
+                    margin-left: 101px;
+                    height: 100%;
+                }
+                .img-screen{
+                    margin-left: 5%;
+                }
+            }
+        }
+    }
+}

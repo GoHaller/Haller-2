@@ -16,26 +16,97 @@
                 </div>
             </div>
             <div class="col-sm-1">&nbsp;</div>
-            <div class="col-sm-4 convo-section">
-                <div *ngIf="conversation.messages && conversation.messages.length >0 ">
-                    <div *ngFor="let msg of conversation.messages; let last = last" class="conversation row" [ngClass]="(msg.createdBy.role == 'bot')?'me':'them'">
-                        <div class="msg-container col-sm-12" *ngIf="msg.body">
-                            <div>{{msg.body}}</div>
-                        </div>
-                        <div *ngIf="msg.botBody" class="msg-container col-sm-12">
-                            <div *ngFor="let bmsg of msg.botBody1" class="bot-msgs">
-                                <div *ngIf="bmsg.body ">{{bmsg.body}}</div>
-                                <div *ngIf="bmsg.image " class="img-container "><img [src]="bmsg.image " /></div>
-                                <!-- <div *ngIf="bmsg.replies ">
+            <div class="col-sm-6">
+                <div class="col-sm-12 selected-user" *ngIf="selectedUser._id">
+                    <div class="col-sm-2">
+                        <img class="user-image" *ngIf="selectedUser.currentProfile && selectedUser.currentProfile.secure_url" [src]="selectedUser.currentProfile.secure_url">
+                        <i *ngIf="!selectedUser.currentProfile || !selectedUser.currentProfile.secure_url" class="material-icons" style="font-size: 50px;padding: 3px 11px;">person</i>
+                    </div>
+                    <div class="col-sm-7">
+                        {{selectedUser.firstName + ' '+ selectedUser.lastName}}<br/> from {{selectedUser.residence}}<br/>{{selectedUser.email}}
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn btn-primary btn-simple btn-sm" *ngIf="conversationId" (click)="openModal('bot-reply-form');">Reply</button>
+                    </div>
+                </div>
+                <!-- <div class="col-sm-12 text-center" *ngIf="selectedUser._id">
+                    <span>the first message is the latest one.</span>
+                </div> -->
+                <div class="col-sm-12 convo-section" id="convo-section">
+                    <div *ngIf="conversation.messages && conversation.messages.length >0 ">
+                        <div *ngFor="let msg of conversation.messages" class="conversation row" [ngClass]="(msg.createdBy._id != selectedUser._id)?'me':'them'">
+                            <div class="msg-container col-sm-12" *ngIf="msg.body">
+                                <div class="user-msgs">
+                                    <p class="msg-name">
+                                        {{msg.createdBy.firstName + ' ' + msg.createdBy.lastName}}
+                                    </p>
+                                    {{msg.body}}
+                                    <div>
+                                        <p class="msg-time">
+                                            {{msg.createdAt | date:userService.getDateFormate(msg.createdAt)}}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div *ngIf="msg.botBody" class="msg-container col-sm-12">
+                                <div class="bot-msgs">
+                                    <p class="msg-name">
+                                        {{msg.createdBy.firstName + ' ' + msg.createdBy.lastName}}
+                                    </p>
+
+                                    <div *ngFor="let bmsg of msg.botBody1">
+                                        <div *ngIf="bmsg.body ">{{bmsg.body}}</div>
+                                        <div *ngIf="bmsg.image " class="img-container "><img [src]="bmsg.image " /></div>
+                                        <!-- <div *ngIf="bmsg.replies ">
                                         <button ion-button round (click)="sendQuestion(r) " small *ngFor="let r of bmsg.replies ">{{r}}</button>
                                     </div> -->
-                                <div *ngIf="bmsg.link " style="margin-top:5px "><a href="{{bmsg.link}} " target="_blank ">{{bmsg.linkText || 'Click here'}}</a></div>
-                                <div *ngIf="bmsg.location || bmsg.address " style="margin-top:5px "><a>{{bmsg.linkText || 'Show on map'}}</a></div>
+                                        <div *ngIf="bmsg.link " style="margin-top:5px "><a href="{{bmsg.link}} " target="_blank ">{{bmsg.linkText || 'Click here'}}</a></div>
+                                        <div *ngIf="bmsg.location || bmsg.address " style="margin-top:5px "><a>{{bmsg.linkText || 'Show on map'}}</a></div>
+                                    </div>
+                                    <p class="msg-time">
+                                        {{msg.createdAt | date:userService.getDateFormate(msg.createdAt)}}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
+
+<!--Bot repla  modal start -->
+<modal id="bot-reply-form">
+    <div class="modal">
+        <div class="modal-body col-md-4 col-md-offset-4">
+            <div class="card">
+                <form #frmBotReply="ngForm" novalidate (ngSubmit)="save(frmBotReply.value, frmBotReply.valid,'bot-reply-form')">
+                    <div class="card-header card-header-icon" data-background-color="blue">
+                        <i class="material-icons">featured_play_list</i>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title">Reply to {{selectedUser.firstName + ' '+ selectedUser.lastName}}</h4>
+                        <div class="form-group col-lg-12">
+                            <textarea rows="3" type="text" class="form-control" name="body" placeholder="Description" [(ngModel)]="body"></textarea>
+                        </div>
+                        <div class="form-group col-lg-12">
+                            <input type="text" class="form-control" placeholder="Address" name="adderess" [(ngModel)]="adderess" />
+                        </div>
+                        <div class="form-group col-lg-12">
+                            <input type="text" class="form-control" placeholder="Link" name="link" [(ngModel)]="link" />
+                            <span *ngIf="!linkIsValid">Link is invalid.</span>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn btn-info btn-fill btn-wd" type="submit" [disabled]="!frmBotReply.valid">Send</button>
+                            <button type="button" class="btn btn-default" (click)="closeModal('bot-reply-form');">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-background"></div>
+</modal>
+<!--Bot repla modal end -->

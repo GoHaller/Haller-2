@@ -44,26 +44,38 @@
       </ion-avatar>
       <h2 (click)="viewProfile(feed.createdBy)">{{(feed.createdBy ? feed.createdBy.firstName : 'No One' ) + ' ' + (feed.createdBy ? feed.createdBy.lastName : 'No One')}}</h2>
       <ion-note>{{feed.createdAt | date: getDateFormatr(feed.createdAt)}}</ion-note>
-      <button ion-button icon-only item-right clear small color="newlight" (click)="presentFeedActionSheet(feed)"><ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon></button>
+      <ion-note item-right *ngIf="feed._userFlagged"><ion-icon name="flag" color="danger"></ion-icon></ion-note>
+      <button ion-button icon-only item-right clear small color="newlight" (click)="presentFeedActionSheet(feed)">
+        <ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon>
+      </button>
     </ion-item>
     <img *ngIf="feed.cover.length > 0" (click)="gototFeedDetail(feed)" [src]="feed.cover[feed.cover.length - 1].secure_url">
     <div *ngIf="feed.giphy" class="img-container"><img [src]="feed.giphy.gif.url" /></div>
     <div *ngIf="feed.giphy" class="powered-giphy">
       <ion-note>Powered by GIPHY</ion-note>
     </div>
-    <ion-card-content *ngIf="feed.details && !checkLink(feed.details)" (click)="gototFeedDetail(feed)">
+    <ion-card-content *ngIf="feed.details && !feed.linkData" (click)="gototFeedDetail(feed)">
+      <p>{{feed.details}}</p>
+    </ion-card-content>
+    <ion-card-content *ngIf="feed.details && feed.linkData">
+      <span *ngFor="let link of feed.linkData">
+        <span *ngIf="link.text" (click)="gototFeedDetail(feed)">{{link.text}}</span>
+      <span class="link-text" (click)="openExternalLink(link.link)" *ngIf="link.link">{{link.link}}</span>
+      </span>
+    </ion-card-content>
+    <!-- <ion-card-content *ngIf="feed.details && !checkLink(feed.details)" (click)="gototFeedDetail(feed)">
       <p>{{feed.details}}</p>
     </ion-card-content>
     <ion-card-content *ngIf="feed.details && checkLink(feed.details)" (click)="openExternalLink(feed.details)">
       <p class="link-text">{{feed.details}}</p>
-    </ion-card-content>
+    </ion-card-content> -->
     <!-- <ion-card-content *ngIf="feed.details">
       <p [innerHTML]="linkify(feed.details)"></p>
     </ion-card-content> -->
     <ion-row class="action-count">
       <ion-col *ngIf="feed.liked.length > 0 || feed.comments.length > 0">
         <button style="float:left" ion-button color="dark" clear small (click)="openLikeModel(feed.liked,null)">{{feed.liked.length +' '}}{{feed.liked.length>1||feed.liked.length==0?'Likes':'Like'}}</button>
-        <button style="float:right" ion-button color="dark" clear small (click)="openLikeModel(null,feed.comments)">{{feed.comments.length + ' '}}{{feed.comments.length>1||feed.comments.length==0?'Comments':'Comment'}}</button>
+        <button style="float:right" ion-button color="dark" clear small (click)="gototFeedDetail(feed)">{{feed.comments.length + ' '}}{{feed.comments.length>1||feed.comments.length==0?'Comments':'Comment'}}</button>
         <!-- <span style="float:left" *ngIf="feed.liked.length > 0" (click)="openLikeModel(feed.liked,null)">{{feed.liked.length +' Likes'}}</span> -->
         <!-- <span style="float:right" *ngIf="feed.comments.length > 0" (click)="openLikeModel(null,feed.comments)">{{feed.comments.length + ' Comments'}}</span> -->
       </ion-col>

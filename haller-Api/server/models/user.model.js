@@ -439,9 +439,7 @@ UserSchema.statics = {
   },
 
   getUserForNotification() {
-    this.find({ 'notifications.deviceToken': { $exists: true, $ne: "" } })
-      .then((users) => { res.json(users); })
-      .catch((e) => { return next(e); });
+    return this.find({ 'notifications.deviceToken': { $exists: true, $ne: "" } })
   }
 };
 

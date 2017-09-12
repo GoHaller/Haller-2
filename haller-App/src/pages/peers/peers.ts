@@ -28,44 +28,26 @@ export class Peers {
   private userAvatar = '';
   private chooseUser: boolean = false;
   public infiniteScroll = null;
+  shouldEnableInfinite: boolean = true;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public profileProvider: ProfileProvider, private viewCtrl: ViewController) {
-    this.local = new Storage('localstorage');
+  constructor(public navCtrl: NavController, public navParams: NavParams, public profileProvider: ProfileProvider, private viewCtrl: ViewController, storage: Storage) {
+    this.local = storage;
     this.userAvatar = profileProvider.httpClient.userAvatar;
     // this.chooseUser = this.navParams.get('resolve') ? true : false;
     this.chooseUser = this.navParams.get('selection') ? true : false;
     this.selectedUser = this.navParams.get('selected') || [];
+    this.profileProvider.httpClient.getActivationToken();
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
-      // this.getPeersList();
+      this.getPeersList();
     });
   }
 
-  ionViewDidLoad() {
-    // console.log('ionViewDidLoad Peers');
-  }
-  ionViewDidLeave() {
-    // console.log('ionViewDidLeave Peers');
-    this.clearList = true;
-    // this.peersList = [];
-  }
-
-  ionViewWillEnter() {
-    if (this.userInfo['_id']) {
-      this.clearList = true;
-      this.getPeersList();
-    } else {
-      setTimeout(() => {
-        this.clearList = true;
-        this.getPeersList();
-      }, 100);
-    }
-  }
+  ionViewDidLoad() {}
+  ionViewDidLeave() {}
+  ionViewWillEnter() {}
 
   goBack() {
-    // if (this.chooseUser) {
-    //   this.navParams.get('resolve')(this.selectedUser);
-    // }
     this.navCtrl.pop();
   }
 
@@ -83,6 +65,7 @@ export class Peers {
   onSearchChange(ev: any) {
     if (!ev.target.value || ev.target.value.length == 0) {
       this.searchText = '';
+      this.skip = 0;
       this.clearList = true;
       this.getPeersList();
     } else {
@@ -90,13 +73,10 @@ export class Peers {
     }
   }
 
-  getItems(ev: any) {
-    // console.log(ev);
-    // if (ev.target.value.length > 0) {
-    //   this.searchText = ev.target.value;
+  getItems() {
+    this.skip = 0;
     this.clearList = true;
     this.getPeersList();
-    // }
   }
 
   getPeersList() {
@@ -111,8 +91,10 @@ export class Peers {
         }
         if (this.infiniteScroll) {
           this.infiniteScroll.complete();
-          if (res.length == 0)
+          if (res.length == 0){
+            this.shouldEnableInfinite = false;
             this.infiniteScroll.enable(false);
+          }
           this.infiniteScroll = null;
         }
       }, error => {
@@ -180,6 +162,7 @@ export class Peers {
   changeSegment(segment) {
     this.skip = 0;
     this.selectedPeers = segment;
+    this.shouldEnableInfinite = true;
     this.clearList = true;
     this.getPeersList();
   }

@@ -10,6 +10,7 @@ import { CloudinaryProvider } from './cloudinary.provider';
 @Injectable()
 export class FeedProvider {
     public userId: String = '';
+    private urlExp = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?");
     // private cloudinaryImageData: Object = {};
     // private allowedOutsideEmails = [
     //     'nptvuong2912@gmail.com', 'fines.robert@gmail.com', 'kgohel@gohaller.com',
@@ -26,6 +27,7 @@ export class FeedProvider {
             modal.present();
         }
     }
+
 
     processFeed(post) {
         let _userLiked = post.liked.filter(l => {
@@ -49,6 +51,22 @@ export class FeedProvider {
             return f.actedBy && f.actedBy._id == this.userId;
         })[0];
         post._userFlagged = (_userFlagged && _userFlagged._id);
+
+        let links = this.urlExp.exec(post.details);
+
+        if (links && links[0]) {
+            post.linkData = [];
+            let body = post.details;
+            let urls = links[0].split(' ');
+            urls.forEach(url => {
+                let bs = body.split(url);
+                post.linkData.push({ text: bs[0] });
+                post.linkData.push({ link: url });
+                body = bs[1];
+            });
+            post.linkData.push({ text: body });
+            // botConvo.push({ id: id, body: body });
+        }
 
         return post;
     }

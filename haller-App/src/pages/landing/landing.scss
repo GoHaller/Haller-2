@@ -1,5 +1,15 @@
 page-landing {
-    .m-b-32{
-        margin: 32px;
+    .spinner {
+        position: absolute;
+        top: 48%;
+        line, circle{
+            stroke: #ffffff;
+            fill: #ffffff;
+        }
+    }
+    .kepp-center{
+        width: 100%;
+        position: absolute;
+        top: 40%;
     }
 }

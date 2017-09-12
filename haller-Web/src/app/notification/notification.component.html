@@ -3,7 +3,7 @@
 
     <modal id="notification">
         <div class="modal">
-            <div class="modal-body col-md-4 col-md-offset-4">
+            <div class="modal-body col-md-6 col-md-offset-3">
                 <div class="card">
                     <form #frmNotification="ngForm" novalidate>
                         <div class="card-header card-header-icon" data-background-color="blue">
@@ -36,6 +36,9 @@
                                         </select>
                                     </div>
                                 </div>
+                            </div>
+                            <div *ngIf="selectOneRecipient" class="text-center" style="color:red">
+                                Sorry sir, but you haven't selected any recipient.
                             </div>
                             <div class="form-group label-floating">
                                 <textarea type="text" class="form-control" placeholder="title...." name="title" [(ngModel)]="notificationModal.title" #title="ngModel"></textarea>
@@ -126,7 +129,7 @@
                                         <th>No.</th>
                                         <th>Title</th>
                                         <th>Message</th>
-                                        <th *ngIf="admin">Created By</th>
+                                        <th *ngIf="userInfo.role == 'admin'">Created By</th>
                                         <th>Created At</th>
                                         <th>Type</th>
                                         <th>Action</th>
@@ -139,9 +142,9 @@
                                         <td>{{i+1}}</td>
                                         <td>{{item.body.title}}</td>
                                         <td>
-                                            <p class="restrictbody">{{item.body.message}}</p>
+                                            <span class="restrictbody">{{item.body.message}}</span>
                                         </td>
-                                        <td *ngIf="admin">{{item.createdBy.firstName}} {{item.createdBy.lastName}} </td>
+                                        <td *ngIf="userInfo.role == 'admin'">{{item.createdBy.firstName}} {{item.createdBy.lastName}} </td>
                                         <td>{{item.createdAt | date:'medium'}}</td>
                                         <td>{{item.type==21?'Custom':'University'}}</td>
                                         <td><button type="button" rel="tooltip" (click)="openPopToDIsplay(item)" class="btn btn-success btn-sm">View</button></td>

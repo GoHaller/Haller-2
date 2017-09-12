@@ -50,8 +50,8 @@ export class ProfileEdit {
 
   constructor(private navCtrl: NavController, private navParams: NavParams, public profileProvider: ProfileProvider,
     private formBuilder: FormBuilder, private modalCtrl: ModalController, private cloudinaryProvider: CloudinaryProvider,
-    public loadingCtrl: LoadingController, private event: Events, private authProvider: AuthProvider, public toastCtrl: ToastController) {
-    this.local = new Storage('localstorage');
+    public loadingCtrl: LoadingController, private event: Events, private authProvider: AuthProvider, public toastCtrl: ToastController, storage: Storage) {
+    this.local = storage;
     this.userAvatar = profileProvider.httpClient.userAvatar;
     this.userForm = this.formBuilder.group({
       firstName: ['', Validators.compose([Validators.maxLength(50), Validators.required])],
@@ -299,7 +299,7 @@ export class ProfileEdit {
           this.getFbDetail();
         }
       })
-      .catch(e => { console.log('Error logging into Facebook', e); this.loaderObj.dismiss(); });
+      .catch(e => { console.log('Error logging into Facebook', e); if (this.loaderObj.dismiss) this.loaderObj.dismiss(); });
   }
 
   getFbDetail() {
@@ -307,7 +307,7 @@ export class ProfileEdit {
       .then((res: any) => {
         if (res) {
           this.userInfo['facebook'] = res;
-          this.loaderObj.dismiss();
+          if (this.loaderObj.dismiss) this.loaderObj.dismiss();
           this.profileProvider.updateUser(this.userInfo['_id'], { facebook: res })
             .subscribe((res: any) => {
               // console.info('updateUser res', res);
@@ -329,7 +329,7 @@ export class ProfileEdit {
         }
       }).catch(e => {
         console.info('fb api error', e);
-        this.loaderObj.dismiss();
+        if (this.loaderObj.dismiss) this.loaderObj.dismiss();
       });
   }
 

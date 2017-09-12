@@ -38,14 +38,16 @@ export class Registration {
   private facebookData: any;
   private years = [];
   private email: string = '';
+  private password: string = '';
   public loaderObj: any = null;
   public inviteCode: string = '';
   public universityData: any = { halls: ['Scholarship Hall', 'Oliver Hall', 'Ellsworth Hall', 'Oswald/Self Hall', 'New Hall'] };
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private authProvider: AuthProvider,
     private profileProvider: ProfileProvider, private formBuilder: FormBuilder, public toastCtrl: ToastController,
-    private loadingCtrl: LoadingController, statusBar: StatusBar, splashScreen: SplashScreen, private cloudinaryProvider: CloudinaryProvider, public alertCtrl: AlertController) {
-    this.local = new Storage('localstorage');
+    private loadingCtrl: LoadingController, statusBar: StatusBar, splashScreen: SplashScreen, private cloudinaryProvider: CloudinaryProvider,
+    public alertCtrl: AlertController, storage: Storage) {
+    this.local = storage;
     this.authForm = this.formBuilder.group({
       pwd1: ['', Validators.compose([Validators.maxLength(50), Validators.required])],
       pwd2: ['', Validators.compose([Validators.maxLength(30), Validators.required])]
@@ -113,9 +115,11 @@ export class Registration {
       this.swipeTo(this.currentTab + 1);
   }
 
-  createAccount(data) {
-    if (this.email && data['pwd1']) {
-      this.createNewAccount({ email: this.email, password: data.pwd1 });
+  setPassword(data) {
+    if (this.authForm.valid && this.email && data['pwd1']) {
+      this.password = data['pwd1'];
+      this.swipeTo(this.currentTab + 1);
+      // this.createNewAccount({ email: this.email, password: data.pwd1 });
     }
   }
 
@@ -134,12 +138,12 @@ export class Registration {
             this.userInfo = res.user;
             this.authToken = res.token;
             // console.info('data', data)
-            if (data.facebook) {
-              this.finishRegistration(this.detailForm.value);
-              // this.swipeTo(this.currentTab + 2);
-            }
-            else
-              this.swipeTo(this.currentTab + 1);
+            // if (data.facebook) {
+            this.finishRegistration(this.detailForm.value);
+            // this.swipeTo(this.currentTab + 2);
+            // }
+            // else
+            // this.swipeTo(this.currentTab + 1);
           } else if (res['_id']) {
             let message = 'Try with another email';
             let toast = this.toastCtrl.create({
@@ -207,6 +211,16 @@ export class Registration {
       });
   }
 
+  createAccount(data) {
+    if (this.detailForm.valid) {
+      if (this.password.length >= 8)
+        this.createNewAccount({ email: this.email, password: this.password });
+      else {
+        this.paswwordValidation();
+      }
+    }
+  }
+
   finishRegistration(data) {
     this.local.get('fcm-data').then((val) => {
       if (val)
@@ -230,7 +244,8 @@ export class Registration {
         residence: this.residence,
         bio: this.userInfo['bio'],
         // hometown: '',//data['hometown'],
-        notifications: deviceData
+        notifications: deviceData,
+        inviteCode: this.inviteCode
       }
       //facebook: this.facebookData
       let loader = this.loadingCtrl.create({
@@ -264,8 +279,10 @@ export class Registration {
       if (res.status != 'connected') {
         this.getFbLogin();
       } else if (res.status == 'connected') {
-        this.fbAuthDetail = res.authResponse;
-        this.getFbDetail();
+        // this.fbAuthDetail = res.authResponse;
+        this.authProvider.logoutFromFB().then((response) => {
+          this.getFbDetail();
+        }).catch(e => { console.log('Error logging out Facebook', e); this.loaderObj.dismiss(); });
       }
     }).catch(error => {
       console.info('getLoginStatus error', error);
@@ -279,23 +296,24 @@ export class Registration {
       dismissOnPageChange: true
     });
     this.loaderObj.present();
-    this.authProvider.logoutFromFB().then((response) => {
-      this.authProvider.loginToFB()
-        .then((res: any) => {
-          // console.log('Logged into Facebook!', res);
-          if (res.status == 'connected') {
-            this.fbAuthDetail = res.authResponse;
-            this.getFbDetail();
-          }
-        })
-        .catch(e => { console.log('Error logging into Facebook', e); this.loaderObj.dismiss(); });
-    }).catch(e => { console.log('Error logging out Facebook', e); this.loaderObj.dismiss(); });
+    // this.authProvider.logoutFromFB().then((response) => {
+    this.authProvider.loginToFB()
+      .then((res: any) => {
+        // console.log('Logged into Facebook!', res);
+        if (res.status == 'connected') {
+          this.fbAuthDetail = res.authResponse;
+          this.getFbDetail();
+        } else {
+          if (this.loaderObj.dismiss) this.loaderObj.dismiss();
+        }
+      })
+      .catch(e => { console.log('Error logging into Facebook', e); if (this.loaderObj.dismiss) this.loaderObj.dismiss(); });
+    // }).catch(e => { console.log('Error logging out Facebook', e); this.loaderObj.dismiss(); });
   }
 
   getFbDetail() {
     this.authProvider.getFBUserDetail(this.fbAuthDetail['userID'])
       .then((res: any) => {
-        // console.info('fb api res', res);
         this.detailForm.controls['firstName'].setValue(res.name.split(' ')[0]);
         this.detailForm.controls['lastName'].setValue(res.name.split(' ')[1]);
         // this.detailForm.controls['hometown'].setValue(res.hometown ? res.hometown.name : '');
@@ -303,30 +321,15 @@ export class Registration {
         // this.userInfo['location'] = res.location ? res.location.name : '';
         this.facebookData = res;
         this.facebookData['auth'] = this.fbAuthDetail;
-        // console.info('this.facebookData', this.facebookData);
-        // if (!this.facebookData.likes) {
-        //   this.authProvider.getUserslikes(this.fbAuthDetail['userID'])
-        //     .then((likesRes: any) => {
-        //       console.log('likesRes', likesRes);
-        //     })
-        // } else {
-        //   console.log('this.facebookData', this.facebookData);
-        // }
         // this.saveProfileImageToCloudinary();
         // this.swipeTo(this.currentTab + 2);
-        this.loaderObj.dismiss();
+        if (this.loaderObj.dismiss) this.loaderObj.dismiss();
         this.createNewAccount({ email: this.email, facebook: res });
       }).catch(e => {
         console.info('fb api error', e);
-        this.loaderObj.dismiss();
+        if (this.loaderObj.dismiss) this.loaderObj.dismiss();
       });
   }
-
-  // getNextFacebookLikes(){
-  //   if(this.facebookData.likes){
-
-  //   }
-  // }
 
   saveProfileImageToCloudinary() {
     this.cloudinaryProvider.imageLocalPath = this.facebookData.picture.data.url;
@@ -350,12 +353,25 @@ export class Registration {
     }
   }
 
+  paswwordValidation() {
+    let prompt = this.alertCtrl.create({
+      title: 'Passwords must be 8 characters long',
+      buttons: [
+        {
+          text: 'Ok',
+          handler: data => { }
+        }
+      ]
+    });
+    prompt.present();
+  }
+
   logoutFacebook() {
     this.authProvider.logoutFromFB().then((response) => {
       console.info('response', response);
     });
   }
-  gotoProfile(uid) { this.navCtrl.setRoot('Profile', { uid: uid }, { animate: true, direction: 'forward' }); }
+  gotoProfile(uid) { this.navCtrl.setRoot('Intro', { uid: uid }, { animate: true, direction: 'forward' }); }
 }
 
 

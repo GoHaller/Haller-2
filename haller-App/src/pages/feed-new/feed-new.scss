@@ -2,6 +2,11 @@ page-feed-new {
     .footer{
         border-top: 2px solid color($colors, light);
         background-color: #fff;
+        &.new-post{
+            button{
+                margin: 0px;
+            }
+        }
     }
     
     .scroll-content{

@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, Events } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Events, ModalController } from 'ionic-angular';
 import { HttpClient } from '../../shared/providers/http-client';
+import { ImageFullComponent } from '../../shared/pages/image.full'
 import { Storage } from '@ionic/storage';
+import { InAppBrowser } from "@ionic-native/in-app-browser";
 
 @IonicPage()
 @Component({
@@ -16,9 +18,11 @@ export class Notifications {
   private notifications = [];
   private whichnotification: String = 'university';
   private userAvatar = '';
+  refresher: any = null;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public httpClient: HttpClient, private event: Events) {
-    this.local = new Storage('localstorage');
+  constructor(public navCtrl: NavController, public navParams: NavParams, public httpClient: HttpClient, private event: Events, storage: Storage,
+    private iab: InAppBrowser, public modalCtrl: ModalController) {
+    this.local = storage;
     this.userAvatar = httpClient.userAvatar;
     event.subscribe('notification:university', () => {
       this.whichnotification = 'university';
@@ -52,6 +56,10 @@ export class Notifications {
       .subscribe((res: any) => {
         this.userMessage = res.length > 0 ? '' : 'Nothing here yet.';
         this.notifications = res;
+        if (this.refresher) {
+          this.refresher.complete();
+          this.refresher = null;
+        }
         if (res.length > 0) {
           if (this.whichnotification == 'personal') {
             this.local.set('last-notification-showed', JSON.stringify(res[0])).then(() => {
@@ -71,11 +79,35 @@ export class Notifications {
   }
 
   gototFeedDetail(noti) {
-    this.navCtrl.push('FeedDetail', { feedId: noti.post._id, notificationId: noti._id }, { animate: true, direction: 'forward' });
+    if (!noti.university)
+      this.navCtrl.push('FeedDetail', { feedId: noti.post._id, notificationId: noti._id }, { animate: true, direction: 'forward' });
   }
 
   getDateFormate(date) {
     return this.httpClient.getDateFormate(date);
+  }
+
+  doRefresh(refresher) {
+    this.refresher = refresher;
+    this.getNotification();
+  }
+
+  checkIfPdf(url) {
+    return url.endsWith('.pdf');
+  }
+
+  openUrl(url) {
+    if (this.checkIfPdf(url))
+      this.iab.create(url, '_system');
+    else
+      this.viewFullImage(url);
+  }
+
+  viewFullImage(image) {
+    if (image) {
+      let modal = this.modalCtrl.create(ImageFullComponent, { imgeSrc: image });
+      modal.present();
+    }
   }
 
 }

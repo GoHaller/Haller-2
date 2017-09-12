@@ -1,11 +1,12 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { NavController, NavParams, Events, Tabs, AlertController } from 'ionic-angular';
+import { NavController, NavParams, Events, Tabs, AlertController, IonicPage, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { Storage } from '@ionic/storage';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Keyboard } from "@ionic-native/keyboard";
 
+@IonicPage()
 @Component({
   selector: 'page-tabs',
   templateUrl: 'tabs.html',
@@ -28,9 +29,9 @@ export class TabsPage {
   footerBottomCss = [];
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private statusBar: StatusBar,
-    private splashScreen: SplashScreen, private httpClient: HttpClient, private event: Events,
-    public alertCtrl: AlertController, private keyboard: Keyboard, private myElement: ElementRef) {
-    this.local = new Storage('localstorage');
+    private splashScreen: SplashScreen, private httpClient: HttpClient, private event: Events, private platform: Platform,
+    public alertCtrl: AlertController, private keyboard: Keyboard, private myElement: ElementRef, storage: Storage) {
+    this.local = storage;
 
     event.subscribe('notification:allrecieve', (data) => {
       let hashes = window.location.hash.split('/');
@@ -76,38 +77,27 @@ export class TabsPage {
     });
 
     keyboard.onKeyboardShow().subscribe((e) => {
-      console.log('onKeyboardShow', e);
-      let tabbarEle = document.getElementsByClassName('tabbar');
-      if (tabbarEle.length) {
-        let htmlEle = <HTMLElement>tabbarEle.item(0);
-        htmlEle.style.display = 'none';
+      if (this.platform.is('ios')) {
         let footerEle = document.getElementsByClassName('footer');
         let keyboardHeight: number = e.keyboardHeight || (e.detail && e.detail.keyboardHeight);
         if (footerEle.length) {
           for (let v = 0; v < footerEle.length; v++) {
             let footerHtml = <HTMLElement>footerEle.item(v);
-            this.footerBottomCss[v] = footerHtml.style.bottom;//new-post
-            if ((' ' + footerHtml.className + ' ').indexOf(' new-post ') > -1) {
-              footerHtml.style.bottom = keyboardHeight + 'px';
-            } else {
-              footerHtml.style.bottom = '0px';
-            }
+            // this.footerBottomCss[v] = footerHtml.style.bottom;
+            footerHtml.style.bottom = keyboardHeight + 'px';
           }
         }
       }
     })
+
     keyboard.onKeyboardHide().subscribe((e) => {
-      let tabbarEle = document.getElementsByClassName('tabbar');
-      if (tabbarEle.length) {
-        let htmlEle = <HTMLElement>tabbarEle.item(0);
-        htmlEle.style.display = '';
+      if (this.platform.is('ios')) {
         let footerEle = document.getElementsByClassName('footer');
-        // console.log('footerEle.length', footerEle.length);
         if (footerEle.length) {
           for (let v = 0; v < footerEle.length; v++) {
             let footerHtml = <HTMLElement>footerEle.item(v);
-            // console.log(htmlEle.style.height);
-            footerHtml.style.bottom = this.footerBottomCss[v];
+            // footerHtml.style.bottom = this.footerBottomCss[v];
+            footerHtml.style.bottom = '';
           }
         }
       }
@@ -145,6 +135,9 @@ export class TabsPage {
           this.tabRef.select(3);
       });
     });
+  }
+  ionViewDidEnter() {
+    this.keyboard.disableScroll(true);
   }
 
   getNotificationCount() {
@@ -191,7 +184,6 @@ export class TabsPage {
       });
       prompt.present();
     }
-
   }
 
 }

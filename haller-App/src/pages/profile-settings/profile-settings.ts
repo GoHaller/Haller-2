@@ -23,12 +23,13 @@ export class ProfileSettings {
   public notifications: Boolean = false;
   // public facebookBtnShow: Boolean = false;
   public fbAuthDetail: any;
+  private loader: any = {};
   uid: String;
   constructor(private app: App, private navCtrl: NavController, private navParams: NavParams,
     private authProvider: AuthProvider, private actionSheetCtrl: ActionSheetController,
     public profileProvider: ProfileProvider, private event: Events, public alertCtrl: AlertController,
-    public toastCtrl: ToastController, public loadingCtrl: LoadingController) {
-    this.local = new Storage('localstorage');
+    public toastCtrl: ToastController, public loadingCtrl: LoadingController, storage: Storage) {
+    this.local = storage;
     this.ionViewDidEnter();
   }
 
@@ -123,13 +124,13 @@ export class ProfileSettings {
       // this.logoutFacebook();
       this.upadteUserInfo(this.userInfo['_id'], { facebook: null });
       let alert = this.alertCtrl.create({
-        subTitle: 'Your facebook account successfully disconnected',
+        title: 'Your facebook account successfully disconnected',
         buttons: ['OK']
       });
       alert.present();
     } else {
       let alert = this.alertCtrl.create({
-        subTitle: 'You need to create an account password before unconnecting your Facebook account. Please go to your `Create Password` in the Settings to create your password.',
+        title: 'You need to create an account password before unconnecting your Facebook account. Please go to your `Create Password` in the Settings to create your password.',
         buttons: ['OK']
       });
       alert.present();
@@ -161,6 +162,26 @@ export class ProfileSettings {
     actionSheet.present();
   }
 
+  getFbLoginStatus() {
+    this.loader = this.loadingCtrl.create({
+      content: "Please wait...",
+      // duration: 3000,
+      // dismissOnPageChange: true
+    });
+    this.loader.present();
+    this.authProvider.checkFBLoginStatus().then((res: any) => {
+      if (res.status != 'connected') {
+        this.getFbLogin();
+      } else if (res.status == 'connected') {
+        this.authProvider.logoutFromFB().then((response) => {
+          this.getFbLogin();
+        }).catch(e => { console.log('Error logging out Facebook', e); if (this.loader.dismiss) this.loader.dismiss(); });
+      }
+    }).catch(error => {
+      console.info('getLoginStatus error', error);  if (this.loader.dismiss) this.loader.dismiss();
+    })
+  }
+
   getFbLogin() {
     this.authProvider.loginToFB()
       .then((res: any) => {
@@ -170,44 +191,42 @@ export class ProfileSettings {
         }
       }).catch(error => {
         console.info('Error logging into Facebook', error);
+        if (this.loader.dismiss)
+          this.loader.dismiss();
       });
   }
 
   getFbDetail() {
     this.authProvider.getFBUserDetail(this.fbAuthDetail['userID'])
       .then((res: any) => {
-        let loader = this.loadingCtrl.create({
-          content: "Please wait...",
-          // duration: 3000,
-          dismissOnPageChange: true
-        });
-        loader.present();
         this.profileProvider.updateUser(this.userInfo['_id'], { facebook: res })
-          .subscribe((res: any) => {
+          .subscribe((apiRes: any) => {
+            this.userInfo = apiRes;
             this.local.set('userInfo', JSON.stringify(this.userInfo)).then(() => {
-              this.userInfo = res;
-
-              loader.dismiss();
               let alert = this.alertCtrl.create({
-                subTitle: 'Your facebook account successfully connected',
+                title: 'Your facebook account successfully connected',
                 buttons: ['OK']
               });
               alert.present();
+              if (this.loader.dismiss)
+                this.loader.dismiss();
             });
 
           }, error => {
             console.info('updateUser error', error);
-            loader.dismiss();
             if (error._body.indexOf('Facebook account is already in use.') > -1) {
               let prompt = this.alertCtrl.create({
-                subTitle: "This facebook account is already connected with another user.",
+                title: "This facebook account is already connected with another user.",
                 buttons: ['Ok']
               });
               prompt.present();
             }
+            if (this.loader.dismiss)
+              this.loader.dismiss();
           });
       }).catch(e => {
         console.info('fb api error', e);
+        if (this.loader.dismiss) this.loader.dismiss();
       });
   }
   logoutFacebook() {

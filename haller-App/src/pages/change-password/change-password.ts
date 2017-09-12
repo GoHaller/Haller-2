@@ -18,8 +18,8 @@ export class ChangePassword {
   public userInfo: any = {};
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private formBuilder: FormBuilder,
-    public alertCtrl: AlertController, private authProvider: AuthProvider, public toastCtrl: ToastController) {
-    this.local = new Storage('localstorage');
+    public alertCtrl: AlertController, private authProvider: AuthProvider, public toastCtrl: ToastController, storage: Storage) {
+    this.local = storage;
     this.local.get('uid').then(val => {
       this.uid = val;
     });
@@ -59,45 +59,91 @@ export class ChangePassword {
   ionViewDidLoad() { }
 
   submitForm(data) {
-    this.authProvider.changePassword(this.uid, data.password, data.newPassword)
-      .subscribe((res: any) => {
-        // console.info('changePassword res', res);
-        if (res._id == this.uid) {
-          this.navCtrl.pop();
-        }
-      }, e => {
-        // console.info('changePassword error', e);
-        if (e.status = 401) {
-          let toast = this.toastCtrl.create({
-            message: 'Authention fail!',
-            duration: 3000,
-            position: 'top'
-          });
-          toast.present();
-        }
-      });
+    if (data.password.length >= 8) {
+      this.authProvider.changePassword(this.uid, data.password, data.newPassword)
+        .subscribe((res: any) => {
+          // console.info('changePassword res', res);
+          if (res._id == this.uid) {
+            // this.navCtrl.pop();
+            this.passwordChanged();
+            this.authForm.reset();
+          }
+        }, e => {
+          // console.info('changePassword error', e);
+          if (e.status = 401) {
+            if (e._body.indexOf('Password missmatch') > -1) {
+              let prompt = this.alertCtrl.create({
+                title: 'Current password does not match',
+                buttons: [{ text: 'Ok', handler: data => { } }]
+              });
+              prompt.present();
+            } else {
+              let toast = this.toastCtrl.create({
+                message: 'Authention fail!',
+                duration: 3000,
+                position: 'top'
+              });
+              toast.present();
+            }
+          }
+        });
+    } else {
+      this.paswwordValidation();
+    }
   }
 
   submitCreateForm(data) {
-    this.authProvider.createPassword(this.uid, data.password)
-      .subscribe((res: any) => {
-        // console.info('changePassword res', res);
-        if (res._id == this.uid) {
-          this.local.set('userInfo', JSON.stringify(res)).then(() => {
-            this.navCtrl.pop();
-          });
+    if (data.password.length >= 8) {
+      this.authProvider.createPassword(this.uid, data.password)
+        .subscribe((res: any) => {
+          // console.info('changePassword res', res);
+          if (res._id == this.uid) {
+            this.local.set('userInfo', JSON.stringify(res)).then(() => {
+              // this.navCtrl.pop();
+              this.passwordChanged();
+              this.createPassForm.reset();
+            });
+          }
+        }, e => {
+          // console.info('changePassword error', e);
+          if (e.status = 401) {
+            let toast = this.toastCtrl.create({
+              message: 'Authention fail!',
+              duration: 3000,
+              position: 'top'
+            });
+            toast.present();
+          }
+        });
+    } else {
+      this.paswwordValidation();
+    }
+  }
+
+  paswwordValidation() {
+    let prompt = this.alertCtrl.create({
+      title: 'Passwords must be 8 characters long',
+      buttons: [
+        {
+          text: 'Ok',
+          handler: data => { }
         }
-      }, e => {
-        // console.info('changePassword error', e);
-        if (e.status = 401) {
-          let toast = this.toastCtrl.create({
-            message: 'Authention fail!',
-            duration: 3000,
-            position: 'top'
-          });
-          toast.present();
+      ]
+    });
+    prompt.present();
+  }
+
+  passwordChanged() {
+    let prompt = this.alertCtrl.create({
+      title: 'Your password has been updated',
+      buttons: [
+        {
+          text: 'Ok',
+          handler: data => { }
         }
-      });
+      ]
+    });
+    prompt.present();
   }
 
 }

@@ -9,6 +9,9 @@ page-message {
             width: 6vh;
             border-radius: 50%;
         }
+        &.right{
+            text-align: right;
+        }
     }
     .new-msg{
         border: 1px solid rgba(0,0,0,0.2);
@@ -31,11 +34,15 @@ page-message {
             }
         }
         .msg-attachment{
-            border-top: 1px solid #e4e4e4;
-            ion-col{
-                text-align: center;
-                padding-top: 10px;
-                padding-bottom: 10px;
+            // border-top: 1px solid #e4e4e4;
+            // ion-col{
+                // text-align: center;
+                // padding: 15px 2px 5px;
+                // padding-top: 15px;
+                // padding-bottom: 10px;
+            // }
+            button{
+                padding: 0 0.4em;
             }
         }
     }

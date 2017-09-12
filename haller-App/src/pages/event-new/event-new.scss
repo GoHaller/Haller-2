@@ -31,5 +31,10 @@ page-event-new {
     }
     .footer{
         background-color: #fff;
+        &.new-post{
+            button{
+                margin: 0px;
+            }
+        }
     }
 }

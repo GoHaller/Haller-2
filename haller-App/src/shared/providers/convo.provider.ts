@@ -89,4 +89,8 @@ export class ConvoProvider {
     else
       return this.httpClient.post('/conversations/bot', msgObj).map(this.httpClient.extractData)
   }
+
+  markConversationAsRead(convoId: string) {
+    return this.httpClient.get('/conversations/' + convoId + '/markasread').map(this.httpClient.extractData)
+  }
 }

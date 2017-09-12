@@ -26,8 +26,8 @@ export class BlockedUsers {
 
   constructor(public navCtrl: NavController, public navParams: NavParams,
     public profileProvider: ProfileProvider, private convoProvider: ConvoProvider,
-    public actionSheetCtrl: ActionSheetController) {
-    this.local = new Storage('localstorage');
+    public actionSheetCtrl: ActionSheetController, storage: Storage) {
+    this.local = storage;
     this.userAvatar = convoProvider.httpClient.userAvatar;
     this.local.get('userInfo').then(val => {
       this.userInfo = JSON.parse(val);

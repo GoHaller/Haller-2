@@ -1,5 +1,5 @@
 import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
-import { PostService } from '../../services/post.services';
+import { PostService } from '../../services/post.service';
 import { ModalService } from '../../services/modal.service';
 import { Ng2PaginationModule } from 'ng2-pagination';
 import { EventJoinComponent } from "../modal/eventJoin.component";
