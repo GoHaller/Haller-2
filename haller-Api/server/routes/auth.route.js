@@ -34,6 +34,17 @@ router.route('/:userId/report')
     }
   }), authCtrl.reportProblem])
 
+router.route('/:userId/feedback')
+  .post([expressJwt({
+    secret: config.jwtSecret,
+    getToken: (req) => {
+      if (req.headers && req.headers.authorization) {
+        return req.headers.authorization.split(':')[1];
+      }
+      return null;
+    }
+  }), authCtrl.hallerFeedback])
+
 router.route('/:userId/password')
   .put([expressJwt({
     secret: config.jwtSecret,

@@ -8,6 +8,7 @@ import { ConvoProvider } from "../../shared/providers/convo.provider";
 import { ImageFullComponent } from '../../shared/pages/image.full';
 import { CloudinaryProvider } from '../../shared/providers/cloudinary.provider';
 import { InAppBrowser } from "@ionic-native/in-app-browser";
+import { Keyboard } from '@ionic-native/keyboard';
 
 /**
  * Generated class for the Message page.
@@ -44,7 +45,7 @@ export class Message {
   constructor(public modalCtrl: ModalController, public navCtrl: NavController, public navParams: NavParams,
     public convoProvider: ConvoProvider, public cloudinaryProvider: CloudinaryProvider, private event: Events,
     public loadingCtrl: LoadingController, private zone: NgZone, public alertCtrl: AlertController,
-    private iab: InAppBrowser, storage: Storage, public actionSheetCtrl: ActionSheetController) {
+    private iab: InAppBrowser, storage: Storage, public actionSheetCtrl: ActionSheetController, private keyboard: Keyboard) {
     this.conversationId = this.navParams.data.conversationId;
 
     this.recipients = this.navParams.data.recipients ? [this.navParams.data.recipients] : [];
@@ -81,6 +82,10 @@ export class Message {
         });
       }
     });
+
+    keyboard.onKeyboardShow().subscribe((e) => {
+      // this.content.scrollToBottom(0);
+    })
   }
 
   callFunction() {

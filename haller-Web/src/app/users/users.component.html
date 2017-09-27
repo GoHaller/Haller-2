@@ -7,14 +7,19 @@
                         <i class="material-icons">assignment</i>
                     </div>
                     <div class="card-content">
-                        <h4 class="card-title">User List</h4>
+                        <h4 class="card-title">User List
+                            <!-- openModal('edit-user-form')clickOnInviteCodeStatus() getInviteCodeExcelData()-->
+                            <button type="button" (click)="getInviteCodeExcelData()" class="btn btn-white btn-round pull-right">
+                                Download Invite Code Status
+                            </button>
+                        </h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
                             <div class="row">
                                 <div class="col-sm-2">
                                     <select class="selectpicker" (change)="setFilter()" name="residence" [(ngModel)]="search.residence" data-style="btn btn-info btn-round"
                                         title="All Residence" data-size="6">
-                                        <option *ngFor="let resident of residenceListForSearch" [ngValue]="resident.value"> {{resident.name}} </option>
+                                        <option *ngFor="let resident of residenceListForSearch" [ngValue]="resident.value">{{resident.name}}</option>
                                     </select>
                                 </div>
                                 <div class="col-sm-2">
@@ -56,6 +61,7 @@
                                         <th>Avg Comment</th>
                                         <th>Image/Video</th>
                                         <th>Account Type</th>
+                                        <th>Email</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -73,6 +79,7 @@
                                         <td>{{user.commentavg}}</td>
                                         <td>{{user.covercount}}</td>
                                         <td>{{getAccountType(user.isRA,user.role)}}</td>
+                                        <td>{{user.email}}</td>
                                         <td>
                                             <div class="row">
                                                 <div class="col-sm-6"><button type="button" rel="tooltip" (click)="blockUser(user)" class="btn block btn-sm"
@@ -115,6 +122,13 @@
         <div class="modal-body col-md-5 col-md-offset-3">
             <div class="card card-profile">
                 <form #frmUser="ngForm" novalidate (ngSubmit)="save(frmUser.value, frmUser.valid,'new-feed-form')">
+                    <div class="edit-user-action">
+                        <button style="float: left" type="button" *ngIf="editUser.role=='student' && !isUserFormEditable" class="btn btn-info btn-fill btn-wd"
+                            (click)="makeUserFormEditable()">Edit</button>
+                        <button style="float: left" type="button" *ngIf="editUser.role=='student' && isUserFormEditable" class="btn btn-info btn-fill btn-wd"
+                            (click)="updateUser()" [disabled]="!frmUser.valid">Save</button>
+                        <button style="float: right" class="btn btn-default" type="button" (click)="closeModal('edit-user-form');">Close</button>
+                    </div>
                     <div class="card-avatar" style="background-color: #fff">
                         <a>
                             <i *ngIf="!editUser.currentProfile || !editUser.currentProfile.secure_url" class="material-icons" style="font-size: 116px;padding: 3px 0px;">person</i>
@@ -122,55 +136,93 @@
                         </a>
                     </div>
                     <div class="card-content">
-                        <h4 class="card-title">{{editUser.firstName +' ' +editUser.lastName}}<span *ngIf="editUser.role=='student'">&nbsp;from&nbsp;{{editUser.hometown || '_______'}}</span></h4>
-                        <div class="col-lg-12" style="text-align:left">
-                            <div class="form-group col-sm-6">
-                                <div class="checkbox">
-                                    <label>Class of {{editUser.graduationYear}}</label>
-                                </div>
-                            </div>
-                            <div class="form-group col-sm-6">
-                                <div class="checkbox">
-                                    <label>Major: {{editUser.major}}</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-12" style="text-align:left">
-                            <div class="col-sm-4">
-                                <select class="selectpicker" name="residence" [(ngModel)]="residence" data-style="btn btn-info btn-round" title="Residence"
-                                    data-size="6">
-                                    <option *ngFor="let resident of residenceListForUser" [ngValue]="resident.value">
-                                            {{resident.name}}
-                                    </option>
+                        <h4 class="card-title">
+                            {{editUser.firstName +' ' +editUser.lastName}}
+                            <br/>{{editUser.email}}
+                            <span *ngIf="!isUserFormEditable"><br/>{{editUser.residence}}</span></h4>
+                        <div class="col-lg-12" *ngIf="isUserFormEditable">
+                            <div class="col-md-4 col-md-offset-4">
+                                <select id="edit-residence" class="selectpicker" name="edit-residence" [(ngModel)]="editUser.residence" data-style="btn btn-info btn-round"
+                                    title="Residence" data-size="6">
+                                    <option *ngFor="let resident of residenceListForUser" [ngValue]="resident.value">{{resident.name}}</option>
                                 </select>
                             </div>
-                            <div class="col-sm-2"></div>
-                            <div class="col-sm-6">
-                                <div class="checkbox" *ngIf="editUser.role=='student'">
-                                    <label>
-                                        Is RA&nbsp;&nbsp;<input type="checkbox" name="optionsCheckboxes" [(ngModel)]="editUser.isRA">
-                                        &nbsp;&nbsp;&nbsp;Role: {{editUser.isRA?'RA':'Student'}}
-                                    </label>
-                                </div>
-                                <div class="checkbox" *ngIf="editUser.role!='student'">
-                                    Role: {{editUser.role}}
+                        </div>
+                        <!-- <span *ngIf="editUser.role=='student'">&nbsp;from&nbsp;{{editUser.hometown || '_______'}}</span></h4> -->
+                        <div class="col-lg-12" style="text-align:left">
+                            <div class="form-group col-sm-6">
+                                <label>From <span *ngIf="!isUserFormEditable">{{editUser.hometown}}</span></label>
+                                <input type="text" *ngIf="isUserFormEditable" name="hometown" placeholder="Home town" class="form-control" [(ngModel)]="editUser.hometown">
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label>Class of <span *ngIf="!isUserFormEditable">{{editUser.graduationYear}}</span></label>
+                                <div *ngIf="isUserFormEditable">
+                                    <select id="edit-graduation-year" class="selectpicker" name="edit-graduation-year" [(ngModel)]="editUser.graduationYear"
+                                        data-style="btn btn-info btn-round" title="Class of" data-size="6">
+                                        <option *ngFor="let yr of years" [ngValue]="yr">{{yr}}</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                         <div class="col-lg-12" style="text-align:left">
-                            <div>
+                            <div class="form-group col-sm-6">
+                                <label>Major: <span *ngIf="!isUserFormEditable">{{editUser.major}}</span></label>
+                                <input type="text" name="major" *ngIf="isUserFormEditable" placeholder="Major" class="form-control" [(ngModel)]="editUser.major">
+                            </div>
+                            <div class="form-group col-sm-6">
                                 <label>Organizations</label>
                             </div>
                         </div>
-                        <div class="col-lg-12" style="text-align:left">
-                            <div *ngFor="let org of editUser.organizations"><label>{{org.name}}</label></div>
-                        </div>
-                        <div class="text-center">
-                            <button type="button" *ngIf="editUser.role=='student'" class="btn btn-info btn-fill btn-wd" (click)="updateUser()" [disabled]="!frmUser.valid">Edit</button>
-                            <button class="btn btn-default" type="button" (click)="closeModal('edit-user-form');">Close</button>
+                        <div class="form-group col-lg-12" style="text-align:left">
+                            <div class="checkbox col-sm-6">
+                                <label style="width:100px">Role: {{editUser.isRA?'RA':'Student'}}</label>
+                                <label *ngIf="isUserFormEditable">
+                                    Set RA: <input type="checkbox" name="isRACheckboxes" [(ngModel)]="editUser.isRA">
+                                </label>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="col-lg-12" style="text-align:left">
+                                    <div *ngFor="let org of editUser.organizations"><label>{{org.name}}</label></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-background"></div>
+</modal>
+<!--Edit User modal end -->
+
+<!--Edit User modal start -->
+<modal id="invite-code-status">
+    <div class="modal">
+        <div class="modal-body col-md-6 col-md-offset-3">
+            <div class="card card-profile">
+                <div class="card-content">
+                    <h4 class="card-title">Invite Codes</h4>
+                    <div class="col-sm-12">&nbsp;</div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th width="10%" style="padding:5px" colspan="1">Count</th>
+                                <th width="20%" style="padding:5px" colspan="4">Code</th>
+                                <th width="70%" style="padding:5px" colspan="4">Users</th>
+                            </tr>
+                        </thead>
+                        <tbody style="text-align:left">
+                            <tr *ngFor="let code of invitedCodeDetails.status">
+                                <td style="padding:5px" colspan="1">{{code.count}}</td>
+                                <td style="padding:5px" colspan="4">{{code._id}}</td>
+                                <td style="padding:5px" colspan="4"><span *ngFor="let user of code.users">{{user.firstName+ ' '+ user.lastName}},&nbsp;</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="text-center">
+                        <button class="btn btn-default btn-sm" type="button" (click)="closeModal('invite-code-status');">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

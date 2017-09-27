@@ -42,7 +42,9 @@
                 "../src/assets/js/core/jquery.perfect-scrollbar.min.js",
                 "../src/assets/js/plugins/jquery-jvectormap.js",
                 "../src/assets/js/plugins/sweetalert2.min.js",
-                "../src/assets/js/core/jquery.validate.min.js"
+                "../src/assets/js/core/jquery.validate.min.js",
+                "../node_modules/file-saver/FileSaver.js",
+                "../node_modules/xlsx/xlsx.js"
             ],
             "environmentSource": "environments/environment.ts",
             "environments": {

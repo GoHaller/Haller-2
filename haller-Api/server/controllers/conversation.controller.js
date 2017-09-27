@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
+import config from '../../config/env';
 import Conversation from '../models/conversation.model';
 import FCMSender from '../helpers/FCMSender';
 import User from '../models/user.model';
@@ -10,7 +11,7 @@ import devBot from '../controllers/bot.controller';
 import emailVerification from '../cronJobs/emailVerification';
 
 const activityType = 19;
-
+// console.log('config.botEmail', config.botEmail);
 function processConversationList(conversations, userId, callback) {
   for (var i = 0; i < conversations.length; i++) {
     var conversation = conversations[i];
@@ -142,6 +143,97 @@ function list(req, res, next) {
     })
     .error(e => { console.info('conversation controller list error', e); next(e) })
     .catch((e) => { console.info('conversation controller list catch', e); next(e) });
+}
+
+function getConversation(req, res, next) {
+  const { skip = 0, limit = 10, participant = null } = req.query;
+  if (participant && participant.toString().match(/^[0-9a-fA-F]{24}$/).length > 0) {
+    Conversation.getOneConvoByParticipent(devBot._id, participant, parseInt(skip), parseInt(limit))
+      .exec((err, convo) => {
+        if (err) {
+          console.info('conversation controller getConversationWithBot error1', err);
+          return next(err);
+        }
+        processConversation(convo, req.params.userId, function (processedConvo) {
+          res.json(processedConvo);
+        });
+      })
+  } else {
+    const err = new APIError('Invalid participant!', httpStatus.INTERNAL_SERVER_ERROR);
+    return Promise.reject(err);
+  }
+}
+
+function getConversationWithBot(req, res, next) {
+  const { skip = 0, limit = 10 } = req.query;
+  User.findOne({ email: config.botEmail })
+    .exec((err, devBot) => {
+      if (err) {
+        console.info('conversation controller getConversationWithBot error', err);
+        return next(err);
+      }
+      Conversation.getOneConvoByParticipent(devBot._id, req.params.userId, parseInt(skip), parseInt(limit))
+        .exec((err1, convo) => {
+          if (err1) {
+            console.info('conversation controller getConversationWithBot error1', err1);
+            return next(err1);
+          }
+          res.json(convo)
+        })
+      //getOneConvoByParticipent(res, devBot._id, req.params.userId, parseInt(skip), parseInt(limit))
+      // .then(convo => {
+      //   // console.log('convo', convo)
+      //   res.json(convo)
+      // }).catch(err => {
+      //   console.info('conversation controller getConversationWithBot error1', err);
+      //   return next(err);
+      // })
+      // .exec((err1, convo) => {
+      //   if (err1) {
+      //     console.info('conversation controller getConversationWithBot error1', err1);
+      //     return next(err1);
+      //   }
+      //   res.json(convo)
+      // })
+    })
+}
+
+function getOneConvoByParticipent(res, userId1, userId2, msgSkip, msgLimit) {
+  // console.log('msgSkip', msgSkip);
+  // console.log('msgLimit', msgLimit);
+
+  // return new Promise((resolve, reject) => {
+  Conversation.aggregate([{ $match: { $and: [{ participants: userId1 }, { participants: userId2 }] } },
+  { $group: { count: { $sum: 1 }, convoCount: { $sum: 1 }, _id: null } }], (error, countObj) => {
+    console.log('error', error);
+    if (error) {
+      console.log('conversation controller getConversationWithBot error1', error);
+      return next(error);
+    }
+    else {
+      // console.log('countObj', countObj);
+      let c = countObj.count || 0;
+      let sliceBtm = 0;
+      if (msgSkip > c) {
+        sliceBtm = msgSkip;
+      } else {
+        let sliceBtm = (msgSkip + msgLimit) > 0 ? 0 : ((msgSkip + msgLimit) * -1);
+      }
+      // console.log('sliceBtm', sliceBtm);
+      Conversation.findOne({ $and: [{ participants: userId1 }, { participants: userId2 }] },
+        { createdBy: 1, createdAt: 1, participants: 1, messages: { $slice: [sliceBtm, msgLimit] } })
+        .exec((error1, result1) => {
+          if (error1) {
+            console.info('conversation controller getConversationWithBot error1', error1);
+            return next(error1);
+          }
+          else {
+            res.json(result1);
+          }
+        })
+    }
+  })
+  // })
 }
 
 
@@ -400,6 +492,7 @@ function askToBot(req, res, next) {
     Conversation.get(req.params.conversationId, null).then((convo) => {
       const savedConvo = convo;
       if (req.body.message) {
+        if (!req.body.message.createdAt) req.body.message.createdAt = new Date();
         savedConvo.messages.push(req.body.message);
         savedConvo.updatedAt = new Date();
       }
@@ -712,4 +805,83 @@ function createNotification(actObj) {
     console.info('Post.get error', e);
   })
 }
-export default { get, list, create, update, updateMessage, remove, removeMessage, leaveConversation, createBotConversation, askToBot, markConversationAsRead, replyAsBot };
+
+function botMassReply(req, res, next) {
+  if (!req.body.allStudent || req.body.allStudent || req.body.residence) {
+    var q = { role: 'student' };
+    if (req.body.residence) {
+      q.residence = req.body.residence;
+    }
+    User.find(q, { _id: 1 }).exec((err, result) => {
+      let messagesObj = {
+        createdBy: req.body.createdBy,
+        createdAt: new Date(),
+        botBody: req.body.body
+      }
+      res.json({ success: true, user: result });
+      var email = 'dev.bot@ku.edu';// + domain;, facebook: 1
+      User.findOne({ email: email, role: 'bot' }, { _id: 1 })
+        .then(bot => {
+          sendBotMessagesToUsersForLoop(bot, result, messagesObj, 0);
+        });
+    })
+  } else {
+    res.json({ success: false });
+  }
+}
+
+function sendBotMessagesToUsersForLoop(bot, users, msgObj, index) {
+  var convoPopulatePath = [{ path: 'createdBy', model: 'User' }, { path: 'messages.createdBy', model: 'User', },
+  { path: 'messages.recipient', model: 'User', }, { path: 'participants', model: 'User' }];
+  msgObj['recipient'] = users[index]._id;
+  Conversation.findOne({ $and: [{ participants: users[index]._id }, { participants: bot._id }] })
+    .exec((err, savedConvo) => {
+      if (savedConvo && savedConvo._id) {
+        savedConvo.messages.push(msgObj);
+        savedConvo.updatedAt = new Date();
+        savedConvo.save().then((sConvo) => {
+          sConvo.populate(convoPopulatePath, (err, doc) => {
+            if (err) { return next(err); } else if (doc) {
+              doc.participants.forEach((participant) => {
+                if (participant.email == 'dev.bot@ku.edu')
+                  msgObj.createdBy = participant._id;
+              });
+              index++;
+              if (users[index])
+                sendBotMessagesToUsersForLoop(bot, users, msgObj, index);
+              FCMSender.sendMsgNotification(msgObj, doc);
+            }
+          });
+        })
+      } else {
+        var convoObj = {
+          messages: [msgObj],
+          createdAt: new Date(),
+          createdBy: bot._id,
+          participants: [bot._id, users[index]._id]
+        }
+        const convo = new Conversation(_.extend(convoObj, { _id: mongoose.Types.ObjectId() }));
+        convo.save().then((sConvo) => {
+          sConvo.populate(convoPopulatePath, (err, doc) => {
+            if (err) { return console.log('sendBotMessagesToUsers', err); }
+            else if (doc) {
+              doc.participants.forEach((participant) => {
+                if (participant.email == 'dev.bot@ku.edu')
+                  msgObj.createdBy = participant._id;
+              });
+              index++;
+              if (users[index])
+                sendBotMessagesToUsersForLoop(bot, users, msgObj, index);
+              FCMSender.sendMsgNotification(msgObj, doc);
+            }
+          });
+        })
+      }
+    })
+}
+
+export default {
+  get, list, create, update, updateMessage, remove, removeMessage, leaveConversation,
+  createBotConversation, askToBot, markConversationAsRead, replyAsBot, getConversation, getConversationWithBot,
+  botMassReply
+};

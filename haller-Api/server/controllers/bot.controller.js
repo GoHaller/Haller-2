@@ -37,29 +37,29 @@ function sendText(accessToken, conversationId, message, callback) {
 }
 
 function createBot(req, res, next) {
-  const user = new User({
-    _id: mongoose.Types.ObjectId(), //eslint-disable-line
-    email: 'apiaisupport@haller.com',
-    password: req.body.token ? bcrypt.hashSync(req.body.token, 10) : '',
-    status: {
-      online: true,
-      lastOnline: new Date(),
-      currentStatus: 'online',
-    },
-    isBot: true,
-    botData: {
-      description: req.body.description,
-      accessToken: req.body.token
-    },
-    emailVerified: true
-  });
-  user.save().then((sBot) => {
-    return res.json(sBot);
-  }).catch((err) => {
-    console.log('bot.create error', err);
-    const error = new APIError('Could not create Bot!', httpStatus.NOT_FOUND);
-    return next(error);
-  });
+  // const user = new User({
+  //   _id: mongoose.Types.ObjectId(), //eslint-disable-line
+  //   email: 'apiaisupport@haller.com',
+  //   password: req.body.token ? bcrypt.hashSync(req.body.token, 10) : '',
+  //   status: {
+  //     online: true,
+  //     lastOnline: new Date(),
+  //     currentStatus: 'online',
+  //   },
+  //   isBot: true,
+  //   botData: {
+  //     description: req.body.description,
+  //     accessToken: req.body.token
+  //   },
+  //   emailVerified: true
+  // });
+  // user.save().then((sBot) => {
+  //   return res.json(sBot);
+  // }).catch((err) => {
+  //   console.log('bot.create error', err);
+  //   const error = new APIError('Could not create Bot!', httpStatus.NOT_FOUND);
+  //   return next(error);
+  // });
 }
 
 function list(req, res, next) {

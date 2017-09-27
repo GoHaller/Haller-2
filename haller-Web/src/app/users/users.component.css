@@ -1,3 +1,19 @@
 .bootstrap-select{
     margin: 0px;
 }
+.form-group{
+    margin-top: 0px;
+}
+
+.edit-user-action{
+    margin: 50px 25px 0px;
+    position: absolute;
+    width: 92.3%;
+}
+
+#edit-user-form .modal-body{
+    margin-top:20px;
+}
+#edit-user-form .bootstrap-select{
+    margin-top: 0px !important;
+}

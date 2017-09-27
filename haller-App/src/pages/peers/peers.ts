@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform, Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ViewController, ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 
 import { ProfileProvider } from "../../shared/providers/profile.provider";
@@ -30,7 +30,8 @@ export class Peers {
   public infiniteScroll = null;
   shouldEnableInfinite: boolean = true;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public profileProvider: ProfileProvider, private viewCtrl: ViewController, storage: Storage) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public profileProvider: ProfileProvider,
+    private viewCtrl: ViewController, storage: Storage, private modalCtrl: ModalController) {
     this.local = storage;
     this.userAvatar = profileProvider.httpClient.userAvatar;
     // this.chooseUser = this.navParams.get('resolve') ? true : false;
@@ -43,9 +44,21 @@ export class Peers {
     });
   }
 
-  ionViewDidLoad() {}
-  ionViewDidLeave() {}
-  ionViewWillEnter() {}
+  ionViewDidLoad() {
+    this.local.get('intro').then((val) => {
+      let intro = val ? JSON.parse(val) : null;
+      if (!intro || intro.indexOf(4) == -1) {
+        let modal = this.modalCtrl.create('Intro', { intro: 4 });
+        modal.present();
+        if (!intro) intro = [4];
+        else intro.push(4);
+        this.local.set('intro', JSON.stringify(intro));
+      }
+    });
+  }
+
+  ionViewDidLeave() { }
+  ionViewWillEnter() { }
 
   goBack() {
     this.navCtrl.pop();
@@ -91,7 +104,7 @@ export class Peers {
         }
         if (this.infiniteScroll) {
           this.infiniteScroll.complete();
-          if (res.length == 0){
+          if (res.length == 0) {
             this.shouldEnableInfinite = false;
             this.infiniteScroll.enable(false);
           }

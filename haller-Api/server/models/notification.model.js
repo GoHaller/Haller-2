@@ -26,6 +26,10 @@ const NotificationSchema = new mongoose.Schema({
       ref: 'Library',
     }
   },
+  residence: {
+    type: String,
+    required: false
+  },
   objectId: {
     type: String,
   },

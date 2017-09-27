@@ -16,34 +16,61 @@
                                     <div class="col-sm-4">
                                         <div class="checkbox">
                                             <label>
-                                                Is Custom:&nbsp;&nbsp;<input type="checkbox" name="optionsCheckboxes" [(ngModel)]="isCustomNotification">
+                                                Is Custom:&nbsp;&nbsp;<input (change)="changeCustomNotification()" type="checkbox" name="isCustomNotification" [(ngModel)]="isCustomNotification">
                                             </label>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="row" *ngIf="isCustomNotification">
+                                    <div class="col-sm-4">
+                                        <select id="select-resicense" class="selectpicker" name="recipent" [(ngModel)]="selectedResidense" data-style="select-with-transition"
+                                            title="All Residence" data-size="6">
+                                            <option *ngFor="let residence of residenceListForSearch" [ngValue]="residence.value">
+                                                    {{residence.name}}
+                                            </option>
+                                        </select>
                                     </div>
                                     <div class="col-sm-4">
                                         <div class="checkbox">
                                             <label>
-                                                To All student:&nbsp;&nbsp;<input type="checkbox" name="optionsCheckboxes" [(ngModel)]="toAllstudent">
+                                                To All student:&nbsp;&nbsp;<input type="checkbox" name="toAllstudent" [(ngModel)]="toAllstudent">
                                             </label>
                                         </div>
                                     </div>
                                     <div class="col-sm-4">
-                                        <select class="selectpicker" [disabled]="toAllstudent" name="recipent" [(ngModel)]="selectedUserList" multiple="multiple"
+                                        <div>
+                                            <input type="text" name="select-user" [disabled]="toAllstudent" placeholder="Search User" class="form-control" [(ngModel)]="searchText">
+                                        </div>
+                                        <div class="noti-user-selection">
+                                            <div *ngFor="let user of usersForNotifications | peersearch:['firstName','lastName',searchText, selectedResidense, selectedUserList]"
+                                                class="noti-user-selection-list" (click)="selectUserForNotification(user)">
+                                                {{user.firstName + ' ' + user.lastName}}
+                                            </div>
+                                        </div>
+                                        <!-- <select class="selectpicker" [disabled]="toAllstudent" name="recipent" [(ngModel)]="selectedUserList" multiple="multiple"
                                             data-style="btn btn-info btn-round" title="Recipent" data-size="6">
                                             <option *ngFor="let user of usersForNotifications" [ngValue]="user._id">
                                                     {{user.firstName + ' ' + user.lastName}}
                                             </option>
-                                        </select>
+                                        </select> -->
+                                    </div>
+                                </div>
+                                <div class="row" *ngIf="isCustomNotification">
+                                    <div class="col-sm-12">
+                                        <span *ngFor="let user of selectedUserList; let i=index" class="noti-user-selected-list">
+                                            {{user.firstName + ' ' + user.lastName}}
+                                            <span (click)="removeSelectedUser(i)"><i class="material-icons noti-selected-user-remove">close</i></span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                             <div *ngIf="selectOneRecipient" class="text-center" style="color:red">
                                 Sorry sir, but you haven't selected any recipient.
                             </div>
-                            <div class="form-group label-floating">
+                            <div class="label-floating">
                                 <textarea type="text" class="form-control" placeholder="title...." name="title" [(ngModel)]="notificationModal.title" #title="ngModel"></textarea>
                             </div>
-                            <div class="form-group label-floating">
+                            <div class="label-floating">
                                 <textarea type="text" class="form-control" placeholder="Notification...." name="message" [(ngModel)]="notificationModal.message"
                                     #message="ngModel" rows="5"></textarea>
                             </div>
@@ -91,6 +118,18 @@
                             <img *ngIf="checkFileIfImageToDisplay(displayNotification.body.image.secure_url)" [src]="displayNotification.body.image.secure_url">
                             <a *ngIf="!checkFileIfImageToDisplay(displayNotification.body.image.secure_url)" [href]="displayNotification.body.image.secure_url"
                                 target="_blank">Open pdf</a>
+                        </div>
+                        <div *ngIf="displayNotification.type == 21">
+                            <div *ngIf="displayNotification.recipients && displayNotification.recipients.length > 0">
+                                <b>Recipient: </b>
+                                <span *ngFor="let user of displayNotification.recipients">{{user.user.firstName+' '+user.user.lastName+', '}}</span>
+                            </div>
+                            <div *ngIf="(!displayNotification.recipients || displayNotification.recipients.length == 0) && displayNotification.residence">
+                                <b>Recipient: </b>{{displayNotification.residence}}
+                            </div>
+                            <div *ngIf="(!displayNotification.recipients || displayNotification.recipients.length == 0) && !displayNotification.residence">
+                                <b>Recipient: </b>All Students
+                            </div>
                         </div>
                         <div class="text-center">
                             <button class="btn btn-default" (click)="closeModal('display-notification');">Close</button>

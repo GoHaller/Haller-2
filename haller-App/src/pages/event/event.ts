@@ -48,6 +48,16 @@ export class EventPage {
         this.getEvents();
       });
     });
+    this.local.get('intro').then((val) => {
+      let intro = val ? JSON.parse(val) : null;
+      if (!intro || intro.indexOf(2) == -1) {
+        let modal = this.modalCtrl.create('Intro', { intro: 2 });
+        modal.present();
+        if (!intro) intro = [2];
+        else intro.push(2);
+        this.local.set('intro', JSON.stringify(intro));
+      }
+    });
   }
 
   viewFullImage(image) {

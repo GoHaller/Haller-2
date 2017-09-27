@@ -31,12 +31,12 @@ export class NotificationModalComponent implements OnInit {
         this.element.appendTo('body');
 
         // close modal on background click
-        this.element.on('click', function (e: any) {
-            var target = $(e.target);
-            if (!target.closest('.modal-body').length) {
-                modal.close();
-            }
-        });
+        // this.element.on('click', function (e: any) {
+        //     var target = $(e.target);
+        //     if (!target.closest('.modal-body').length) {
+        //         modal.close();
+        //     }
+        // });
 
         // add self (this modal instance) to the modal service so it's accessible from controllers
         this.modalService.add(this);

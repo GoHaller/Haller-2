@@ -3,6 +3,8 @@ import { IonicPage, NavController, NavParams, Content, LoadingController } from 
 import { ConvoProvider } from "../../shared/providers/convo.provider";
 import { Storage } from '@ionic/storage';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
+import { Keyboard } from '@ionic-native/keyboard';
+
 
 /**
  * Generated class for the ChatBot page.
@@ -23,23 +25,30 @@ export class ChatBot {
   private local: Storage;
   question: string = '';
   conversation: any = [];
-  public userInfo: Object = {};
+  public userInfo: any = { _id: '' };
   public botInfo: Object = {};
   public conversationId: string = '';
   messages: any = [];
-
+  skip = 0;
+  limit = 20;
+  enableInfiniteScroll: Boolean = true;
 
   //, private googleMaps: GoogleMaps
   // @ViewChild('mapCanvas') mapElement: ElementRef;
   @ViewChild(Content) content: Content;
   constructor(public navCtrl: NavController, private elementRef: ElementRef, public navParams: NavParams,
-    private convoProvider: ConvoProvider, private iab: InAppBrowser, private loadingCtrl: LoadingController, storage: Storage) {
+    public convoProvider: ConvoProvider, private iab: InAppBrowser, private loadingCtrl: LoadingController, storage: Storage,
+    private keyboard: Keyboard) {
     this.local = storage;
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
       // console.log('this.userInfo', this.userInfo);
-      this.getBotUser();
+      // this.getBotUser();
+      this.getBotConversation();
     });
+    keyboard.onKeyboardShow().subscribe((e) => {
+      this.content.scrollToBottom(0);
+    })
   }
 
   ionViewDidLoad() {
@@ -49,6 +58,55 @@ export class ChatBot {
   callFunction() {
     this.content.scrollToBottom(0);
     return '';
+  }
+  doInfinite(infiniteScroll) {
+    this.skip += this.limit;
+    this.getBotConversation();
+    setTimeout(() => {
+      console.log('Async operation has ended');
+      infiniteScroll.complete();
+    }, 500);
+  }
+
+  getBotConversation() {
+    let loader = this.loadingCtrl.create({
+      content: "Please wait...",
+      // duration: 3000,
+      dismissOnPageChange: true
+    });
+    loader.present();
+    this.convoProvider.getConversationWithChatBot(this.userInfo['_id'], this.skip, this.limit)
+      .subscribe((res: any) => {
+        if (res._id) {
+          if (res._id == this.conversationId) {
+            let cId = this.conversation.messages.length - 1;
+            if (res.messages.length > 0)
+              this.conversation.messages = res.messages.concat(this.conversation.messages);
+            else this.enableInfiniteScroll = false;
+            this.parseConversation().then(() => {
+              setTimeout(() => {
+                cId = this.conversation.messages.length - cId;
+                let ele = document.getElementById('msg-' + cId);
+                if (ele) {
+                  this.content.scrollTo(0, ele.offsetTop, 0);
+                }
+              }, 500)
+            })
+          } else {
+            this.conversation = res;
+            this.parseConversation();
+            setTimeout(() => {
+              this.content.scrollToBottom(0);
+            }, 500);
+          }
+          this.conversationId = this.conversation['_id'];
+
+        }
+      }, (error: any) => {
+        console.info('usres error', error);
+      }, () => {
+        loader.dismiss();
+      })
   }
 
   getBotUser() {
@@ -117,6 +175,7 @@ export class ChatBot {
       }
       if (this.conversationId)
         this.conversation.messages.push(messageObj);
+      this.question = '';
       this.convoProvider.sendQuestionToBot(this.conversationId, convoObj)
         .subscribe((res: any) => {
           this.question = '';
@@ -131,6 +190,12 @@ export class ChatBot {
         })
     }
   }
+
+  onBlur(e) {
+    // e.target.focus();
+  }
+
+  onfocus() { }
 
   parseResponse(res) {
     let botConvo = [];
@@ -178,18 +243,24 @@ export class ChatBot {
     let links = exp.exec(body);
     do {
       links = exp.exec(body);
-      if (links && links[0]) {
-        let urls = links[0].split(' ');
-        urls.forEach(url => {
-          if (url.trim()) {
-            let bs = body.split(url);
-            botConvo.push({ id: id, body: bs[0] });
-            body = bs[1].trim();
-            botConvo.push({ id: id, link: url, linkText: url });
-          }
-        });
-      } else {
-        botConvo.push({ id: id, body: body });
+      try {
+        if (links && links[0]) {
+          let urls = links[0].split(' ');
+          urls.forEach(url => {
+            if (url && url.trim() && exp.test(url.trim())) {
+              let bs = body.split(url);
+              botConvo.push({ id: id, body: bs[0] });
+              body = bs[1].trim();
+              botConvo.push({ id: id, link: url, linkText: url });
+            }
+          });
+        } else {
+          botConvo.push({ id: id, body: body });
+        }
+      } catch (e) {
+        console.log('e', e);
+        // No content response..
+        links = null;
       }
     } while (links);
   }
@@ -250,11 +321,16 @@ export class ChatBot {
   }
 
   parseConversation() {
-    this.conversation.messages.forEach(msg => {
-      if (msg.botBody) {
-        msg.botBody1 = this.parseResponse(msg.botBody);
-      }
-    });
+    return new Promise((resolve, reject) => {
+      this.conversation.messages.forEach(msg => {
+        if (msg.botBody) {
+          msg.botBody1 = this.parseResponse(msg.botBody);
+        }
+        if (this.conversation.messages.indexOf(msg) == (this.conversation.messages.length - 1)) {
+          resolve();
+        }
+      });
+    })
   }
 
   openMap(location) {

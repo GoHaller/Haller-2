@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NotificationComponent } from './notification.component';
+import { NotificationComponent, PeerFilterPipe } from './notification.component';
 import { NotificationRoutes } from "./notification.routing";
 import { RouterModule } from "@angular/router";
 import { FormsModule } from '@angular/forms';
@@ -17,7 +17,7 @@ import { Ng2PaginationModule } from 'ng2-pagination';
         RouterModule.forChild(NotificationRoutes),
         Ng2PaginationModule
     ],
-    declarations: [NotificationComponent, NotificationModalComponent],
+    declarations: [NotificationComponent, NotificationModalComponent, PeerFilterPipe],
     providers: [PostService, NotificationService, ModalService]
 })
 export class NotificationModule { }

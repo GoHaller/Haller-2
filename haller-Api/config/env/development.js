@@ -10,6 +10,25 @@ export default {
     key: 'key-123e941659eb0511afc01ddf7b60df3a',
     domain: 'mg.gohaller.com'
   },
+  botEmail: 'dev.bot@ku.edu',
   websiteUrl: 'localhost:4200',
-  inviteCode: 'gohallerku'
+  inviteCode: 'gohallerku',
+  baCodes: ['ricril',
+    'mclbri',
+    'pieisa',
+    'fiocla',
+    'gunemm',
+    'staemm',
+    'wolmck',
+    'osthea',
+    'stolau',
+    'erioli',
+    'mohhai',
+    'asthai',
+    'linnat',
+    'heshop',
+    'pummay',
+    'kenchr',
+    'peaeme',
+    'corgre']
 };

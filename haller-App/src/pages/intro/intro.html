@@ -1,5 +1,5 @@
-<ion-content center text-center>
-  <div class="reg-div">
+<ion-content center text-center (click)="goBack()">
+  <!-- <div class="reg-div">
     <ion-slides pager="true">
       <ion-slide padding>
         <ion-icon name="list-box-outline"></ion-icon>
@@ -35,5 +35,25 @@
         </div>
       </ion-slide>
     </ion-slides>
+  </div> -->
+  <div class="haller-tour feed-intro" [ngClass]="{'show-intro':showFeedIntroClass}" *ngIf="showFeedIntro">
+    <h1 text-center class="title">News Feed</h1>
+    <h3 text-center class="description">Trying to find a lost item, get notes for class, or sell your textbooks?</h3>
+    <h3 text-center class="description">Post about it here and wait for other students to get back to you!</h3>
+  </div>
+  <div class="haller-tour event-intro" [ngClass]="{'show-intro':showEventIntroClass}" *ngIf="showEventIntro">
+    <h1 text-center class="title">Event Feed</h1>
+    <h3 text-center class="description">Want to get involved on campus or find other students to do something with?</h3>
+    <h3 text-center class="description">Easily set up or find things to do with people living around you here!</h3>
+  </div>
+  <div class="haller-tour message-intro" [ngClass]="{'show-intro':showMsgIntroClass}" *ngIf="showMsgIntro">
+    <h1 text-center class="title">Messaging</h1>
+    <h3 text-center class="description">Don’t get frustrated looking for university related information, ask AI Jaybird and she’ll get you the answer right away!</h3>
+    <h3 text-center class="description">You can also contact people living around you. Private message one on one or create a group!</h3>
+  </div>
+  <div class="haller-tour peer-intro" [ngClass]="{'show-intro':showPeerIntroClass}" *ngIf="showPeerIntro">
+    <h1 text-center class="title">Peers List</h1>
+    <h3 text-center class="description">Look for people that might have similar interests or come from the same hometown as you!</h3>
+    <h3 text-center class="description">You can search the peers list based off someone’s name, interests, hometown, or major!</h3>
   </div>
 </ion-content>

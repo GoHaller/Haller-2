@@ -8,12 +8,12 @@ import { Events } from "ionic-angular";
 export class HttpClient {
   private local: Storage;
   public activeToken: String;
-  // private ApiBaseUrl = 'http://10.0.0.11:4040/api';
+  // private ApiBaseUrl = 'http://10.0.0.24:4040/api';
   // private ApiBaseUrl = 'http://192.168.0.104:4040/api';
   private ApiBaseUrl = 'https://haller-api-v2.herokuapp.com/api';//stage
   // private ApiBaseUrl = 'https://haller-api-v2-main.herokuapp.com/api';//prod
-  //private ApiBaseUrl = 'https://haller-api-app-stage.herokuapp.com/api';
-  //private ApiBaseUrl = 'https://haller-app-api.herokuapp.com/api';
+  // private ApiBaseUrl = 'https://haller-api-app-stage.herokuapp.com/api';//prod - temp
+  // private ApiBaseUrl = 'https://haller-app-api.herokuapp.com/api';//prod
   public emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   public kuEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@ku.edu$/;
   public userAvatar = 'assets/img/default-user.png';

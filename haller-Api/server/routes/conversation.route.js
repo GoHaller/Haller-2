@@ -8,7 +8,11 @@ import config from '../../config/env';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
-
+router.route('/bot-mass-reply')
+  .post(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), conversationCtrl.botMassReply);
 router.route('/')
   /** POST /api/conversations - Create new user */
   .post(validate(paramValidation.createConversation), conversationCtrl.create);
@@ -93,5 +97,13 @@ router.route('/users/:userId')
     secret: config.jwtSecret,
     getToken
   }), validate(paramValidation.listConversations), conversationCtrl.list);
+
+router.route('/:userId/convo')
+  .get(conversationCtrl.getConversation);
+router.route('/:userId/bot-convo')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), conversationCtrl.getConversationWithBot);
 
 export default router;

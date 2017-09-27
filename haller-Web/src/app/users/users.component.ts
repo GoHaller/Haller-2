@@ -21,14 +21,34 @@ export class UsersComponent implements OnInit {
     limit: number = 5;
     userData: any = { recordsTotal: 0 };
     Math: any;
+    years: any = [];
     public residence: string = '';
-    public residenceListForUser = [{ name: 'Oliver Hall', value: 'Oliver' }, { name: 'Scholarship Hall', value: 'Scholarship Hall' }, { name: 'Oswald/Self Hall', value: 'Self Hall' }, { name: 'Ellsworth Halls', value: 'Ellsworth Halls' }, { name: 'Downs Hall', value: 'Downs Hall' }];
-    public residenceListForSearch = [{ name: 'All Residence', value: '' }, { name: 'Oliver Hall', value: 'Oliver' }, { name: 'Scholarship Hall', value: 'Scholarship Hall' }, { name: 'Oswald/Self Hall', value: 'Self Hall' }, { name: 'Ellsworth Halls', value: 'Ellsworth Halls' }, { name: 'Downs Hall', value: 'Downs Hall' }];
-    accountTypeList = [{ name: 'All Account', value: '' }, { name: 'Student', value: 'student' }, { name: 'RA', value: 'ra' }, { name: 'Staff', value: 'staff' }]
-    studentLevel = [{ name: 'Not Specified', value: '' }, { name: 'Freshman', value: 'freshman' }, { name: 'Sophomore', value: 'sophomore' }, { name: 'Junior', value: 'junior' }, { name: 'Senior', value: 'senior' }]
+    invitedCodeDetails: any = {};
+    isUserFormEditable: Boolean = false;
+    public residenceListForUser = [
+        { name: 'Oliver Hall', value: 'Oliver Hall' },
+        { name: 'Scholarship Hall', value: 'Scholarship Hall' },
+        { name: 'Oswald/Self Hall', value: 'Self Hall' },
+        { name: 'Ellsworth Halls', value: 'Ellsworth Halls' },
+        { name: 'Downs Hall', value: 'Downs Hall' }
+    ];
+    public residenceListForSearch = [
+        { name: 'All Residence', value: '' },
+        { name: 'Oliver Hall', value: 'Oliver' },
+        { name: 'Scholarship Hall', value: 'Scholarship Hall' },
+        { name: 'Oswald/Self Hall', value: 'Self Hall' },
+        { name: 'Ellsworth Halls', value: 'Ellsworth Halls' },
+        { name: 'Downs Hall', value: 'Downs Hall' }
+    ];
+    accountTypeList = [{ name: 'All Account', value: '' }, { name: 'Student', value: 'student' },
+    { name: 'RA', value: 'ra' }, { name: 'Staff', value: 'staff' }]
+    studentLevel = [{ name: 'Not Specified', value: '' }, { name: 'Freshman', value: 'freshman' },
+    { name: 'Sophomore', value: 'sophomore' }, { name: 'Junior', value: 'junior' }, { name: 'Senior', value: 'senior' }]
 
     constructor(public userService: UserService, private modalService: ModalService) {
         this.Math = Math;
+        let yr = new Date().getFullYear() + 1;
+        this.years = [yr, yr + 1, yr + 2, yr + 3, yr + 4, yr + 5, yr + 6];
     }
 
     ngOnInit() {
@@ -43,11 +63,34 @@ export class UsersComponent implements OnInit {
         setTimeout(() => {
             $('.selectpicker').selectpicker('refresh');
         }, 200);
+        this.getInviteCOdeStatus();
+    }
+    makeUserFormEditable() {
+        this.isUserFormEditable = true;
+        setTimeout(() => {
+            $('#edit-graduation-year').selectpicker('refresh');
+            $('#edit-residence').selectpicker('refresh');
+        }, 200);
+    }
+
+    clickOnInviteCodeStatus() {
+        this.openModal('invite-code-status');
+        this.getInviteCOdeStatus();
+    }
+
+    getInviteCOdeStatus() {
+        this.userService.getInviteCOdeStatus()
+            .subscribe((res: any) => {
+                this.invitedCodeDetails = res;
+            }, (error: any) => {
+                console.log('error', error)
+            })
     }
     openModal(id: string) {
         this.modalService.open(id);
     }
     closeModal(id: string) {
+        this.isUserFormEditable = false;
         this.modalService.close(id);
     }
     save(model, isValid, id) {
@@ -59,8 +102,8 @@ export class UsersComponent implements OnInit {
     }
 
     changeThePage(next, pre) {
-        if (next) this.skip += this.limit;
-        if (pre) this.skip -= this.limit;
+        if (next) { this.skip += this.limit; }
+        if (pre) { this.skip -= this.limit; }
         this.getUserList();
     }
     pageCountChange() {
@@ -82,8 +125,8 @@ export class UsersComponent implements OnInit {
     }
 
     getUserList() {
-        this.userService.getUsersListWithFilter(this.skip, this.limit, this.search.search, this.search.residence, this.search.account, this.search.level)
-            .subscribe((res: any) => {
+        this.userService.getUsersListWithFilter(this.skip, this.limit, this.search.search, this.search.residence,
+            this.search.account, this.search.level).subscribe((res: any) => {
                 // console.log('res', res);
                 this.userData = res;
             }, err => {
@@ -109,7 +152,7 @@ export class UsersComponent implements OnInit {
                         callback(gotData);
                     }
                 }, error => {
-                    console.info('getAllUsers error', error);
+                    console.log('getAllUsers error', error);
                 })
             },
             columns: [
@@ -239,16 +282,17 @@ export class UsersComponent implements OnInit {
             // table.ajax.reload(null, false);
             this.getUserList();
         }, error => {
-            console.info('toggleStatus error', error);
+            console.log('toggleStatus error', error);
         });
     }
     editUserFn(user) {
-        this.editUser = user;
+        this.editUser = JSON.parse(JSON.stringify(user));
         this.openModal('edit-user-form');
-        this.residence = this.editUser['residence'];
-        setTimeout(() => {
-            $('.selectpicker').selectpicker('refresh');
-        }, 500);
+        // this.residence = this.editUser['residence'];
+        // setTimeout(() => {
+        //     $('#edit-graduation-year').selectpicker('refresh');
+        //     $('#edit-residence').selectpicker('refresh');
+        // }, 800);
     }
 
     getStudentLevel(graduationYear) {
@@ -294,13 +338,102 @@ export class UsersComponent implements OnInit {
 
     updateUser() {
         this.closeModal('edit-user-form')
-        this.userService.updateUser(this.editUser._id, { isRA: this.editUser.isRA, residence: this.editUser.residence })
+        let userObj = { isRA: this.editUser.isRA, residence: this.editUser.residence, hometown: this.editUser.hometown };
+        userObj['graduationYear'] = this.editUser.graduationYear;
+        userObj['major'] = this.editUser.major;
+        this.userService.updateUser(this.editUser._id, userObj)
             .subscribe((res: any) => {
                 // $('#datatables').ajax.reload(null, false);
                 // table.ajax.reload(null, false);
                 this.getUserList();
             }, error => {
-                console.info('getAllUsers error', error);
+                console.log('getAllUsers error', error);
             })
+    }
+
+    getInviteCodeExcelData() {
+        this.userService.getInviteCodeExcelData()
+            .subscribe((res: any) => {
+                let excelData = [];
+                res.forEach(data => {
+                    let excelCell = {};
+                    let d = new Date(data.createdAt);
+                    excelCell['Access Code'] = data.inviteCode;
+                    excelCell['First Name'] = data.firstName;
+                    excelCell['Last Name'] = data.lastName;
+                    excelCell['Date of Account Creation'] = (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+                    let h = d.getHours() > 12 ? d.getHours() - 12 : d.getHours();
+                    let am_pm = d.getHours() >= 12 ? 'PM' : 'AM';
+                    let m = d.getMinutes();
+                    excelCell['Time of Account Creation'] = (h < 10 ? ('0' + h) : h) + ':' + (m < 10 ? ('0' + m) : m) + ' ' + am_pm;
+                    excelCell['Residence Hall'] = data.residence;
+                    excelData.push(excelCell);
+                });
+                let date = new Date();
+                let d = (date.getMonth() + 1) + '-' + date.getDate() + '-' + date.getFullYear();
+                this.JSONToCSVConvertor(excelData, 'Invite Codes', true, 'haller-invite-code-' + d + '.csv');
+            }, error => {
+                console.log('error', error);
+            })
+    }
+
+    JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel, filename) {
+        // If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+        let arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+        let CSV = '';
+        // This condition will generate the Label/Header
+        if (ShowLabel) {
+            let row = '';
+
+            // This loop will extract the label from 1st index of on array
+            for (let index in arrData[0]) {
+                // Now convert each value to string and comma-seprated
+                row += index + ',';
+            }
+            row = row.slice(0, -1);
+            // append Label row with line break
+            CSV += row + '\r\n';
+        }
+
+        // 1st loop is to extract each row
+        for (var i = 0; i < arrData.length; i++) {
+            var row = '';
+            // 2nd loop will extract each column and convert it in string comma-seprated
+            for (var index in arrData[i]) {
+                row += '"' + arrData[i][index] + '",';
+            }
+            row.slice(0, row.length - 1);
+            // add a line break after each row
+            CSV += row + '\r\n';
+        }
+
+        if (CSV == '') {
+            alert('Invalid data');
+            return;
+        }
+
+        // this trick will generate a temp "a" tag
+        let link = document.createElement('a');
+        link.id = 'lnkDwnldLnk';
+
+        // this part will append the anchor tag and remove it after automatic click
+        document.body.appendChild(link);
+        console.log('CSV', CSV);
+        let csv = CSV;
+        let blob = new Blob([csv], { type: 'application/csv' });
+        let csvUrl = (window as any).webkitURL.createObjectURL(blob);
+        // var filename = 'UserExport.csv';
+        link.setAttribute('download', filename);
+        link.setAttribute('href', csvUrl);
+        link.click();
+        // $('#lnkDwnldLnk').attr({ 'download': filename, 'href': csvUrl });
+        // $('#lnkDwnldLnk')[0].click();
+        document.body.removeChild(link);
+    }
+    s2ab(s) {
+        var buf = new ArrayBuffer(s.length);
+        var view = new Uint8Array(buf);
+        for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+        return buf;
     }
 }

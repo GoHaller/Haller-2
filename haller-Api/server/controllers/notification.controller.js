@@ -123,6 +123,9 @@ function createNotification(req, res, next, notiObje = {}) {
     title: req.body.title,// || 'Haller University says',
     message: req.body.message,// || 'Hello friends, this is lorem ippsem.',
   };
+  if (req.body.residence) {
+    notiObje['residence'] = req.body.residence;
+  }
   if (req.body.recipients && req.body.recipients.length > 0) {
     notiObje.recipients = [];
     req.body.recipients.forEach((value, index, array) => {
@@ -159,7 +162,8 @@ function sendUniversityNotification(notification, next) {
   if (notification.recipients && notification.recipients.length > 0) {
     FCMSender.sendCustomUniversityNotification(notification.recipients, notification);
   } else {
-    User.getUserForNotification()
+    console.log('notification.residence', notification.residence);
+    User.getUserForNotification(notification.residence || null)
       .then(users => {
         FCMSender.sendUniversityNotification(users, notification);
       }).catch(e => { console.info('university savedNoti error', e); next(e); });
@@ -284,7 +288,7 @@ function getUnreadNotificationCount(req, res, next) {
 
 function getNotification(req, res, next) {
   const { limit = 50, skip = 0, university = 'false' } = req.query;
-  console.log('university', university);
+  // console.log('university', university);
   if (university == 'true' && skip == 0) {
     var act = { _id: mongoose.Types.ObjectId(), activityType: 22, createdBy: req.params.userId };
     createActivityLog(act, function () { console.log('activity saved'); });

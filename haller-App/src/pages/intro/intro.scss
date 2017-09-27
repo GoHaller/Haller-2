@@ -2,7 +2,7 @@ page-intro {
     .content{
         text-align: center;
         align-content: center;
-        background-color: #ffffff;
+        background-color: rgba( 0, 0,0, 0);
         ion-slides{
             max-width:414px;
             max-height:736px;
@@ -41,5 +41,26 @@ page-intro {
                 }
             }
         }
+    }
+
+    .haller-tour{
+      transition: all linear 0.5s;
+      opacity:0;
+      padding: 5px;
+      position: absolute;
+      background-color: rgba( 0, 0,0, 0.7);
+      height: 100%;
+      width: 100%;
+      color: #ffffff;
+      vertical-align: middle;
+      &.show-intro{
+        opacity: 1;
+      }
+      .title{
+        margin-top: 25vh;
+      }
+      .description{
+        margin-top: 10vh;
+      }
     }
 }

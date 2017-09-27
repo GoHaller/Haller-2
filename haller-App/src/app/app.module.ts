@@ -29,7 +29,8 @@ import { HttpClient } from '../shared/providers/http-client';
       tabsPlacement: 'bottom',
       pageTransition: 'ios-transition',
       tabsHideOnSubPages:"true",
-      scrollAssist: false
+      scrollAssist: false,
+      autoFocusAssist: false
     }),
     IonicStorageModule.forRoot({
       name: '__hallerdb',

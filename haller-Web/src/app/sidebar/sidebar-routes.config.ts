@@ -12,7 +12,7 @@ export const APPROUTES: RouteInfo[] = [
 
 export const ADMINAPPROUTES: RouteInfo[] = [
     { path: '/bot', title: 'Bot Conversations', icon: 'material-icons', iconName: 'chat' },
-    { path: '/analytics', title: 'Analytics', icon: 'material-icons', iconName: 'chat' },
+    // { path: '/analytics', title: 'Analytics', icon: 'material-icons', iconName: 'chat' }
 ];
 
 export const ROUTES: RouteInfo[] = [

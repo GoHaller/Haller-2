@@ -1,23 +1,17 @@
 page-tabs {
     .haller-tour{
+      display: none;
         position: absolute;
         background-color: rgba( 0, 0,0, 0.7);
         height: 100%;
         width: 100%;
         color: #ffffff;
-        ion-icon{
-            font-size: 2.3em;
+        vertical-align: middle;
+        .title{
+          margin-top: 25vh;
         }
-        h3,h4{
-            margin: 0px;
-        }
-        .to-right{
-            text-align: right;
-        }
-        .to-bottom{
-            position: absolute;
-            width: 100%;
-            bottom: 50px;
+        .description{
+          margin-top: 10vh;
         }
     }
 }

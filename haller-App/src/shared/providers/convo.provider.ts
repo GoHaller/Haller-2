@@ -75,6 +75,16 @@ export class ConvoProvider {
     // .catch(this.httpClient.extractError);
   }
 
+  getConversationWithChatBot(userId, msgSkip = 0, msgLimit = 20) {
+    let q = '?skip=' + msgSkip + '&limit=' + msgLimit;
+    return this.httpClient.get('/conversations/' + userId + '/bot-convo' + q).map(this.httpClient.extractData)
+  }
+
+  getConversationWithparticipants(userId, participant, msgSkip = 0, msgLimit = 20) {
+    let q = '?skip=' + msgSkip + '&limit=' + msgLimit + '&participant=' + participant;
+    return this.httpClient.get('/conversations/' + userId + '/convo' + q).map(this.httpClient.extractData)
+  }
+
   getBotUser(email) {
     return this.httpClient.get('/users/bot/' + email).map(this.httpClient.extractData);
   }

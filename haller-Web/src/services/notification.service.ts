@@ -18,8 +18,7 @@ export class NotificationService {
 
     createAuthorizationHeader() {
         this.headers = new Headers();
-        if (this.activeToken)
-            this.headers.append('Authorization', 'Bearer:' + this.activeToken);
+        if (this.activeToken) { this.headers.append('Authorization', 'Bearer:' + this.activeToken); }
     }
 
     createNotification(notificationObj: any) {
@@ -34,7 +33,8 @@ export class NotificationService {
 
     getUsersForNotification() {
         this.createAuthorizationHeader();
-        return this.http.get(environment.ApiBaseUrl + 'users/admin/users-for-notification', { headers: this.headers }).map(this.extractData);
+        return this.http.get(environment.ApiBaseUrl + 'users/admin/users-for-notification', { headers: this.headers })
+            .map(this.extractData);
     }
 
     private extractData(res: any) {

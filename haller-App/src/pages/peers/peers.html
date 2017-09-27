@@ -23,7 +23,7 @@
     </ion-buttons>
   </ion-toolbar>
   <ion-toolbar>
-    <ion-searchbar (ionInput)="onSearchChange($event)" (search)="getItems()"></ion-searchbar>
+    <ion-searchbar (ionInput)="onSearchChange($event)" placeholder="Search names, hometowns, interests, or orgs" (search)="getItems()"></ion-searchbar>
     <ion-buttons right>
       <button ion-button icon-only (click)="getItems()">
       <ion-icon name="search"></ion-icon>

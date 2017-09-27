@@ -26,19 +26,19 @@ export class Registration {
 
   @ViewChild('emailInput') emailInput;
   @ViewChild(Slides) slides: Slides;
-  private local: Storage;
-  private userInfo: Object = {};
-  private authToken: string = '';
-  private authForm: any;
-  private detailForm: any;
-  private currentTab: number = 0;
-  private residence: string = '';
-  private showResidenceOption: boolean = false;
-  private fcmData: any;
-  private facebookData: any;
-  private years = [];
-  private email: string = '';
-  private password: string = '';
+  public local: Storage;
+  public userInfo: Object = {};
+  public authToken: string = '';
+  public authForm: any;
+  public detailForm: any;
+  public currentTab: number = 0;
+  public residence: string = '';
+  public showResidenceOption: boolean = false;
+  public fcmData: any;
+  public facebookData: any;
+  public years = [];
+  public email: string = '';
+  public password: string = '';
   public loaderObj: any = null;
   public inviteCode: string = '';
   public universityData: any = { halls: ['Scholarship Hall', 'Oliver Hall', 'Ellsworth Hall', 'Oswald/Self Hall', 'New Hall'] };
@@ -117,9 +117,13 @@ export class Registration {
 
   setPassword(data) {
     if (this.authForm.valid && this.email && data['pwd1']) {
-      this.password = data['pwd1'];
-      this.swipeTo(this.currentTab + 1);
-      // this.createNewAccount({ email: this.email, password: data.pwd1 });
+      if (data['pwd1'].length >= 8) {
+        this.password = data['pwd1'];
+        this.swipeTo(this.currentTab + 1);
+        // this.createNewAccount({ email: this.email, password: data.pwd1 });
+      } else {
+        this.paswwordValidation();
+      }
     }
   }
 
@@ -210,6 +214,7 @@ export class Registration {
         console.info('updateUser currentProfile error', error);
       });
   }
+
 
   createAccount(data) {
     if (this.detailForm.valid) {
@@ -371,7 +376,20 @@ export class Registration {
       console.info('response', response);
     });
   }
-  gotoProfile(uid) { this.navCtrl.setRoot('Intro', { uid: uid }, { animate: true, direction: 'forward' }); }
+
+  goToAddress(page: string, sec: string) {
+    this.navCtrl.push(page, { sec: sec }, { animate: true, direction: 'forward' });
+  }
+
+  accessCodeHelp() {
+    let prompt = this.alertCtrl.create({
+      title: "You can ask your RA for the access code or find it on Haller flyers in your dorm!",
+      buttons: [{ text: 'Ok', handler: data => { } }]
+    });
+    prompt.present();
+  }
+
+  gotoProfile(uid) { this.navCtrl.setRoot('Profile', { uid: uid }, { animate: true, direction: 'forward' }); }
 }
 
 

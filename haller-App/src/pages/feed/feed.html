@@ -36,7 +36,6 @@
   </ion-refresher>
 
   <ion-card *ngFor="let feed of feedList">
-
     <ion-item>
       <ion-avatar item-left (click)="viewProfile(feed.createdBy)">
         <!-- <img [src]="(feed.createdBy && feed.createdBy.currentProfile) ? feed.createdBy.currentProfile.secure_url : userAvatar"> -->
@@ -44,7 +43,9 @@
       </ion-avatar>
       <h2 (click)="viewProfile(feed.createdBy)">{{(feed.createdBy ? feed.createdBy.firstName : 'No One' ) + ' ' + (feed.createdBy ? feed.createdBy.lastName : 'No One')}}</h2>
       <ion-note>{{feed.createdAt | date: getDateFormatr(feed.createdAt)}}</ion-note>
-      <ion-note item-right *ngIf="feed._userFlagged"><ion-icon name="flag" color="danger"></ion-icon></ion-note>
+      <ion-note item-right *ngIf="feed._userFlagged">
+        <ion-icon name="flag" color="danger"></ion-icon>
+      </ion-note>
       <button ion-button icon-only item-right clear small color="newlight" (click)="presentFeedActionSheet(feed)">
         <ion-icon ios="ios-arrow-down" md="md-arrow-dropdown" color="newlight"></ion-icon>
       </button>

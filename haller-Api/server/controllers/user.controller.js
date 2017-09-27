@@ -402,13 +402,38 @@ function searchPeers(req, res, next) {
     });
 }
 
+function getUsersBotConversation(req, res, next) {
+  const { search = null } = req.query;
+  var email = 'dev.bot@ku.edu';// + domain;, facebook: 1
+  User.findOne({ email: email, role: 'bot' })
+    .then(bot => {
+      var query = [
+        { $match: { participants: bot._id } },
+        { $unwind: "$participants" },
+        { $match: { participants: { $ne: bot._id } } },
+        { $lookup: { from: 'users', localField: 'participants', foreignField: '_id', as: 'user' } },
+        { $unwind: "$user" }];
+      if (search) {
+        query.push({
+          $match: {
+            $or: [{ 'messages.botBody.result.fulfillment.messages.speech': { $regex: search, $options: 'i' } },
+            { 'messages.botBody.result.fulfillment.speech': { $regex: search, $options: 'i' } },
+            { 'messages.body': { $regex: search, $options: 'i' } },
+            { 'user.firstName': { $regex: '^' + search.split(' ')[0], $options: 'i' } },
+            { 'user.lastName': { $regex: '^' + search.split(' ')[1], $options: 'i' } }]
+          }
+        })
+      }
+      query.push({ $group: { _id: null, users: { $push: '$user' } } });
+      Conversation.aggregate(query, (error, result) => { if (error) return next(error); else { result[0] ? res.json(result[0].users) : res.json({}) } })
+    }).catch((e) => { return next(e); });
+}
+
 function getUsesrWhoTalkWith(req, res, next) {
   Conversation.find({ participants: req.params.userId }, { participants: 1 }).exec()
     .then((convos) => {
       let usersArray = [];
-      for (let i = 0; i < convos.length; i++) {
-        usersArray = usersArray.concat(convos[i].participants);
-      }
+      for (let i = 0; i < convos.length; i++) { usersArray = usersArray.concat(convos[i].participants); }
       User.find({ $and: [{ _id: { $in: usersArray } }, { _id: { $ne: req.params.userId } }] }).exec()
         .then((users) => {
           res.json(users)
@@ -969,7 +994,7 @@ function getUserAnalytics(req, res, next) {
   var email = 'dev.bot@ku.edu';// + domain;, facebook: 1
   User.findOne({ email: email, role: 'bot' })
     .then(bot => {
-      User.find({ role: 'student' }, { _id: 1, firstName: 1, lastName: 1, residence: 1, graduationYear: 1 }).lean().exec().then((users) => {
+      User.find({ role: 'student' }, { _id: 1, firstName: 1, lastName: 1, residence: 1, graduationYear: 1, facebook: 1, organizations: 1 }).populate('organizations', 'name').lean().exec().then((users) => {
         let count = 1;
         users.forEach((user, index, array) => {
           let userId = user._id;
@@ -986,10 +1011,10 @@ function getUserAnalytics(req, res, next) {
                     "sentmsgs": { $filter: { input: '$messages', as: 'msg', cond: { $eq: ["$$msg.createdBy", userId] } } }
                   }
                 }, { $group: { count: { $sum: { $size: '$sentmsgs' } }, _id: null } }], (errorsent, sentCount) => {
-                  Conversation.find({ $and: [{ participants: userId }, { participants: { $size: 2 } }, { participants: bot._id }] },
+                  Conversation.findOne({ $and: [{ participants: userId }, { participants: { $size: 2 } }, { participants: bot._id }] },
                     { _id: 1, 'messages.createdBy': 1, 'messages.createdAt': 1 }).lean().exec().then((botConvo) => {
                       Activities.find({ createdBy: userId }).sort({ 'createdAt': -1 }).exec((error, notiTab) => {
-                        user['analyticsMsg'] = { userId: userId, totalCount: totalCount[0] ? totalCount[0] : null, oneToOneCount: oneToOneCount, sentCount: sentCount[0] ? sentCount[0].count : 0, bot: botConvo };
+                        user['analyticsMsg'] = { userId: userId, totalCount: totalCount[0] ? totalCount[0] : null, oneToOneCount: oneToOneCount, sentCount: sentCount[0] ? sentCount[0].count : 0, bot: botConvo ? botConvo.messages : botConvo };
                         user['activities'] = notiTab;
                         if (count == array.length) {
                           res.setHeader('Content-Type', 'application/json');
@@ -1007,6 +1032,26 @@ function getUserAnalytics(req, res, next) {
     }).catch((e) => { return next(e); });
 }
 
+function getInviteCodeStatusExcel(req, res, next) {
+  User.aggregate([{ $match: { 'inviteCode': { $exists: true } } },
+  { "$sort": { "inviteCode": 1 } },
+  { "$project": { firstName: 1, lastName: 1, role: 1, _id: 1, inviteCode: 1, residence: 1, createdAt: 1 } }],
+    (error, result) => {
+      res.json(result);
+    })
+}
+
+function getInviteCodeStatus(req, res, next) {
+  User.aggregate([{ $match: { 'inviteCode': { $exists: true } } }, {
+    $group: {
+      count: { $sum: 1 }, _id: '$inviteCode',
+      users: { $push: { firstName: '$firstName', lastName: '$lastName', _id: '$_id' } }
+    }
+  }],
+    (error, inviteCodeStatus) => {
+      res.json({ universityInviteCode: config.inviteCode, codes: config.baCodes, status: inviteCodeStatus });
+    })
+}
 export default {
   get,
   getById,
@@ -1039,5 +1084,8 @@ export default {
   searchPeers,
   getUserForNotification,
   getUsesrWhoTalkWith,
-  getUserAnalytics
+  getUsersBotConversation,
+  getUserAnalytics,
+  getInviteCodeStatus,
+  getInviteCodeStatusExcel
 };

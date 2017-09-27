@@ -150,6 +150,7 @@ export class PostService {
         this.createAuthorizationHeader();
         return this.http.get(this.adminApiUrl + postDays + '/getpostcount', { headers: this.headers }).map(this.extractData)
     }
+
     private extractData(res: any) {
         return (typeof res == 'object') ? res.json() : res;
     }

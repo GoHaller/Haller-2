@@ -1,41 +1,7 @@
 <ion-tabs #mainTabs selectedIndex="{{mySelectedIndex}}">
   <ion-tab [root]="tab1Root" tabTitle="Feed" tabIcon="list-box"></ion-tab>
   <ion-tab [root]="tab2Root" tabTitle="Event" tabIcon="calendar"></ion-tab>
-  <ion-tab [root]="tab3Root" tabBadge="{{msgCount}}" tabBadgeStyle="danger" tabTitle="Messages" tabIcon="chatbubbles"></ion-tab>
-  <ion-tab [root]="tab4Root" tabBadge="{{notiCount}}" tabBadgeStyle="danger" tabTitle="Notifications" tabIcon="notifications"></ion-tab>
+  <ion-tab [root]="tab3Root" [tabBadge]="msgCount" tabBadgeStyle="danger" tabTitle="Messages" tabIcon="chatbubbles"></ion-tab>
+  <ion-tab [root]="tab4Root" [tabBadge]="notiCount" tabBadgeStyle="danger" tabTitle="Notifications" tabIcon="notifications"></ion-tab>
   <ion-tab [root]="tab5Root" tabTitle="Peers" tabIcon="ios-people"></ion-tab>
 </ion-tabs>
-<!-- <div class="haller-tour profile">
-  <div class="row" style="margin-top:45px;">
-    <div col-3>
-    </div>
-    <div col-3 class="to-right">
-      will show all the feeds limited to your dorm only.
-    </div>
-    <div col-3>
-      will show all the feeds created for entire campus.
-    </div>
-  </div>
-  <div class="row">
-    <div col-4>
-      <ion-icon name="ios-settings-outline"></ion-icon><br/> will take you to your profile setting.
-    </div>
-    <div col-4>
-    </div>
-    <div col-4 class="to-right">
-      <h3>Create</h3>
-      will take you to page where you can create new feed to your selected tab.
-    </div>
-  </div>
-  <div class="to-bottom">
-    <div class="row">
-      <div col-6><div class="row"><div col-4></div><div col-8><h4>Event</h4>See all the feed from your dorm and created for campus/university</div></div></div>
-      <div col-6><div class="row"><div col-4></div><div col-8><h4>Notifications</h4>See all the notifications from university and about your feed and event.</div></div></div>
-    </div>
-    <div class="row">
-        <div col-4><h4>Feed</h4>See all the feed from your dorm and created for campus/university</div>
-        <div col-4 text-center><h4>Messages</h4>See all your conversation and interact with our bot ready to help you</div>
-        <div col-4 class="to-right"><h4>Peers</h4>Find all profile from your doem and university</div>
-    </div>
-  </div>
-</div> -->

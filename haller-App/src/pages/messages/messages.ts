@@ -1,5 +1,5 @@
 import { Component, PipeTransform, Pipe, NgZone } from '@angular/core';
-import { IonicPage, NavController, NavParams, ActionSheetController, Events } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ActionSheetController, Events, ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 
 import { ConvoProvider } from "../../shared/providers/convo.provider";
@@ -25,7 +25,8 @@ export class Messages {
   private groupAvatar = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public convoProvider: ConvoProvider,
-    public actionSheetCtrl: ActionSheetController, private event: Events, private zone: NgZone, storage: Storage) {
+    public actionSheetCtrl: ActionSheetController, private event: Events, private zone: NgZone, storage: Storage,
+    private modalCtrl: ModalController) {
     this.local = storage;
     // this.userAvatar = convoProvider.httpClient.userAvatar;
     this.groupAvatar = convoProvider.httpClient.groupAvatar;
@@ -69,7 +70,16 @@ export class Messages {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad Messages');
+    this.local.get('intro').then((val) => {
+      let intro = val ? JSON.parse(val) : null;
+      if (!intro || intro.indexOf(3) == -1) {
+        let modal = this.modalCtrl.create('Intro', { intro: 3 });
+        modal.present();
+        if (!intro) intro = [3];
+        else intro.push(3);
+        this.local.set('intro', JSON.stringify(intro));
+      }
+    });
   }
 
   composeNewMessage() {

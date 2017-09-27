@@ -31,9 +31,28 @@ router.route('/admin/change-user-sataus')
   }), validate(paramValidation.userStatus), userCtrl.toggleUserStatus);
 
 router.route('/admin/users-for-notification')
-  .get(userCtrl.getUserForNotification)
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.getUserForNotification)
+
+router.route('/admin/invite-code-status-excel')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.getInviteCodeStatusExcel)
+router.route('/admin/invite-code-status')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.getInviteCodeStatus)
 // router.route('/analytics')
 //   .get(userCtrl.getUserAnalytics)
+router.route('/botconversation')
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }), userCtrl.getUsersBotConversation)
 //App APIS
 router.route('/university/:id')
   .get(universityCtrl.getById)

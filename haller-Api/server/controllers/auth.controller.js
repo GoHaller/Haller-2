@@ -199,7 +199,23 @@ function reportProblem(req, res, next) {
       if (user) {
         emailVerification.sendProblemReportEmail(user, req.body)
           .then(({ success, notified }) => {
-            success ? res.json({ 'sent': true }) : res.error('not successful notifying user by email')
+            success ? res.json({ 'sent': true }) : res.error('report problem failed.')
+          });
+      }
+    });
+  } else {
+    const err = new APIError('Authentication error-2', httpStatus.UNAUTHORIZED);
+    return next(err);
+  }
+}
+
+function hallerFeedback(req, res, next) {
+  if (req.params.userId && req.body.description) {
+    User.get(req.params.userId).then((user) => {
+      if (user) {
+        emailVerification.sendFeedbackEmail(user, req.body)
+          .then(({ success, notified }) => {
+            success ? res.json({ 'sent': true }) : res.error('feedback failed.')
           });
       }
     });
@@ -330,4 +346,4 @@ function changeUserPassword(req, res, next) {
     });
 }
 
-export default { changeUserPassword, sendEmailResetPassword, login, adminlogin, getRandomNumber, logout, encryptPassword, changePassword, createPassword, reportProblem };
+export default { changeUserPassword, sendEmailResetPassword, login, adminlogin, getRandomNumber, logout, encryptPassword, changePassword, createPassword, reportProblem, hallerFeedback };

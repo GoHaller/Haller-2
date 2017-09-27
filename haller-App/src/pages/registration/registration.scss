@@ -9,7 +9,7 @@ page-registration {
     .logo-image{
         text-align: center;
         margin-top: 27%;
-            
+
         img{
             max-width: 200px;
         }
@@ -19,7 +19,7 @@ page-registration {
         color: #fff;
         font-style: italic;
         margin-top: 5px;
-        margin-bottom: 60px; 
+        margin-bottom: 60px;
         text-align: center;
     }
 
@@ -49,5 +49,24 @@ page-registration {
         &.list > .item-block:last-child, &.list > .item-wrapper:last-child .item-block{
             border-bottom: none;
         }
+    }
+
+    .reg-div{
+      .reg-slides{
+        margin-top:10vh;
+      }
+    }
+
+    .tnc-section{
+      font-size: 1.6rem;
+      margin-top:5vh;
+      span{
+        vertical-align: -webkit-baseline-middle;
+      }
+      .button{
+        margin: 0px;
+        height: 1em;
+        text-decoration: underline;
+      }
     }
 }

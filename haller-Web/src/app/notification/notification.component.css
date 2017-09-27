@@ -9,3 +9,30 @@
 {
 	margin-left: 40%;
 }
+
+.noti-user-selection{
+    position: absolute;
+    z-index: 10;
+    width: 87%;
+    background-color: #ffffff;
+    max-height: 500px;
+    overflow-y: auto;
+}
+.noti-user-selected-list{
+    padding: 5px;
+}
+.noti-user-selection-list{
+    padding: 5px;
+    border-bottom: 1px solid #aaaaaa;
+    cursor: pointer;
+}
+
+.bootstrap-select {
+    margin-top: 0px !important;
+}
+
+.noti-selected-user-remove{
+    font-size: 16px;
+    margin-left: 5px;
+    cursor: pointer;
+}

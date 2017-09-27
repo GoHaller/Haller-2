@@ -198,6 +198,12 @@ ConversationSchema.statics = {
     return Promise.reject(err);
   },
 
+  getOneConvoByParticipent(userId1, userId2, msgSkip, msgLimit) {
+    let sliceBtm = (msgSkip + msgLimit) * -1;
+    return this.findOne({ $and: [{ participants: userId1 }, { participants: userId2 }] },
+      { createdBy: 1, createdAt: 1, participants: 1, messages: { $slice: [sliceBtm, msgLimit] } });
+  }
+
 };
 
 /**

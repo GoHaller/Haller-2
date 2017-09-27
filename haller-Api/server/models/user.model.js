@@ -438,8 +438,12 @@ UserSchema.statics = {
     return Promise.reject(err);
   },
 
-  getUserForNotification() {
-    return this.find({ 'notifications.deviceToken': { $exists: true, $ne: "" } })
+  getUserForNotification(residence = null) {
+    var q = { 'notifications.deviceToken': { $exists: true, $ne: "" } };
+    if (residence) {
+      q = { $and: [q, { 'residence': residence }] };
+    }
+    return this.find(q)
   }
 };
 

@@ -133,7 +133,7 @@ const sendMsgNotification = (message, convo) => {
           notiesObj.body += ' has posted in ' + (convo.groupName || '') + ' group chat';
         else
           notiesObj.body += ' has sent you a new message';
-        console.info('msg notiesObj', notiesObj);
+        // console.info('msg notiesObj', notiesObj);
         send(token, notiesObj, os)
           .then(function (response) {
             console.log("Successfully sent with response");//, JSON.stringify(response));
@@ -151,6 +151,7 @@ const sendMsgNotification = (message, convo) => {
 
 const sendUniversityNotification = (participants, message) => {
   participants.forEach((participant) => {
+    // console.log(participant.firstName + ' ' + participant.lastName);
     var token = [];
     var os = 'ios';
     if (participant.notifications.deviceToken) {
@@ -164,7 +165,7 @@ const sendUniversityNotification = (participants, message) => {
       notiesObj.body = message.body.message;
       notiesObj.uni_msg = message.body;
       notiesObj._id = message._id;
-      notiesObj.type = 20;
+      notiesObj.type = message.type == 21 ? 22 : 20;
       notiesObj.notId = message._id.toString().substr(-4) + notiesObj.type;
       console.info('msg notiesObj', notiesObj.notId);
       send(token, notiesObj, os)
@@ -187,6 +188,7 @@ const sendCustomUniversityNotification = (participants, message) => {
   participants.forEach((participant) => {
     var token = [];
     var os = 'ios';
+    // console.log(participant.user.firstName + ' ' + participant.user.lastName);
     if (participant.user.notifications.deviceToken) {
       token.push(participant.user.notifications.deviceToken);
       os = participant.user.notifications.os;
@@ -198,7 +200,7 @@ const sendCustomUniversityNotification = (participants, message) => {
       notiesObj.body = message.body.message;
       notiesObj.uni_msg = message.body;
       notiesObj._id = message._id;
-      notiesObj.type = 20;
+      notiesObj.type = 22;
       notiesObj.notId = message._id.toString().substr(-4) + notiesObj.type;
       // console.info('msg notiesObj', notiesObj.notId);
       send(token, notiesObj, os)

@@ -28,6 +28,7 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       this.initPushNotification();
       this.rootPage = 'Landing';
+      // this.rootPage = 'Intro';
       // this.local.get('userInfo').then((val) => {
       //   if (val) {
       //     this.rootPage = Landing;

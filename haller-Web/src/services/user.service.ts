@@ -8,6 +8,13 @@ export class UserService {
     private adminApiUrl: string = 'users/admin/';
     private headers = new Headers();
     public activeToken: String;
+    public residenceList = [
+        { name: 'Oliver Hall', value: 'Oliver Hall' },
+        { name: 'Scholarship Hall', value: 'Scholarship Hall' },
+        { name: 'Oswald/Self Hall', value: 'Oswald/Self Hall' },
+        { name: 'Ellsworth Halls', value: 'Ellsworth Halls' },
+        { name: 'Downs Hall', value: 'Downs Hall' }
+    ];
 
     constructor(private http: Http) {
         this.adminApiUrl = environment.ApiBaseUrl + this.adminApiUrl;
@@ -22,20 +29,23 @@ export class UserService {
             this.headers.append('Authorization', 'Bearer:' + this.activeToken);
     }
 
-    getUsersListWithFilter(skip: number = 0, limit: number = 25, search: string = null, residence: string = null, account: string = null, level: string = null) {
-        //let { skip = 0, limit = 25, search = null, residence = null, account = null } = req.query;
+    getUsersListWithFilter(skip: number = 0, limit: number = 25, search: string = null, residence: string = null,
+        account: string = null, level: string = null) {
+        // let { skip = 0, limit = 25, search = null, residence = null, account = null } = req.query;
         this.createAuthorizationHeader();
         let q = 'skip=' + skip + '&limit=' + limit;
-        if (search) q += '&search=' + search;
-        if (residence) q += '&residence=' + residence;
-        if (account) q += '&account=' + account;
-        if (level) q += '&level=' + level;
-        return this.http.get(this.adminApiUrl + localStorage.getItem('uid') + '/list?' + q, { headers: this.headers }).map(this.extractData);
+        if (search) { q += '&search=' + search; }
+        if (residence) { q += '&residence=' + residence; }
+        if (account) { q += '&account=' + account; }
+        if (level) { q += '&level=' + level; }
+        return this.http.get(this.adminApiUrl + localStorage.getItem('uid') + '/list?' + q, { headers: this.headers })
+            .map(this.extractData);
     }
 
     getAllUsers(queryParams: any) {
         this.createAuthorizationHeader();
-        return this.http.post(this.adminApiUrl + localStorage.getItem('uid') + '/list', queryParams, { headers: this.headers }).map(this.extractData);
+        return this.http.post(this.adminApiUrl + localStorage.getItem('uid') + '/list', queryParams,
+            { headers: this.headers }).map(this.extractData);
     }
 
     toggleStatus(userId: any, sataus: any) {
@@ -57,25 +67,50 @@ export class UserService {
     getConversationForRecipient(userId, recipientId, bot = false) {
         this.createAuthorizationHeader();
         let q = (recipientId ? ('?recipient=' + recipientId) : '');
-        if (q.length == 0) q = '?'; else q = q + '&';
+        if (q.length == 0) { q = '?'; } else { q = q + '&'; }
         q = q + 'bot=' + bot;
         return this.http.get(environment.ApiBaseUrl + 'conversations/users/' + userId + q, { headers: this.headers }).map(this.extractData)
     }
 
-    getUsesrWhoTalkWith(userId: string) {
+    getUsesrWhoTalkWith(userId: string, search: string = null) {
         this.createAuthorizationHeader();
-        return this.http.get(environment.ApiBaseUrl + 'users/' + userId + '/getusesrwhotalkwith', { headers: this.headers }).map(this.extractData);
+        // return this.http.get(environment.ApiBaseUrl + 'users/' + userId + '/getusesrwhotalkwith', 
+        // { headers: this.headers }).map(this.extractData);
+        let q = '';
+        if (search) {
+            q = '?search=' + search;
+        }
+        return this.http.get(environment.ApiBaseUrl + 'users/botconversation' + q,
+            { headers: this.headers }).map(this.extractData);
     }
     ///:userId/getusesrwhotalkwith
 
     replyAsBot(conversationId, recipient, createdBy, body) {
         let obj = { recipient: recipient, createdBy: createdBy, body: body };
         this.createAuthorizationHeader();
-        return this.http.post(environment.ApiBaseUrl + 'conversations/' + conversationId + '/bot', obj, { headers: this.headers }).map(this.extractData)
+        return this.http.post(environment.ApiBaseUrl + 'conversations/' + conversationId + '/bot', obj,
+            { headers: this.headers }).map(this.extractData)
+    }
+
+    massReplyAsBot(allStudent, residence, createdBy, body) {
+        let obj = { allStudent: allStudent, residence: residence, createdBy: createdBy, body: body };
+        this.createAuthorizationHeader();
+        return this.http.post(environment.ApiBaseUrl + 'conversations/bot-mass-reply', obj,
+            { headers: this.headers }).map(this.extractData)
     }
 
     getStudentAnalytics() {
         return this.http.get(environment.ApiBaseUrl + 'users/analytics', { headers: this.headers }).map(this.extractData)
+    }
+
+    getInviteCOdeStatus() {
+        this.createAuthorizationHeader();
+        return this.http.get(this.adminApiUrl + 'invite-code-status', { headers: this.headers }).map(this.extractData)
+    }
+
+    getInviteCodeExcelData() {
+        this.createAuthorizationHeader();
+        return this.http.get(this.adminApiUrl + 'invite-code-status-excel', { headers: this.headers }).map(this.extractData)
     }
 
     private extractData(res: any) {

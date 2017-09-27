@@ -21,14 +21,19 @@ export class BotComponent implements OnInit {
     conversation: any = {};
     conversationId: string = '';
     botMessageContent: string = '';
+    searchkey: string = '';
     body: string = '';
     adderess: string = '';
     link: string = '';
     linkIsValid: Boolean = true;
+    selectedResidense: string = '';
+    selectOneRecipient: boolean = false;
+    toAllstudent: boolean = false;
     botNewMessage: any = { result: { action: 'manual', fulfillment: { messages: [] } } }
     botPayloads: any = { type: 4, payload: { linkText: '', link: '', address: '' } };
     botReply: any = { type: 0, speech: '' };
     urlExp = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?");
+
     constructor(public userService: UserService, private modalService: ModalService, private router: Router) {
         this.userInfo = localStorage.getItem('userInfo');
         this.userInfo = JSON.parse(this.userInfo);
@@ -44,9 +49,9 @@ export class BotComponent implements OnInit {
     }
 
     getAllUserWithFilter() {
-        this.userService.getUsesrWhoTalkWith(this.botInfo._id)
+        this.userService.getUsesrWhoTalkWith(this.botInfo._id, this.searchkey || null)
             .subscribe((res) => {
-                // console.log('res', res);
+                console.log('res', res);
                 this.userList = res;
             }, error => {
                 console.log('error', error);
@@ -57,7 +62,12 @@ export class BotComponent implements OnInit {
         this.body = '';
         this.adderess = '';
         this.link = '';
+        this.selectedResidense = '';
+        this.toAllstudent = false;
         this.modalService.open(id);
+        setTimeout(() => {
+            $('.selectpicker').selectpicker('refresh');
+        }, 200);
     }
 
     closeModal(id: string) {
@@ -126,15 +136,13 @@ export class BotComponent implements OnInit {
     getConversationForRecipient() {
         this.userService.getConversationForRecipient(this.selectedUser['_id'], this.botInfo['_id'], true)
             .subscribe((res: any) => {
-                if (res[0])
-                    this.conversation = res[0];
-                else this.conversation = {};
+                if (res[0]) { this.conversation = res[0]; } else { this.conversation = {}; }
                 if (this.conversation) {
                     this.conversationId = this.conversation['_id'];
                     this.parseConversation();
                 }
             }, error => {
-                console.info('usres error', error);
+                console.log('usres error', error);
             });
     }
 
@@ -215,5 +223,55 @@ export class BotComponent implements OnInit {
                 botConvo.push({ id: id, body: body });
             }
         } while (links);
+    }
+
+    massMessages() {
+        this.openModal('mass-bot-reply-form');
+    }
+
+    sendMassMessage(model, isValid, id) {
+        if (this.userInfo.role == 'admin') {
+            if (this.toAllstudent || (!this.toAllstudent && this.selectedResidense)) {
+                this.selectOneRecipient = false;
+                if (model.adderess || model.body || model.link) {
+                    let botNewMessage = JSON.parse(JSON.stringify(this.botNewMessage));
+                    if (model.body) {
+                        let botReply = JSON.parse(JSON.stringify(this.botReply));
+                        botReply.speech = model.body;
+                        botNewMessage.result.fulfillment.messages.push(botReply);
+                    }
+                    if (model.adderess) {
+                        let botReply = JSON.parse(JSON.stringify(this.botPayloads));
+                        botReply.payload.address = model.adderess;
+                        delete botReply.payload.link;
+                        botNewMessage.result.fulfillment.messages.push(botReply);
+                    }
+                    if (model.link) {
+                        let botReply = JSON.parse(JSON.stringify(this.botPayloads));
+                        this.linkIsValid = this.urlExp.test(model.link);
+                        if (this.linkIsValid) {
+                            botReply.payload.link = model.link;
+                            delete botReply.payload.address;
+                            botNewMessage.result.fulfillment.messages.push(botReply);
+                        }
+                    }
+                    if (this.linkIsValid) {
+                        this.closeModal(id);
+                        if (this.toAllstudent) { this.selectedResidense = '' }
+                        this.userService.massReplyAsBot(this.toAllstudent, this.selectedResidense, this.userInfo._id, botNewMessage)
+                            .subscribe((res) => {
+                                if (res._id) {
+                                    this.conversation = res;
+                                    this.parseConversation();
+                                }
+                            }, err => {
+                                console.log('replyAsBot err', err);
+                            })
+                    }
+                }
+            } else {
+                this.selectOneRecipient = true;
+            }
+        }
     }
 }

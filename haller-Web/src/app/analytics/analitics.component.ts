@@ -12,6 +12,8 @@ declare var $: any;
 })
 export class AnaliticsComponent implements OnInit {
 
+    analyticsData: any = {};
+
     constructor(private userService: UserService, private modalService: ModalService, private zone: NgZone, private cdrf: ChangeDetectorRef) {
     }
 
@@ -22,6 +24,7 @@ export class AnaliticsComponent implements OnInit {
     getAnalytics() {
         this.userService.getStudentAnalytics()
             .subscribe((res: any) => {
+                this.analyticsData = res;
                 console.log('res', res);
             }, error => {
                 console.log('error', error);
@@ -29,4 +32,33 @@ export class AnaliticsComponent implements OnInit {
     }
 
     ngAfterViewInit() { }
+
+    getTimeThatUserSent(userId, data) {
+        let dates = [];
+        if (data) {
+            data.forEach(msg => {
+                if (msg.createdBy == userId) {
+                    dates.push(this.getFormatedDate(msg.createdAt));
+                }
+            });
+        }
+        return dates.join('<br/>');
+    }
+
+    getTimeThatBotSent(userId, data) {
+        let dates = [];
+        if (data) {
+            data.forEach(msg => {
+                if (msg.createdBy != userId) {
+                    dates.push(this.getFormatedDate(msg.createdAt));
+                }
+            });
+        }
+        return dates.join('<br/>');
+    }
+
+    getFormatedDate(createdAt) {
+        let d = new Date(createdAt);
+        return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear() + ' ' + d.getHours() + ':' + d.getMinutes();
+    }
 }

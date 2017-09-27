@@ -25,7 +25,7 @@ if (config.MONGOOSE_DEBUG) {
   });
 }
 
-if (config.env == 'production' || config.env == 'staging') {
+if (config.env !== 'development') {
   setInterval(function () {
     console.log('I am up at ', new Date());
     startKeepAlive();

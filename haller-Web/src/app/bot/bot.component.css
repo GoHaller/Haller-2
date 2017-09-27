@@ -46,3 +46,6 @@
 .alert.alert-info i{
     color: inherit;
 }
+.p-r-0{
+    padding-right: 0px;
+}

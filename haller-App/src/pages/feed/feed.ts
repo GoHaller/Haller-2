@@ -49,12 +49,22 @@ export class Feed {
         this.getFeeds();
       });
     });
+    this.local.get('intro').then((val) => {
+      let intro = val ? JSON.parse(val) : null;
+      if (!intro || intro.indexOf(1) == -1) {
+        let modal = this.modalCtrl.create('Intro', { intro: 1 });
+        modal.present();
+        if (!intro) intro = [1];
+        else intro.push(1);
+        this.local.set('intro', JSON.stringify(intro));
+      }
+    });
+    // this.navCtrl.push('Intro', { intro: 1 }, { animate: true, direction: 'up' })
   }
 
   allowUserToPost() {
     return (this.whichfeed == 'discovery' && this.feedProvider.isAdmin(this.userInfo['email'])) || this.whichfeed != 'discovery'
   }
-
 
   gotoFeedNew() {
     if (this.allowUserToPost()) {

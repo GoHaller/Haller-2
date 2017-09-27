@@ -90,6 +90,32 @@ const sendProblemReportEmail = (user, problemData) =>
     });
   });
 
+const sendFeedbackEmail = (user, problemData) =>
+  new Promise((fulfill, reject) => { //eslint-disable-line
+    if (config.env === 'test') {
+      return fulfill({ success: true, notified: user });
+    }
+
+    const data = {
+      from: 'Haller Feedback <noreply@gohaller.com>',
+      to: 'support@gohaller.com',
+      subject: 'By ' + user.firstName + ' ' + user.lastName,
+      html: `<h3> <b>Name:</b> ` + user.firstName + ' ' + user.lastName + `</h3>` +
+      `<h3> <b>Email:</b> ` + user.email + `</h3>` +
+      `<h3> <b>Residence:</b> ` + user.residence + `</h3>` +
+      `<h3> <b>Description:</b> ` + problemData.description + `</h3>`
+    };
+    mailgun.messages().send(data, (error, body) => {
+      if (error) {
+        console.error(error); //eslint-disable-line
+        reject(error);
+      } else {
+        // console.log(body); //eslint-disable-line
+        fulfill({ success: true, notified: user }); //eslint-disable-line
+      }
+    });
+  });
+
 const sendForgotPasswordEmail = (user) =>
   new Promise((fulfill, reject) => {
     const data = {
@@ -139,4 +165,4 @@ const sendBotQuestionEmail = (user, question) =>
     });
   });
 
-export default { sendVerificationEmail, sendIsRAVerificationEmail, sendProblemReportEmail, sendForgotPasswordEmail, sendBotQuestionEmail };
+export default { sendVerificationEmail, sendIsRAVerificationEmail, sendProblemReportEmail, sendForgotPasswordEmail, sendBotQuestionEmail, sendFeedbackEmail };

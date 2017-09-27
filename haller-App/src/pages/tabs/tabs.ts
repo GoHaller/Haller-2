@@ -45,20 +45,22 @@ export class TabsPage {
     event.subscribe('notification:allclick', (data) => {
       let hashes = window.location.hash.split('/');
       let hash = hashes[hashes.length - 1];
-      if (data.post) {
+      if (data.type = 22) {
+        if (this.navCtrl) { this.navCtrl.push('ChatBot', {}, { animate: true, direction: 'forward' }); }
+      } else if (data.post) {
         if (typeof data.post == 'string') data.post = JSON.parse(data.post);
         if (hash != 'feed-detail')
-          this.navCtrl.push('FeedDetail', { feedId: data.post._id, notificationId: data._id }, { animate: true, direction: 'forward' });
-        else {
-          this.event.publish('notification:feeddetail', data.post._id, data._id);
-        }
+          if (this.navCtrl) { this.navCtrl.push('FeedDetail', { feedId: data.post._id, notificationId: data._id }, { animate: true, direction: 'forward' }); }
+          else {
+            this.event.publish('notification:feeddetail', data.post._id, data._id);
+          }
       } else if (data.convo) {
         if (typeof data.convo == 'string') data.convo = JSON.parse(data.convo);
         if (hash != 'message')
-          this.navCtrl.push('Message', { conversationId: data.convo._id }, { animate: true, direction: 'forward' });
-        else {
-          this.event.publish('notification:message', data.convo._id);
-        }
+          if (this.navCtrl) { this.navCtrl.push('Message', { conversationId: data.convo._id }, { animate: true, direction: 'forward' }); }
+          else {
+            this.event.publish('notification:message', data.convo._id);
+          }
       } else if (data.uni_msg) {
         this.local.set('university-notification', JSON.stringify(data)).then(() => { });
         this.tabRef.select(3);
@@ -80,6 +82,15 @@ export class TabsPage {
       if (this.platform.is('ios')) {
         let footerEle = document.getElementsByClassName('footer');
         let keyboardHeight: number = e.keyboardHeight || (e.detail && e.detail.keyboardHeight);
+        let contentEle = document.getElementsByClassName('keyboard-show-content');
+        if (contentEle.length) {
+          for (let v = 0; v < contentEle.length; v++) {
+            let contentHtml = <HTMLElement>contentEle.item(v);
+            // this.footerBottomCss[v] = footerHtml.style.bottom;
+            contentHtml.style.bottom = keyboardHeight + 'px';
+            contentHtml.style.height = 'auto';
+          }
+        }
         if (footerEle.length) {
           for (let v = 0; v < footerEle.length; v++) {
             let footerHtml = <HTMLElement>footerEle.item(v);
@@ -93,6 +104,15 @@ export class TabsPage {
     keyboard.onKeyboardHide().subscribe((e) => {
       if (this.platform.is('ios')) {
         let footerEle = document.getElementsByClassName('footer');
+        let contentEle = document.getElementsByClassName('keyboard-show-content');
+        if (contentEle.length) {
+          for (let v = 0; v < contentEle.length; v++) {
+            let contentHtml = <HTMLElement>contentEle.item(v);
+            // this.footerBottomCss[v] = footerHtml.style.bottom;
+            contentHtml.style.height = '';
+            contentHtml.style.bottom = '';
+          }
+        }
         if (footerEle.length) {
           for (let v = 0; v < footerEle.length; v++) {
             let footerHtml = <HTMLElement>footerEle.item(v);

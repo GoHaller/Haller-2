@@ -1,5 +1,121 @@
 <div class="main-content">
     <div class="container-fluid">
-        Analytics here!
+        <div class="col-sm-12">&nbsp;</div>
+        <div>
+            <ul class="nav nav-pills nav-pills-warning">
+                <li class="active">
+                    <a href="#pill1" data-toggle="tab">Organizations</a>
+                </li>
+                <li>
+                    <a href="#pill2" data-toggle="tab">Interests</a>
+                </li>
+                <li>
+                    <a href="#pill3" data-toggle="tab">Interactions - Messages</a>
+                </li>
+                <li>
+                    <a href="#pill4" data-toggle="tab">Interactions - Bot</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="pill1">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th width="10%">Name</th>
+                                <th width="10%">Residence</th>
+                                <th width="10%">Class of</th>
+                                <th>Organizations</th>
+                            </tr>
+                        </thead>
+                        <tbody style="text-align:left">
+                            <tr *ngFor="let user of analyticsData.users">
+                                <td>{{user.firstName + ' ' + user.lastName}}</td>
+                                <td>{{user.residence}}</td>
+                                <td>{{user.graduationYear}}</td>
+                                <td><span *ngFor="let org of user.organizations">{{org.name}},&nbsp;&nbsp;</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane" id="pill2">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th width="10%">Name</th>
+                                <th width="8%">Residence</th>
+                                <th width="8%">Class of</th>
+                                <th width="8%">fb Conn.</th>
+                                <th>Interest</th>
+                            </tr>
+                        </thead>
+                        <tbody style="text-align:left">
+                            <tr *ngFor="let user of analyticsData.users">
+                                <td>{{user.firstName + ' ' + user.lastName}}</td>
+                                <td>{{user.residence}}</td>
+                                <td>{{user.graduationYear}}</td>
+                                <td><i *ngIf="user.facebook" class="material-icons" style="color:#449d44">check_circle</i></td>
+                                <td>
+                                    <div *ngIf="user.facebook && user.facebook.likes"><span *ngFor="let like of user.facebook.likes.data">{{like.name}},&nbsp;&nbsp;</span></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane" id="pill3">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th width="10%">Name</th>
+                                <th width="8%">Residence</th>
+                                <th width="8%">Class of</th>
+                                <th width="8%">fb Conn.</th>
+                                <th># of Conversations</th>
+                                <th># of 1 to 1 Conversations</th>
+                                <th># of group Conversations</th>
+                                <th># of messages sent</th>
+                                <th># of messages received</th>
+                            </tr>
+                        </thead>
+                        <tbody style="text-align:left">
+                            <tr *ngFor="let user of analyticsData.users">
+                                <td>{{user.firstName + ' ' + user.lastName}}</td>
+                                <td>{{user.residence}}</td>
+                                <td>{{user.graduationYear}}</td>
+                                <td><i *ngIf="user.facebook" class="material-icons" style="color:#449d44">check_circle</i></td>
+                                <td>{{user.analyticsMsg.totalCount?(user.analyticsMsg.totalCount.convoCount):0}}</td>
+                                <td>{{user.analyticsMsg.oneToOneCount}}</td>
+                                <td>{{user.analyticsMsg.totalCount?(user.analyticsMsg.totalCount.convoCount - user.analyticsMsg.oneToOneCount):0}}</td>
+                                <td>{{user.analyticsMsg.sentCount}}</td>
+                                <td>{{user.analyticsMsg.totalCount?(user.analyticsMsg.totalCount.msgCount - user.analyticsMsg.sentCount):0}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane" id="pill4">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th width="10%">Name</th>
+                                <th width="8%">Residence</th>
+                                <th width="8%">Class of</th>
+                                <th width="8%">fb Conn.</th>
+                                <th>Time of message sent to chatbot</th>
+                                <th>Time of message received from chatbot</th>
+                            </tr>
+                        </thead>
+                        <tbody style="text-align:left">
+                            <tr *ngFor="let user of analyticsData.users">
+                                <td>{{user.firstName + ' ' + user.lastName}}</td>
+                                <td>{{user.residence}}</td>
+                                <td>{{user.graduationYear}}</td>
+                                <td><i *ngIf="user.facebook" class="material-icons" style="color:#449d44">check_circle</i></td>
+                                <td [innerHTML]="getTimeThatUserSent(user._id,user.analyticsMsg.bot)"></td>
+                                <td [innerHTML]="getTimeThatBotSent(user._id,user.analyticsMsg.bot)"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

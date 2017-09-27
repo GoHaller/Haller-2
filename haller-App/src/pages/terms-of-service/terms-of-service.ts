@@ -9,10 +9,10 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
  */
 @IonicPage()
 @Component({
-  selector: 'page-privacy-policy',
-  templateUrl: 'privacy-policy.html',
+  selector: 'page-terms-of-service',
+  templateUrl: 'terms-of-service.html',
 })
-export class PrivacyPolicy {
+export class TermsofService {
 
   pntOption: string = 'pp';
   constructor(public navCtrl: NavController, public navParams: NavParams) {
@@ -22,7 +22,7 @@ export class PrivacyPolicy {
   }
 
   ionViewDidLoad() {
-    // console.log('ionViewDidLoad PrivacyPolicy');
+    // console.log('ionViewDidLoad TermsofService');
   }
 
 }

@@ -2,6 +2,35 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-4 user-section">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <button type="button" class="btn btn-white" (click)="getAllUserWithFilter()">Refresh List</button>
+                    </div>
+                    <div class="col-sm-6">
+                        <button type="button" class="btn btn-white" (click)="massMessages()">Message To All</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <form role="search">
+                        <div class="col-sm-1">&nbsp;</div>
+                        <div class="form-group form-search is-empty p-r-0" [ngClass]="{'col-sm-7':searchkey.length>0,'col-sm-9':searchkey.length==0}">
+                            <input type="text" class="form-control" name="searchkey" [(ngModel)]="searchkey" placeholder="Search">
+                            <span class="material-input "></span>
+                        </div>
+                        <div class="col-sm-2 p-r-0">
+                            <button type="submit" (click)="getAllUserWithFilter()" class="btn btn-white btn-round btn-just-icon">
+                                    <i class="material-icons">search</i>
+                                    <div class="ripple-container"></div>
+                                </button>
+                        </div>
+                        <div class="col-sm-2 p-r-0" *ngIf="searchkey.length>0">
+                            <button type="submit" (click)="searchkey='';getAllUserWithFilter()" class="btn btn-white btn-round btn-just-icon">
+                                        <i class="material-icons">close</i>
+                                        <div class="ripple-container"></div>
+                                    </button>
+                        </div>
+                    </form>
+                </div>
                 <div class="row user-list" *ngFor="let user of userList" [ngClass]="{'alert alert-info':user._id == selectedUser._id}">
                     <div class="col-sm-3">
                         <img class="user-image" *ngIf="user.currentProfile && user.currentProfile.secure_url" [src]="user.currentProfile.secure_url">
@@ -110,3 +139,59 @@
     <div class="modal-background"></div>
 </modal>
 <!--Bot repla modal end -->
+
+<!--Bot repla'em all modal start -->
+<modal id="mass-bot-reply-form">
+    <div class="modal">
+        <div class="modal-body col-md-4 col-md-offset-4">
+            <div class="card">
+                <form #frmMassBotReply="ngForm" novalidate (ngSubmit)="sendMassMessage(frmMassBotReply.value, frmMassBotReply.valid,'mass-bot-reply-form')">
+                    <div class="card-header card-header-icon" data-background-color="blue">
+                        <i class="material-icons">featured_play_list</i>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title">Message To All</h4>
+                        <p class="note">If "All student" is check then selected residence will be ingored.</p>
+                        <div class="col-sm-12">
+                            <div class="col-sm-6 p-0">
+                                <div class="checkbox">
+                                    <label>
+                                        All student:&nbsp;&nbsp;<input type="checkbox" name="toAllstudent" [(ngModel)]="toAllstudent">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <select id="select-resicense" class="selectpicker m-3" [disabled]="toAllstudent" name="recipent" [(ngModel)]="selectedResidense"
+                                    data-style="select-with-transition" title="Residence" data-size="6">
+                                    <option [ngValue]="''">Select Residence</option>
+                                    <option *ngFor="let residence of userService.residenceList" [ngValue]="residence.value">
+                                            {{residence.name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div *ngIf="selectOneRecipient" class="row text-center" style="color:red">
+                            Please select one of the recipient.
+                        </div>
+                        <div class="m-t-5 form-group col-lg-12">
+                            <textarea rows="3" type="text" class="form-control" name="body" placeholder="Description" [(ngModel)]="body"></textarea>
+                        </div>
+                        <div class="m-t-5 form-group col-lg-12">
+                            <input type="text" class="form-control" placeholder="Address" name="adderess" [(ngModel)]="adderess" />
+                        </div>
+                        <div class="m-t-5 form-group col-lg-12">
+                            <input type="text" class="form-control" placeholder="Link" name="link" [(ngModel)]="link" />
+                            <span *ngIf="!linkIsValid">Link is invalid.</span>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn btn-info btn-fill btn-wd" type="submit" [disabled]="!frmMassBotReply.valid">Send</button>
+                            <button type="button" class="btn btn-default" (click)="closeModal('mass-bot-reply-form');">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-background"></div>
+</modal>
+<!--Bot repla'em all modal end -->
