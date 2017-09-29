@@ -8,5 +8,5 @@
 //ApiBaseUrl: 'https://haller-api-app-stage.herokuapp.com/api/'//prod
 export const environment = {
     production: false,
-    ApiBaseUrl: 'https://haller-api-v2.herokuapp.com/api/'
+    ApiBaseUrl: 'http://localhost:4040/api/'
 };

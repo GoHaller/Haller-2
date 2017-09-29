@@ -389,7 +389,7 @@ function createBotConversation(req, res, next) { //eslint-disable-line
       recipient: message.createdBy,
     }
     if (error) {
-      messagesObj['body'] = 'Sorry sir! Cherry need a doctor right now.';
+      messagesObj['body'] = 'Sorry sir! Bot need a doctor right now.';
     }
     else {
       messagesObj['botBody'] = response

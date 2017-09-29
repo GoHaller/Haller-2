@@ -5,6 +5,7 @@ import postRoutes from './post.route';
 import eventRoutes from './event.route';
 import convoRoutes from './conversation.route';
 import notificationRoutes from './notification.route';
+import botAppRoutes from './bot-app.route';
 import dev from '../controllers/bot.controller';
 import FCMSender from '../helpers/FCMSender';
 // import Demo from '../models/demo.model';
@@ -57,6 +58,7 @@ router.use('/conversations', convoRoutes);
 router.use('/notifications', notificationRoutes);
 // mount auth routes at /auth
 router.use('/auth', authRoutes);
+router.use('/bot', botAppRoutes);
 // router.use('/organization', authRoutes);
 
 

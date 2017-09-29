@@ -47,6 +47,14 @@ export default {
     }).or('password', 'facebook')
   },
 
+  createBotUser: {
+    body: Joi.object().keys({
+      email: Joi.string().required(),
+      password: Joi.string().required(),
+      firstName: Joi.string().required()
+    })
+  },
+
   // UPDATE /api/users/:userId
   updateUser: {
     body: {
@@ -445,6 +453,13 @@ export default {
     params: {
       userId: Joi.string().hex().required()
     }
+  },
+  changePassword: {
+    body: Joi.object().keys({
+      id: Joi.string().hex().required(),
+      password: Joi.string().required(),
+      passwordnew: Joi.string().required()
+    })
   },
   getOrganization: {
     params: {

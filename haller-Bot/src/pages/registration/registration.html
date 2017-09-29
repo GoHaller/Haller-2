@@ -1,0 +1,36 @@
+<ion-content class="app-background">
+  <div>
+    <h2 class="color-white text-center" style="margin-top: 15vh">Haller Bot</h2>
+    <h5 class="color-white">&nbsp;</h5>
+    <form [formGroup]="authForm" class="text-center" (ngSubmit)="regClicked(authForm.value)" *ngIf="section==1">
+      <ion-list>
+        <ion-item>
+          <ion-input type="text" placeholder="First Name" formControlName="firstName"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input type="email" placeholder="KU Email" formControlName="email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input type="password" placeholder="Create password" formControlName="password"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input type="password" placeholder="Re-enter password" formControlName="password1"></ion-input>
+        </ion-item>
+      </ion-list>
+      <button class="auth-btn" [disabled]="!authForm.valid" ion-button color="light">Sign up</button>
+      <button ion-button block (click)="section = 0" clear color="light" style="margin-top:10px">Already have an account? Log in.</button>
+    </form>
+    <form [formGroup]="loginForm" class="text-center" (ngSubmit)="loginClicked(loginForm.value)" *ngIf="section==0">
+      <ion-list>
+        <ion-item>
+          <ion-input type="email" placeholder="KU Email" formControlName="email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input type="password" placeholder="Create password" formControlName="password"></ion-input>
+        </ion-item>
+      </ion-list>
+      <button class="auth-btn" [disabled]="!loginForm.valid" ion-button color="light">Login</button>
+      <button ion-button block (click)="section = 1" clear color="light" style="margin-top:10px">Don’t have an account? Sign Up.</button>
+    </form>
+  </div>
+</ion-content>

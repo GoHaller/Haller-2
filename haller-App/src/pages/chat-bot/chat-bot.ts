@@ -87,9 +87,7 @@ export class ChatBot {
               setTimeout(() => {
                 cId = this.conversation.messages.length - cId;
                 let ele = document.getElementById('msg-' + cId);
-                if (ele) {
-                  this.content.scrollTo(0, ele.offsetTop, 0);
-                }
+                if (ele) { this.content.scrollTo(0, ele.offsetTop, 0); }
               }, 500)
             })
           } else {
@@ -305,7 +303,6 @@ export class ChatBot {
     loader.present();
     this.convoProvider.getConversationForRecipient(this.userInfo['_id'], this.botInfo['_id'], true)
       .subscribe((res: any) => {
-
         if (res[0])
           this.conversation = res[0];
         if (this.conversation) {

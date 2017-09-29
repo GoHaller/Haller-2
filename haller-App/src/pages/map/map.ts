@@ -27,7 +27,7 @@ export class MapPage {
   // title: string = '';
   constructor(public navCtrl: NavController, public navParams: NavParams, private googleMaps: GoogleMaps, private geocoder: Geocoder, private platform: Platform) {
     this.mapData = this.navParams.data.mapData;
-    console.log('this.mapData', this.mapData);
+    // console.log('this.mapData', this.mapData);
     // console.log('this.mapData', JSON.parse(this.mapData.location).location);
   }
 

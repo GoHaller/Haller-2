@@ -1,0 +1,75 @@
+page-chatbot {
+  .user-image{
+    img{
+        width: 6vh;
+        border-radius: 50%;
+    }
+    &.right{
+        text-align: right;
+    }
+}
+  .new-msg{
+      border: 1px solid rgba(0,0,0,0.2);
+      width: 100%;
+      border-radius: 8px;
+      .input-cover{
+          position: static;
+      }
+      textarea,input {
+          margin: 8px;
+      }
+  }
+  ion-row.conversation{
+    .msg-container{
+        max-width: 80%;
+        // background-color: #fff;
+        padding: 3px;
+        border-radius: 3px;
+        // box-shadow: 1px 1px 5px -2px rgba(50, 50, 50, 0.75);
+        // -webkit-box-shadow: 1px 1px 5px -2px rgba(50, 50, 50, 0.75);
+        // -moz-box-shadow: 1px 1px 5px -2px rgba(50, 50, 50, 0.75);
+        div{
+          margin: 0px 3px;
+        }
+
+        .img-container{
+              width: 100%;
+              margin-bottom: 2px;
+              img{
+                  max-height: 200px;
+                  max-width: 100%;
+                  display: block;
+                  margin-left: auto;
+                  margin-right: auto;
+              }
+          }
+    }
+      &.me{
+          .msg-container{
+            // text-align: right;
+              float: right;
+              .msg-time{
+                  float: left;
+              }
+          }
+      }
+      &.them{
+          .msg-container{
+              float: left;
+              .msg-time{
+                  float: right;
+              }
+          }
+      }
+  }
+  .footer{
+        .row.sender-row{
+          background-color: #fff;
+            padding: 0px 0px 0px 10px;
+            ion-col{
+                padding-left: 0px;
+                padding-right: 0px;
+            }
+        }
+    }
+}

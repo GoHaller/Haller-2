@@ -46,8 +46,8 @@ router.route('/admin/invite-code-status')
     secret: config.jwtSecret,
     getToken
   }), userCtrl.getInviteCodeStatus)
-// router.route('/analytics')
-//   .get(userCtrl.getUserAnalytics)
+router.route('/analytics')
+  .get(userCtrl.getUserAnalytics)
 router.route('/botconversation')
   .get(expressJwt({
     secret: config.jwtSecret,
