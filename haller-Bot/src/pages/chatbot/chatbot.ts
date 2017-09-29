@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController, NavParams, IonicPage, LoadingController, Content } from 'ionic-angular';
+import { NavController, NavParams, IonicPage, LoadingController, Content, AlertController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { BotconvoProvider } from "../../providers/botconvo-provider";
 // $IMPORTSTATEMENT
@@ -15,15 +15,17 @@ export class Chatbot {
   public userInfo: any = { _id: '' };
   public conversation: any = {};
   question: string = '';
-
+  canvas: any;
+  loader: any;
   @ViewChild(Content) content: Content;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private botconvoProvider: BotconvoProvider,
-    storage: Storage, private loadingCtrl: LoadingController) {
+    storage: Storage, private loadingCtrl: LoadingController, public alertCtrl: AlertController) {
     this.local = storage;
   }
 
   ionViewDidLoad() {
+    this.canvas = document.createElement("canvas");
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
       this.getBotData();
@@ -31,21 +33,31 @@ export class Chatbot {
   }
 
   getBotData() {
+    this.loader = this.loadingCtrl.create({ content: "Please wait...", dismissOnPageChange: true });
+    this.loader.present();
     this.botconvoProvider.getBotData()
       .subscribe((res: any) => {
+        this.loader.dismiss();
         if (res._id) {
           this.chatBot = res;
-          this.getUsersConversation();
+          if (this.chatBot['_id']) this.getUsersConversation();
         }
-      }, error => {
-        this.botconvoProvider.http.showError(error);
-      })
+      },
+      error => { this.loader.dismiss(); this.botconvoProvider.http.showError(error); },
+      () => { })
   }
 
   getUsersConversation() {
+    this.loader = this.loadingCtrl.create({ content: "Please wait...", dismissOnPageChange: true });
+    this.loader.present();
     this.botconvoProvider.getConversation(this.userInfo['_id'])
-      .subscribe((res: any) => { this.conversation = res; this.parseConversation(); },
-      error => { this.botconvoProvider.http.showError(error); });
+      .subscribe((res: any) => {
+        this.loader.dismiss();
+        this.conversation = res;
+        if (this.conversation) this.parseConversation();
+      },
+      error => { this.loader.dismiss(); this.botconvoProvider.http.showError(error); },
+      () => { });
   }
 
   gotoSetting() {
@@ -55,29 +67,54 @@ export class Chatbot {
   newMessageChange(event) {
     let ele = event.target;
     let row = ele.rows;
-    if (ele.value.length < 100) {
+    if (ele.value.length < 50) {
       row = 1;
+    } else if (ele.value.length < 100) {
+      row = 2;
     } else if (ele.clientHeight < ele.scrollHeight && row < 6) {
       row += 1;
     }
     ele.rows = row;
+    // let row = (Math.floor(this.getTextWidth(ele.value) / ele.clientWidth) + 1)
+    // ele.rows = row > 4 ? 4 : row;
+  }
+
+  getTextWidth(text) {
+    var font = "normal 15.5px SofiaPro";
+    // re-use canvas object for better performance
+    var context = this.canvas.getContext("2d");
+    context.font = font;
+    var metrics = context.measureText(text);
+    return parseInt(metrics.width.toString());
   }
 
   sendQuestion() {
-    let loader = this.loadingCtrl.create({ content: "Please wait...", dismissOnPageChange: true });
-    loader.present();
-    // req.body = { message: '', createdBy: '', conversationId: '', participant: '',//is always bot accessToken: '' }
-    let postObj = {
-      message: this.question.toString(), createdBy: this.userInfo['_id'], participant: this.chatBot['_id'],
-      accessToken: this.chatBot['botData']['accessToken']
-    }
-    this.question = '';
-    if (this.conversation['_id']) { postObj['conversationId'] = this.conversation['_id']; }
+    if (this.chatBot['_id']) {
+      this.loader = this.loadingCtrl.create({ content: "Please wait...", dismissOnPageChange: true });
+      this.loader.present();
+      // req.body = { message: '', createdBy: '', conversationId: '', participant: '',//is always bot accessToken: '' }
+      let postObj = {
+        message: this.question.toString(), createdBy: this.userInfo['_id'], participant: this.chatBot['_id'],
+        accessToken: this.chatBot['botData']['accessToken']
+      }
+      this.question = '';
+      if (this.conversation['_id']) { postObj['conversationId'] = this.conversation['_id']; }
 
-    this.botconvoProvider.askToBot(this.userInfo['_id'], postObj)
-      .subscribe((res: any) => { this.conversation = res; this.parseConversation(); },
-      error => { this.botconvoProvider.http.showError(error); },
-      () => { loader.dismiss(); })
+      this.botconvoProvider.askToBot(this.userInfo['_id'], postObj)
+        .subscribe((res: any) => { this.loader.dismiss(); this.conversation = res; this.parseConversation(); },
+        error => { this.loader.dismiss(); this.botconvoProvider.http.showError(error); },
+        () => { })
+    } else {
+      this.botNotAvailable();
+    }
+  }
+
+  botNotAvailable() {
+    let prompt = this.alertCtrl.create({
+      title: 'Sorry! Bot is not available right now.',
+      buttons: [{ text: 'Ok', handler: data => { } }]
+    });
+    prompt.present();
   }
 
   openExternalLink(link) {

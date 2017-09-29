@@ -20,16 +20,16 @@ export class MapPage {
 
   mapData: any;
   position: any;
-  // title: string = '';
+  
   constructor(public navCtrl: NavController, public navParams: NavParams, private googleMaps: GoogleMaps,
     private geocoder: Geocoder, private platform: Platform) {
     this.mapData = this.navParams.data.mapData;
-    // console.log('this.mapData', this.mapData);
-    // console.log('this.mapData', JSON.parse(this.mapData.location).location);
   }
 
   getDirection() {
     let destination = this.position.lat + ',' + this.position.lng;
+    console.log('ios', this.platform.is('ios'));
+    console.log('destination', destination);
     if (this.platform.is('ios')) {
       window.open('maps://?q=' + destination, '_system');
     } else {
@@ -39,7 +39,6 @@ export class MapPage {
   }
 
   ionViewDidLoad() {
-    // console.log('ionViewDidLoad Map');
     if (this.mapData.location) {
       if (typeof this.mapData.location == 'string')
         this.createMap(JSON.parse(this.mapData.location).location);
@@ -48,10 +47,7 @@ export class MapPage {
         this.createMap(obj);
       }
     } else if (this.mapData.address) {
-      //{ address: '1450 Jayhawk Blvd, Lawrence, KS 66045, USA' }
       this.geocoder.geocode({ address: this.mapData.address }).then((res: any) => {
-        // console.log('res', res);
-        // this.title = res.extra ? (res.extra.name || '') : '';
         this.position = res[0].position;
         this.createMap(res[0].position);
       })
@@ -59,14 +55,11 @@ export class MapPage {
   }
 
   createMap(mapLoc) {
-    // console.log('mapLoc', mapLoc);
     let element: HTMLElement = document.getElementById('gglchatmap');
     let map: GoogleMap = this.googleMaps.create(element);
     map.one(GoogleMapsEvent.MAP_READY).then(
       () => {
-        // console.log('Map is ready!');
         element.classList.add('show-map');
-        // create CameraPosition
         let latlng: ILatLng = {
           lat: mapLoc.lat,
           lng: mapLoc.lng
@@ -78,9 +71,6 @@ export class MapPage {
         };
 
         map.moveCamera(position);
-        //1450 Jayhawk Blvd, Lawrence, KS 66045, USA
-
-        // create new marker
         let markerOptions: MarkerOptions = {
           position: mapLoc
         };
@@ -95,5 +85,4 @@ export class MapPage {
       }
     );
   }
-
 }

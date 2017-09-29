@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, IonicPage, AlertController } from 'ionic-angular';
+import { NavController, NavParams, IonicPage, AlertController, LoadingController } from 'ionic-angular';
 import { Validators, FormBuilder, FormGroup } from '@angular/forms';
 import { Storage } from '@ionic/storage';
 import { AuthProvider } from "../../providers/auth-provider";
@@ -17,7 +17,7 @@ export class Registration {
   local: Storage;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private formBuilder: FormBuilder,
-    private authProvider: AuthProvider, storage: Storage, public alertCtrl: AlertController) {
+    private authProvider: AuthProvider, storage: Storage, public alertCtrl: AlertController, private loadingCtrl: LoadingController) {
     this.authForm = this.formBuilder.group({
       firstName: ['', Validators.compose([Validators.required])],
       email: ['', Validators.compose([Validators.maxLength(30), Validators.required])],
@@ -51,25 +51,35 @@ export class Registration {
     // console.log('password', this.authForm.controls.password);
     // console.log(data);
     // this.navCtrl.setRoot('Chatbot', {}, { animate: true, direction: 'forward' });
-    if (data.password.length >= 8) {
-      this.authProvider.create(data)
-        .subscribe((res: any) => {
-          this.afertRegLogin(res);
-        }, error => {
-          this.authProvider.http.showError(error);
-        }, () => {
-          console.log('complete');
-        })
+    if (this.authProvider.http.kuEmailRegex.test(data.email)) {
+      if (data.password.length >= 8) {
+        let loader = this.loadingCtrl.create({ content: "Please wait...", dismissOnPageChange: true });
+        loader.present();
+        this.authProvider.create(data)
+          .subscribe((res: any) => {
+            loader.dismiss();
+            this.afertRegLogin(res);
+          }, error => {
+            loader.dismiss();
+            this.authProvider.http.showError(error);
+          }, () => { })
+      } else {
+        this.paswwordValidation();
+      }
     } else {
-      this.paswwordValidation();
+      this.emailValidation();
     }
   }
 
   loginClicked(data) {
+    let loader = this.loadingCtrl.create({ content: "Please wait...", dismissOnPageChange: true });
+    loader.present();
     this.authProvider.login(data)
       .subscribe((res: any) => {
+        loader.dismiss();
         this.afertRegLogin(res);
       }, error => {
+        loader.dismiss();
         this.authProvider.http.showError(error);
       }, () => {
         console.log('complete');
@@ -92,15 +102,10 @@ export class Registration {
     prompt.present();
   }
 
-  showError(errorMessage: string) {
+  emailValidation() {
     let prompt = this.alertCtrl.create({
-      title: errorMessage,
-      buttons: [
-        {
-          text: 'Ok',
-          handler: data => { }
-        }
-      ]
+      title: 'Please enter a valid ku email address.',
+      buttons: [{ text: 'Ok', handler: data => { } }]
     });
     prompt.present();
   }

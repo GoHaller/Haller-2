@@ -9,12 +9,15 @@ export class HttpClient {
   private local: Storage;
   private token: string;
   private headers = new Headers();
-  private env = 'local';
+  public emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  public kuEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@ku.edu$/;
+
+  private env = 'prod-working';
   private getApiBaseUrl = () => {
     let url = 'http://10.0.0.22:4040/api/bot/';
     switch (this.env) {
       case 'stage': url = 'https://haller-api-v2.herokuapp.com/api/bot/'; break;
-      case 'prod-temp': url = 'https://haller-api-app-stage.herokuapp.com/api/bot/'; break;
+      case 'prod-working': url = 'https://haller-api-app-stage.herokuapp.com/api/bot/'; break;
       case 'prod': url = 'https://haller-api-v2-main.herokuapp.com/api/bot/'; break;
       default: break;
     }
