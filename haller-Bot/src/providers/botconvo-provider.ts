@@ -26,4 +26,9 @@ export class BotconvoProvider {
     return this.http.post('convo/' + userId, postObj).map(this.http.extractData);
   }
 
+  getNotifications(userId: string, skip: number = 0, limit: number = 50) {
+    let q = '?skip=' + skip + '&limit=' + limit;
+    return this.http.get('notification/for/' + userId + q).map(this.http.extractData);
+  }
+
 }

@@ -3,18 +3,13 @@ import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import BotUser from '../models/bot-users.model';
-// import emailVerification from '../cronJobs/emailVerification';
+import emailVerification from '../cronJobs/emailVerification';
 // const apiai = require('apiai');
 const bcrypt = require('bcryptjs');
 const config = require('../../config/env');
 
 var botuserCtrl = {
-  getBotUser: (req, res, next) => {
-    BotUser.getByEmailNoError('dev.bot@ku.edu')
-      .then((bot) => {
-        res.json(bot);
-      })
-  },
+  getBotUser: (req, res, next) => { BotUser.getByEmailNoError('dev.bot@ku.edu').then((bot) => { res.json(bot) }); },
   logout: (req, res, next) => {
     BotUser.get(req.params.userId)
       .then((user) => {
@@ -75,7 +70,7 @@ var botuserCtrl = {
           bcrypt.compare(req.body.password, user.password, (err, same) => { //eslint-disable-line
             if (same) {
               user.password = bcrypt.hashSync(req.body.passwordnew, 10);
-              user.save().then((savedUser) => { res.json(savedUser); })
+              user.save().then((savedUser) => { res.json(savedUser); });
             } else {
               const error = new APIError('Current password does not match.', httpStatus.UNAUTHORIZED);
               return next(error);
@@ -86,7 +81,7 @@ var botuserCtrl = {
           return next(error);
         }
       }, error => {
-        console.log('changePassword fail!', eroor);
+        console.log('changePassword fail!', error);
         const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);
         return next(err);
       });
@@ -100,7 +95,8 @@ var botuserCtrl = {
         } else {
           const user = new BotUser({
             _id: mongoose.Types.ObjectId(), email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, 10), firstName: req.body.firstName
+            password: bcrypt.hashSync(req.body.password, 10), firstName: req.body.firstName,
+            notifications: req.body.notifications
           });
           user.save()
             .then((savedUser) => {
@@ -109,14 +105,83 @@ var botuserCtrl = {
               userCpy.status.activeToken = token;
               userCpy.save().then((upU) => { res.json({ token, user: upU }); });
             })
-            .catch((eroor) => {
-              console.log('create eroor l2', eroor);
+            .catch((error) => {
+              console.log('create error l2', error);
               const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);
               return next(err);
             });
         }
       }, error => {
-        console.log('create eroor l1', eroor);
+        console.log('create error l1', error);
+        const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);
+        return next(err);
+      })
+  },
+  update: (req, res, next) => {
+    BotUser.get(req.body.userId)
+      .then((user) => {
+        if (user && user._id) {
+          if (req.body.notifications) {
+            user.notifications = req.body.notifications;
+            if (user.notifications.enabled == undefined || user.notifications.enabled == 'undefined') {
+              user.notifications.enabled = true;
+            }
+          }
+          if (req.body.firstName) {
+            user.firstName = req.body.firstName;
+          }
+          user.save().then((savedUser) => { res.json(savedUser) });
+        } else {
+          const err = new APIError('User not found.', httpStatus.UNAUTHORIZED);
+          return next(err);
+        }
+      }, error => {
+        console.log('update error', error);
+        const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);
+        return next(err);
+      })
+  },
+  problem: (req, res, next) => {
+    if (req.params.userId && req.body.title && req.body.description) {
+      BotUser.get(req.params.userId).then((user) => {
+        if (user) {
+          emailVerification.sendBotProblemReportEmail(user, req.body)
+            .then(({ success, notified }) => {
+              success ? res.json({ 'sent': true }) : res.error('report problem failed.')
+            });
+        }
+      });
+    } else {
+      const err = new APIError('Authentication error-2', httpStatus.UNAUTHORIZED);
+      return next(err);
+    }
+  },
+  feedback: (req, res, next) => {
+    if (req.params.userId && req.body.description) {
+      BotUser.get(req.params.userId).then((user) => {
+        if (user) {
+          emailVerification.sendBotFeedbackEmail(user, req.body)
+            .then(({ success, notified }) => {
+              success ? res.json({ 'sent': true }) : res.error('feedback failed.')
+            });
+        }
+      });
+    } else {
+      const err = new APIError('Authentication error-2', httpStatus.UNAUTHORIZED);
+      return next(err);
+    }
+  },
+  searchUser: (req, res, next) => {
+    const { keyword = null, skip = 0, limit = 10 } = req.query;
+    BotUser.search(keyword, skip, limit)
+      .then((users) => {
+        res.json(users);
+      }, error => {
+        console.log('searchUser error', error);
+        const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);
+        return next(err);
+      }).catch(error => {
+        console.log('searchUser error', error);
         const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);
         return next(err);
       })

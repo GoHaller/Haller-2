@@ -9,7 +9,8 @@ var fcm = new FCM(serverKey);
 const demoSend = () => {
   var demoPaylods = {
     //     to: 'f-WoY-10gpU:APA91bGV6JVX0UnQSmkZqGIFlK_WnN4YMyuVuhnWrnn4-br7WdX1HeXvCg1f8msuULZMoXCATV06X6RAUo789h-qBWl4MRnJ2FkwsOcESbR-TWLivzHHi8vu2aYzDZ3Sswo9cRphGOU0', // required fill with device token or topics
-    registration_ids: ["cgNTA6-7oSA:APA91bGCCEpeyopmDWgRgVn-kccQdMKFVByXShAVx6pnplZEUPUPUFSQQkS321bqRqeepjDV-KuL1pToK45pG06N5zosvdv8x-vRtIge9rtBW97GxrCfZ5p2u1htTFNQGNBAeR7cBzWr"],
+    //registration_ids: ["dUZAiNmuk7Y:APA91bEgb1l8GBTtG1rhcRzDyLXASAce2G0LcTHmKnX3Ce0bMQR-MsCnL0Q1Y5lBVO7TshOLZ7CZDNE2dByl2FnQXcQj6KE7RC7186Ezqvb09OhvnpxvE7KcWEjjlPaUaoTCRRTWVGCw"],
+    registration_ids: ["d_3TLG8NCaE:APA91bHcuAC5Fd_IljX_birrMOgPP94iMN2dY-T6nKNtQj1rsoykzRtYnlnv4TWnSmK8DVhV8UIOdEvE0jt-2FfvBZTOJO2aF4SnFWK5zowoxjdYEFga7BqzYUTv45spxOucY8RoE8RM"],
     data: {
       your_custom_data_key: 'your_custom_data_value'
     },

@@ -1,0 +1,18 @@
+<ion-header>
+  <ion-navbar color="primary" hideBackButton>
+    <ion-buttons left><button ion-button (click)="goBack()">Cancel</button></ion-buttons>
+    <ion-title>Leave Feedback</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <div style="margin:10px" text-center>Feel free to leave us any feedback you have. <br/> If you think we should add a feature, let us know!</div>
+  <form [formGroup]="problemForm" (ngSubmit)="submitProblemForm(problemForm.value)">
+    <ion-list>
+      <ion-item>
+        <ion-textarea rows="15" formControlName="description" placeholder="Leave feedback comment"></ion-textarea>
+      </ion-item>
+    </ion-list>
+    <button ion-button full style="padding: 30px;" type="submit" [disabled]="!problemForm.valid">Submit</button>
+  </form>
+</ion-content>

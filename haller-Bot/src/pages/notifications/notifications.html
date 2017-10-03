@@ -5,14 +5,29 @@
   Ionic pages and navigation.
 -->
 <ion-header>
-
   <ion-navbar color="primary">
     <ion-title>Notifications</ion-title>
   </ion-navbar>
-
 </ion-header>
 
 
-<ion-content padding>
+<ion-content>
+  <ion-refresher (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content pullingIcon="ios-arrow-down-outline" pullingText="Pull to refresh" refreshingSpinner="bubbles" refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
 
+  <ion-list *ngIf="!userMessage">
+    <ion-item *ngFor="let noti of notifications" [ngClass]="{'unread': !noti.read }">
+      <h3>{{noti.body.title}} <br/>
+        <ion-note class="note"> {{noti.createdAt | date: botconvoProvider.http.getDateFormate(noti.createdAt)}}</ion-note>
+      </h3>
+      <!-- {{noti | json}} -->
+      <p *ngIf="noti.body.message" [ngClass]="noti.type!=20?'unwrap-text':''">{{noti.body.message}}</p>
+      <p *ngIf="noti.body.image" class="link-text" (click)="openUrl(noti.body.image.secure_url)">{{checkIfPdf(noti.body.image.secure_url)?'Open pdf':'Open image'}} </p>
+    </ion-item>
+  </ion-list>
+  <ion-list *ngIf="userMessage">
+    <ion-item>{{userMessage}}</ion-item>
+  </ion-list>
 </ion-content>

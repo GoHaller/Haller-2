@@ -1,12 +1,7 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import BotConversation from '../models/bot-conversation.model';
-// import emailVerification from '../cronJobs/emailVerification';
-const apiai = require('apiai');
-const bcrypt = require('bcryptjs');
-const config = require('../../config/env');
 import devBot from '../controllers/bot.controller';
 
 var botConvoCtrl = {

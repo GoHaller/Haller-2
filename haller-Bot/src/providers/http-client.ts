@@ -12,9 +12,9 @@ export class HttpClient {
   public emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   public kuEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@ku.edu$/;
 
-  private env = 'prod-working';
+  private env = 'local';
   private getApiBaseUrl = () => {
-    let url = 'http://10.0.0.22:4040/api/bot/';
+    let url = 'http://10.0.0.2:4040/api/bot/';
     switch (this.env) {
       case 'stage': url = 'https://haller-api-v2.herokuapp.com/api/bot/'; break;
       case 'prod-working': url = 'https://haller-api-app-stage.herokuapp.com/api/bot/'; break;
@@ -49,6 +49,11 @@ export class HttpClient {
   post(url: string, postObj: any) {
     this.createAuthorizationHeader();
     return this.http.post(this.ApiBaseUrl + url, postObj, { headers: this.headers });
+  }
+
+  put(url: string, postObj: any) {
+    this.createAuthorizationHeader();
+    return this.http.put(this.ApiBaseUrl + url, postObj, { headers: this.headers });
   }
 
   extractData(res: any) {

@@ -90,6 +90,32 @@ const sendProblemReportEmail = (user, problemData) =>
     });
   });
 
+const sendBotProblemReportEmail = (user, problemData) =>
+  new Promise((fulfill, reject) => { //eslint-disable-line
+    if (config.env === 'test') {
+      return fulfill({ success: true, notified: user });
+    }
+
+    const data = {
+      from: 'HallerBot Problem <noreply@gohaller.com>',
+      to: 'support@gohaller.com',
+      subject: 'By ' + user.firstName,
+      html: `<h3> Name: ` + user.firstName + `</h3>` +
+      `<h3> Email: ` + user.email + `</h3>` +
+      `<h3>Issue Title: ` + problemData.title + `</h3>` +
+      `<h3>Issue Description: ` + problemData.description + `</h3>`
+    };
+    mailgun.messages().send(data, (error, body) => {
+      if (error) {
+        console.error(error); //eslint-disable-line
+        reject(error);
+      } else {
+        // console.log(body); //eslint-disable-line
+        fulfill({ success: true, notified: user }); //eslint-disable-line
+      }
+    });
+  });
+
 const sendFeedbackEmail = (user, problemData) =>
   new Promise((fulfill, reject) => { //eslint-disable-line
     if (config.env === 'test') {
@@ -103,6 +129,31 @@ const sendFeedbackEmail = (user, problemData) =>
       html: `<h3> <b>Name:</b> ` + user.firstName + ' ' + user.lastName + `</h3>` +
       `<h3> <b>Email:</b> ` + user.email + `</h3>` +
       `<h3> <b>Residence:</b> ` + user.residence + `</h3>` +
+      `<h3> <b>Description:</b> ` + problemData.description + `</h3>`
+    };
+    mailgun.messages().send(data, (error, body) => {
+      if (error) {
+        console.error(error); //eslint-disable-line
+        reject(error);
+      } else {
+        // console.log(body); //eslint-disable-line
+        fulfill({ success: true, notified: user }); //eslint-disable-line
+      }
+    });
+  });
+
+const sendBotFeedbackEmail = (user, problemData) =>
+  new Promise((fulfill, reject) => { //eslint-disable-line
+    if (config.env === 'test') {
+      return fulfill({ success: true, notified: user });
+    }
+
+    const data = {
+      from: 'HallerBot Feedback <noreply@gohaller.com>',
+      to: 'support@gohaller.com',
+      subject: 'By ' + user.firstName + ' ' + user.lastName,
+      html: `<h3> <b>Name:</b> ` + user.firstName + `</h3>` +
+      `<h3> <b>Email:</b> ` + user.email + `</h3>` +
       `<h3> <b>Description:</b> ` + problemData.description + `</h3>`
     };
     mailgun.messages().send(data, (error, body) => {

@@ -54,6 +54,13 @@ export default {
       firstName: Joi.string().required()
     })
   },
+  updateBotUser: {
+    body: Joi.object().keys({
+      userId: Joi.string().hex().required(),
+      notifications: Joi.object(),
+      firstName: Joi.string()
+    })
+  },
 
   // UPDATE /api/users/:userId
   updateUser: {
@@ -476,6 +483,23 @@ export default {
     body: {
       sataus: Joi.boolean().required(),
       userId: Joi.string().hex().required()
+    }
+  },
+  feedback: {
+    params: {
+      userId: Joi.string().hex().required()
+    },
+    body: {
+      description: Joi.string().required()
+    }
+  },
+  problemReport: {
+    params: {
+      userId: Joi.string().hex().required()
+    },
+    body: {
+      description: Joi.string().required(),
+      title: Joi.string().required()
     }
   }
 };

@@ -1,3 +1,35 @@
 page-notifications {
-
+    .toolbar-ios .segment-button{
+        max-width: 65px;
+    }
+    .segment-md .segment-button{
+        flex: none;
+        width: 65px;
+    }
+    .list > .item-block:first-child{
+        border-top: none;        
+    }
+    .list > .item-block:last-child{
+        border-bottom: none;
+    }
+    .item ion-avatar[item-left], .item ion-thumbnail[item-left]{
+        margin: 8px 0px 8px 8px;
+    }
+    ion-label{
+        white-space: normal;
+    }
+    .item{
+        background-color: transparent;
+    }
+    .item.unread{
+        background-color: #fff;
+    }
+    .unwrap-text{
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .note{
+        color: inherit;
+        font-size: 1.3rem;
+    }
 }

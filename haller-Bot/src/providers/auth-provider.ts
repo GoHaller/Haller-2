@@ -21,5 +21,8 @@ export class AuthProvider {
   create(postObj: any) {
     return this.http.post('users', postObj).map(this.http.extractData);
   }
+  update(putObj:any){
+    return this.http.put('users', putObj).map(this.http.extractData);
+  }
 
 }

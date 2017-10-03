@@ -5,6 +5,8 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 import { HttpModule } from '@angular/http';
 import { IonicStorageModule } from '@ionic/storage';
+import { Push } from '@ionic-native/push';
+import { LocalNotifications } from "@ionic-native/local-notifications";
 
 import { MyApp } from './app.component';
 import { HttpClient } from "../providers/http-client";
@@ -41,7 +43,7 @@ import { HttpClient } from "../providers/http-client";
     StatusBar,
     SplashScreen,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
-    HttpClient
+    Push, LocalNotifications, HttpClient
   ]
 })
 export class AppModule { }

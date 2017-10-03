@@ -13,6 +13,29 @@ const BotUserSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     index: true,
   },
+  notifications: {
+    enabled: {
+      type: Boolean,
+      default: true
+    },
+    deviceToken: {
+      type: String
+    },
+    os: { type: String },
+    method: {
+      type: String,
+      enum: ['email', 'push']
+    },
+    frequency: {
+      type: String,
+      enum: [
+        'weekly',
+        'monthly',
+        'daily',
+        'immediately'
+      ]
+    }
+  },
   email: {
     type: mongoose.SchemaTypes.Email,
     required: true,
@@ -58,6 +81,39 @@ BotUserSchema.statics = {
         return user;
       });
   },
+  search(keyword, skip, limit) {
+    var q = { $or: [{ role: { $exists: false } }, { role: { $ne: 'bot' } }] };
+    if (keyword) {
+      q = {
+        $and: [{
+          $or: [{ firstName: { $regex: '^' + keyword, $options: 'i' } }, { email: { $regex: '^' + keyword, $options: 'i' } },]
+        }, q]
+      }
+    }
+    // return this.find(q).skip(parseInt(skip)).limit(parseInt(limit)).exec().then((user) => { return user });
+    return this.aggregate([
+      { $match: q },
+      { $project: { _id: 1, email: 1, firstName: 1, createdAt: 1 } },
+      { $group: { count: { $sum: 1 }, _id: null, data: { $push: { _id: '$_id', email: '$email', firstName: '$firstName' } } } },
+      { $addFields: { "data.total": "$count" } },
+      { $unwind: "$data" },
+      { $replaceRoot: { newRoot: "$data" } },
+      { $skip: parseInt(skip) }, { $limit: parseInt(limit) },
+      { $lookup: { from: "botconversations", localField: "_id", foreignField: "createdBy", as: "convo" } },
+      { $project: { _id: 1, email: 1, firstName: 1, total: 1, convo: { "$arrayElemAt": ["$convo", 0] } } },
+      {
+        $project: {
+          email: 1, firstName: 1, total: 1,
+          "sentmsgs": {
+            $cond: [{ '$eq': ['$convo', undefined] }, [{}],
+            { $filter: { input: '$convo.messages', as: 'msg', cond: { $ifNull: ["$$msg.body", undefined] } } }]
+          }
+        }
+      },
+      { $group: { count: { $sum: { $size: { $ifNull: ['$sentmsgs', []] } } }, _id: { id: '$_id', email: '$email', firstName: '$firstName', total: '$total' } } },
+      { $project: { email: '$_id.email', firstName: '$_id.firstName', _id: '$_id.id', total: '$_id.total', sentCount: '$count' } }
+    ])
+  }
 }
 
 export default mongoose.model('BotUser', BotUserSchema);

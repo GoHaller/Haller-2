@@ -48,21 +48,24 @@ export class Registration {
   }
 
   regClicked(data) {
-    // console.log('password', this.authForm.controls.password);
-    // console.log(data);
-    // this.navCtrl.setRoot('Chatbot', {}, { animate: true, direction: 'forward' });
     if (this.authProvider.http.kuEmailRegex.test(data.email)) {
       if (data.password.length >= 8) {
         let loader = this.loadingCtrl.create({ content: "Please wait...", dismissOnPageChange: true });
         loader.present();
-        this.authProvider.create(data)
-          .subscribe((res: any) => {
-            loader.dismiss();
-            this.afertRegLogin(res);
-          }, error => {
-            loader.dismiss();
-            this.authProvider.http.showError(error);
-          }, () => { })
+        this.local.get('fcm-data').then((val) => {
+          if (val) {
+            let fcmData = JSON.parse(val);
+            data['notifications'] = { deviceToken: fcmData.deviceData.token, os: fcmData.deviceData.os }
+          }
+          this.authProvider.create(data)
+            .subscribe((res: any) => {
+              loader.dismiss();
+              this.afertRegistration(res);
+            }, error => {
+              loader.dismiss();
+              this.authProvider.http.showError(error);
+            }, () => { })
+        });
       } else {
         this.paswwordValidation();
       }
@@ -77,7 +80,7 @@ export class Registration {
     this.authProvider.login(data)
       .subscribe((res: any) => {
         loader.dismiss();
-        this.afertRegLogin(res);
+        this.afterLogin(res);
       }, error => {
         loader.dismiss();
         this.authProvider.http.showError(error);
@@ -86,7 +89,38 @@ export class Registration {
       })
   }
 
-  afertRegLogin(res) {
+  afterLogin(res) {
+    let loader = this.loadingCtrl.create({ content: "Please wait...", dismissOnPageChange: true });
+    loader.present();
+    this.local.set('auth', res.token);
+    this.local.set('uid', res.user._id);
+    this.local.set('userInfo', JSON.stringify(res.user)).then(() => {
+      this.local.get('fcm-data').then((val) => {
+        if (val) {
+          let fcmData = JSON.parse(val);
+          let data = { deviceToken: fcmData.deviceData.token, os: fcmData.deviceData.os }
+          this.authProvider.update({ userId: res.user._id, notifications: data })
+            .subscribe((user: any) => {
+              this.local.set('userInfo', JSON.stringify(user)).then(() => { })
+              loader.dismiss();
+              this.gotoChatBotPage();
+            }, error => {
+              loader.dismiss();
+              this.gotoChatBotPage();
+            })
+        } else {
+          loader.dismiss();
+          this.gotoChatBotPage()
+        }
+      });
+    });
+  }
+
+  gotoChatBotPage() {
+    this.navCtrl.setRoot('Chatbot', {}, { animate: true, direction: 'forward' });
+  }
+
+  afertRegistration(res) {
     this.local.set('auth', res.token);
     this.local.set('uid', res.user._id);
     this.local.set('userInfo', JSON.stringify(res.user)).then(() => {
