@@ -33,18 +33,34 @@ router.route('/users')
   .post(validate(paramValidation.createBotUser), botuserCtrl.create)
   .put(validate(paramValidation.updateBotUser), botuserCtrl.update)
   .get(botuserCtrl.searchUser)
+
+router.route('/users/users-for-notification')
+  .get(botuserCtrl.getForNotification)
 //Authentication APi end
 
 //ChatBot APi start
 router.route('/')
   .get(botuserCtrl.getBotUser);
 
+router.route('/convo/mass-reply')
+  .post(botConvoCtrl.massReply);
+
 router.route('/convo/:userId')
   .get(botConvoCtrl.getByCreater)
   .post(botConvoCtrl.asktoBot);
+
+router.route('/convo/reply/:conversationId')
+  .post(botConvoCtrl.replyAsBot);
 //ChatBot APi end
+
+
+router.route('/notification/create')
+  .get(botNotiCtrl.createUniversityNotification);
 
 router.route('/notification/for/:userId')
   .get(botNotiCtrl.getForMe);
+
+router.route('/notification/by/:userId')
+  .get(botNotiCtrl.getByMe);
 
 export default router;

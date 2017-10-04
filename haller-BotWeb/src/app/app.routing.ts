@@ -2,7 +2,10 @@ import { Routes } from '@angular/router';
 
 import { AdminLayoutComponent } from './layouts/admin/admin-layout.component';
 import { AuthLayoutComponent } from './layouts/auth/auth-layout.component';
-
+// {
+//     path: 'notifications',
+//     loadChildren: './notification/notification.module#NotificationModule'
+// },
 export const AppRoutes: Routes = [
     {
         path: '',
@@ -19,9 +22,6 @@ export const AppRoutes: Routes = [
             }, {
                 path: 'users',
                 loadChildren: './users/users.module#UsersModule'
-            }, {
-                path: 'notifications',
-                loadChildren: './notification/notification.module#NotificationModule'
             }, {
                 path: 'bot-conversations',
                 loadChildren: './bot/bot.module#BotModule'

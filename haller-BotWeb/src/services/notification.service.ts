@@ -5,7 +5,7 @@ import { environment } from 'environments/environment';
 
 @Injectable()
 export class NotificationService {
-    private notificationApiUrl: string = 'notifications/';
+    private notificationApiUrl: string = 'notification/';
     private headers = new Headers();
     public activeToken: String;
     private userId: string = localStorage.getItem('uid');
@@ -28,12 +28,12 @@ export class NotificationService {
 
     getNotification(userId: string) {
         this.createAuthorizationHeader();
-        return this.http.get(this.notificationApiUrl + userId + '/list', { headers: this.headers }).map(this.extractData);
+        return this.http.get(this.notificationApiUrl + '/by/' + userId, { headers: this.headers }).map(this.extractData);
     }
 
     getUsersForNotification() {
         this.createAuthorizationHeader();
-        return this.http.get(environment.ApiBaseUrl + 'users/admin/users-for-notification', { headers: this.headers })
+        return this.http.get(environment.ApiBaseUrl + 'users/users-for-notification', { headers: this.headers })
             .map(this.extractData);
     }
 

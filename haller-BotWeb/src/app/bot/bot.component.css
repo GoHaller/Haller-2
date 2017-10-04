@@ -1,0 +1,51 @@
+.bot .user-list{
+    margin-bottom: 0px;
+    padding: 5px 0px 5px 0px;
+    border-bottom: 1px solid #dedede;
+}
+
+.bot .user-image{
+    border-radius: 50%;
+    width:65px;
+    height:65px;
+}
+.selected-user .user-image{
+    border-radius: 50%;
+    width:45px;
+    height:45px;
+}
+
+.convo-section{
+    height: calc(100vh - 171px);
+    padding: 0px;
+}
+.convo-section .row{
+    margin: 0px;
+}
+.user-section{
+    height: calc(100vh - 121px);
+}
+
+.me .msg-container .bot-msgs{ max-width:85%;float: right;}
+.me .msg-container .msg-name{ text-align: right}
+.msg-time, .msg-name { 
+    color: #b5b5b5; 
+    margin: 0px; 
+    font-size: 10px;
+    line-height: 1; 
+}
+
+.them .msg-container .user-msgs{ max-width:85%; float: left; }
+.user-msgs .msg-time { float: right}
+.msg-container .bot-msgs, .msg-container .user-msgs{
+    border-radius: 5px; 
+    background-color: #ffffff; 
+    padding: 2px 5px;
+    margin-bottom: 5px;
+}
+.alert.alert-info i{
+    color: inherit;
+}
+.p-r-0{
+    padding-right: 0px;
+}

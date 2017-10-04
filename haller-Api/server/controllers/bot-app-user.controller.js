@@ -185,6 +185,11 @@ var botuserCtrl = {
         const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);
         return next(err);
       })
+  },
+  getForNotification: (req, res, next) => {
+    BotUser.find({ 'notifications.deviceToken': { $exists: true, $ne: "" } })
+      .then((users) => { res.json(users); })
+      .catch((e) => { return next(e); });
   }
 }
 

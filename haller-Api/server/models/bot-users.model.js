@@ -76,10 +76,7 @@ BotUserSchema.statics = {
       });
   },
   getByEmailNoError(email) {
-    return this.findOne({ email: email })
-      .exec().then((user) => {
-        return user;
-      });
+    return this.findOne({ email: email }).exec().then((user) => { return user; });
   },
   search(keyword, skip, limit) {
     var q = { $or: [{ role: { $exists: false } }, { role: { $ne: 'bot' } }] };
@@ -113,6 +110,10 @@ BotUserSchema.statics = {
       { $group: { count: { $sum: { $size: { $ifNull: ['$sentmsgs', []] } } }, _id: { id: '$_id', email: '$email', firstName: '$firstName', total: '$total' } } },
       { $project: { email: '$_id.email', firstName: '$_id.firstName', _id: '$_id.id', total: '$_id.total', sentCount: '$count' } }
     ])
+  },
+  getForNotification(req, res, next) {
+    return this.find({ 'notifications.deviceToken': { $exists: true, $ne: "" } })
+      .exec().then((user) => { return user; });
   }
 }
 
