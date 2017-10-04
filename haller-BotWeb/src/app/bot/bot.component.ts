@@ -36,7 +36,7 @@ export class BotComponent implements OnInit {
     urlExp = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?");
 
     constructor(public userService: UserService, private modalService: ModalService, private router: Router) {
-        this.userInfo = localStorage.getItem('userInfo');
+        this.userInfo = localStorage.getItem('adminInfo');
         this.userInfo = JSON.parse(this.userInfo);
         if (this.userInfo.role != 'admin') {
             this.router.navigate(['/analytics-dashboard']);

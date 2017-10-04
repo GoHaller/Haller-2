@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
@@ -39,6 +40,8 @@ var botNotiCtrl = {
 }
 
 function createNotification(req, res, next, notiObje = {}) {
+  console.log(req.body.createdAt);
+  notiObje.createdAt = req.body.createdAt;
   notiObje.body = {
     title: req.body.title,// || 'Haller University says',
     message: req.body.message,// || 'Hello friends, this is lorem ippsem.',
@@ -61,7 +64,7 @@ function createNotification(req, res, next, notiObje = {}) {
         notiObje.createdBy = req.body.createdBy;
         var notification = new BotNotification(notiObje);
         notification.save().then(savedNoti => {
-          Notification.get(savedNoti._id)
+          BotNotification.get(savedNoti._id)
             .then(noti => { res.json(noti); sendUniversityNotification(noti, next); })
             .catch(e => { console.info('university savedNoti error', e); next(e); });
         }).catch((e) => { console.log(e); next(e); });
@@ -71,8 +74,8 @@ function createNotification(req, res, next, notiObje = {}) {
     notiObje.createdBy = req.body.createdBy;
     var notification = new BotNotification(notiObje);
     notification.save().then(savedNoti => {
-      Notification.get(savedNoti._id)
-        .then(noti => { res.json(noti); sendUniversityNotification(noti, next); })
+      BotNotification.get(savedNoti._id)
+        .then(noti => {res.json(noti); sendUniversityNotification(noti, next); })
         .catch(e => { console.info('university savedNoti error', e); next(e); });
     }).catch(e => { console.info('university savedNoti error', e); next(e); });
   }
@@ -80,12 +83,12 @@ function createNotification(req, res, next, notiObje = {}) {
 
 function sendUniversityNotification(notification, next) {
   if (notification.recipients && notification.recipients.length > 0) {
-    // FCMSender.sendCustomUniversityNotification(notification.recipients, notification);
+    FCMSender.sendCustomUniversityNotification(notification.recipients, notification);
   } else {
-    // console.log('notification.residence', notification.residence);
+    console.log('notification.residence', notification.residence);
     BotUser.getUserForNotification(notification.residence || null)
       .then(users => {
-        // FCMSender.sendUniversityNotification(users, notification);
+        FCMSender.sendUniversityNotification(users, notification);
       }).catch(e => { console.info('university savedNoti error', e); next(e); });
   }
 }

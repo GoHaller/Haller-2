@@ -65,6 +65,9 @@ const BotUserSchema = new mongoose.Schema({
   },
   updatedAt: {
     type: Date,
+  },
+  role: {
+    type: String
   }
 });
 

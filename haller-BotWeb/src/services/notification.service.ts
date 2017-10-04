@@ -8,11 +8,11 @@ export class NotificationService {
     private notificationApiUrl: string = 'notification/';
     private headers = new Headers();
     public activeToken: String;
-    private userId: string = localStorage.getItem('uid');
+    private userId: string = localStorage.getItem('adminid');
 
     constructor(private http: Http) {
         this.notificationApiUrl = environment.ApiBaseUrl + this.notificationApiUrl;
-        let userInfo = localStorage.getItem('userInfo');
+        let userInfo = localStorage.getItem('adminInfo');
         this.activeToken = userInfo ? JSON.parse(userInfo).status.activeToken : '';
     }
 
@@ -28,7 +28,7 @@ export class NotificationService {
 
     getNotification(userId: string) {
         this.createAuthorizationHeader();
-        return this.http.get(this.notificationApiUrl + '/by/' + userId, { headers: this.headers }).map(this.extractData);
+        return this.http.get(this.notificationApiUrl + 'by/' + userId, { headers: this.headers }).map(this.extractData);
     }
 
     getUsersForNotification() {

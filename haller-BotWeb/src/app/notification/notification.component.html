@@ -3,14 +3,14 @@
         <div class="modal">
             <div class="modal-body col-md-6 col-md-offset-3">
                 <div class="card">
-                    <form #frmNotification="ngForm" novalidate>
+                    <form #frmNotification="ngForm" novalidate autocomplete="off">
                         <div class="card-header card-header-icon" data-background-color="blue">
                             <i class="material-icons">notification</i>
                         </div>
                         <div class="card-content">
                             <h4 class="card-title">Push Notification</h4>
                             <div class="form-group label-floating" *ngIf="userInfo.role == 'admin'">
-                                <div class="row">
+                                <!--<div class="row">
                                     <div class="col-sm-4">
                                         <div class="checkbox">
                                             <label>
@@ -18,16 +18,17 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row" *ngIf="isCustomNotification">
-                                    <div class="col-sm-4">
+                                </div>-->
+                                <!--<div class="row" *ngIf="isCustomNotification">-->
+                                <div class="row">
+                                    <!--<div class="col-sm-4">
                                         <select id="select-resicense" class="selectpicker" name="recipent" [(ngModel)]="selectedResidense" data-style="select-with-transition"
                                             title="All Residence" data-size="6">
                                             <option *ngFor="let residence of residenceListForSearch" [ngValue]="residence.value">
                                                     {{residence.name}}
                                             </option>
                                         </select>
-                                    </div>
+                                    </div>-->
                                     <div class="col-sm-4">
                                         <div class="checkbox">
                                             <label>
@@ -42,7 +43,8 @@
                                         <div class="noti-user-selection">
                                             <div *ngFor="let user of usersForNotifications | peersearch:['firstName','lastName',searchText, selectedResidense, selectedUserList]"
                                                 class="noti-user-selection-list" (click)="selectUserForNotification(user)">
-                                                {{user.firstName + ' ' + user.lastName}}
+                                                <span *ngIf="user.firstName != undefined">{{user.firstName + ' '}}</span>
+                                                <span *ngIf="user.lastName != undefined">{{user.lastName}}</span>
                                             </div>
                                         </div>
                                         <!-- <select class="selectpicker" [disabled]="toAllstudent" name="recipent" [(ngModel)]="selectedUserList" multiple="multiple"
@@ -53,11 +55,13 @@
                                         </select> -->
                                     </div>
                                 </div>
-                                <div class="row" *ngIf="isCustomNotification">
+                                <div class="row">
                                     <div class="col-sm-12">
                                         <span *ngFor="let user of selectedUserList; let i=index" class="noti-user-selected-list">
-                                            {{user.firstName + ' ' + user.lastName}}
-                                            <span (click)="removeSelectedUser(i)"><i class="material-icons noti-selected-user-remove">close</i></span>
+                                            <!--{{user.firstName + ' ' + user.lastName}}-->
+                                             <span *ngIf="user.firstName != undefined">{{user.firstName + ' '}}</span>
+                                        <span *ngIf="user.lastName != undefined">{{user.lastName}}</span>
+                                        <span (click)="removeSelectedUser(i)"><i class="material-icons noti-selected-user-remove">close</i></span>
                                         </span>
                                     </div>
                                 </div>
@@ -117,7 +121,7 @@
                             <a *ngIf="!checkFileIfImageToDisplay(displayNotification.body.image.secure_url)" [href]="displayNotification.body.image.secure_url"
                                 target="_blank">Open pdf</a>
                         </div>
-                        <div *ngIf="displayNotification.type == 21">
+                        <!--<div *ngIf="displayNotification.type == 21">
                             <div *ngIf="displayNotification.recipients && displayNotification.recipients.length > 0">
                                 <b>Recipient: </b>
                                 <span *ngFor="let user of displayNotification.recipients">{{user.user.firstName+' '+user.user.lastName+', '}}</span>
@@ -126,6 +130,20 @@
                                 <b>Recipient: </b>{{displayNotification.residence}}
                             </div>
                             <div *ngIf="(!displayNotification.recipients || displayNotification.recipients.length == 0) && !displayNotification.residence">
+                                <b>Recipient: </b>All Students
+                            </div>
+                        </div>-->
+                        <div>
+                            <div *ngIf="displayNotification.recipients && displayNotification.recipients.length > 0">
+                                <b>Recipient: </b>
+                                <span *ngFor="let user of displayNotification.recipients">
+                                      <span *ngIf="user.user.firstName != undefined">{{user.user.firstName + ' '}}</span>
+                                <span *ngIf="user.user.lastName != undefined">{{user.user.lastName}}</span>,
+
+                                </span>
+                            </div>
+
+                            <div *ngIf="(displayNotification.recipients && displayNotification.recipients.length == 0)">
                                 <b>Recipient: </b>All Students
                             </div>
                         </div>
@@ -166,9 +184,9 @@
                                         <th>No.</th>
                                         <th>Title</th>
                                         <th>Message</th>
-                                        <th *ngIf="userInfo.role == 'admin'">Created By</th>
+                                        <!--<th *ngIf="userInfo.role == 'admin'">Created By</th>-->
                                         <th>Created At</th>
-                                        <th>Type</th>
+                                        <!--<th>Type</th>-->
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -181,9 +199,9 @@
                                         <td>
                                             <span class="restrictbody">{{item.body.message}}</span>
                                         </td>
-                                        <td *ngIf="userInfo.role == 'admin'">{{item.createdBy.firstName}} {{item.createdBy.lastName}} </td>
+                                        <!--<td *ngIf="userInfo.role == 'admin'">{{item.createdBy.firstName}} {{item.createdBy.lastName}} </td>-->
                                         <td>{{item.createdAt | date:'medium'}}</td>
-                                        <td>{{item.type==21?'Custom':'University'}}</td>
+                                        <!--<td>{{item.type==21?'Custom':'University'}}</td>-->
                                         <td><button type="button" rel="tooltip" (click)="openPopToDIsplay(item)" class="btn btn-success btn-sm">View</button></td>
                                         <!--  </template> -->
                                     </tr>

@@ -63,6 +63,42 @@ var botuserCtrl = {
         return next(err);
       })
   },
+
+  adminlogin: (req, res, next) => {
+    BotUser.getByEmailNoError(req.body.email)
+      .then((user) => {
+         if (user && user.role == 'admin') {
+          bcrypt.compare(req.body.password, user.password, (err, same) => { //eslint-disable-line
+            if (same) {
+              const token = jwt.sign({ email: user.email }, config.jwtSecret);
+              const userCpy = user;   // update the user status object to
+              userCpy.status.online = true; // reflect their current online status.
+              userCpy.status.currentStatus = 'online';
+              userCpy.status.lastOnline = new Date();
+              userCpy.status.activeToken = token;
+              userCpy.save().then(updatedUser => { res.json({ token, user: updatedUser, }) }
+                , error => {
+                  console.log('login error', error);
+                  const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);
+                  return next(err);
+                });
+            } else {
+              const error = new APIError('Authentication fail!', httpStatus.UNAUTHORIZED);
+              return next(error);
+            }
+          });
+        }
+         else {
+          const error = new APIError('Authentication fail!', httpStatus.UNAUTHORIZED);
+          return next(error);
+         }
+      },
+      (error) => {
+        console.log('login error', error);
+        const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);
+        return next(err);
+      })
+  },
   changePassword: (req, res, next) => {
     BotUser.get(req.body.id)
       .then((user) => {

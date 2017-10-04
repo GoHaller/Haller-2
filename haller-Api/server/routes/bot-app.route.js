@@ -23,6 +23,8 @@ router.route('/report-problem/:userId')
 router.route('/login')
   .post(validate(paramValidation.login), botuserCtrl.login);
 
+  router.route('/adminlogin').post(validate(paramValidation.login), botuserCtrl.adminlogin);
+
 router.route('/logout/:userId')
   .get(botuserCtrl.logout);
 
@@ -54,8 +56,8 @@ router.route('/convo/reply/:conversationId')
 //ChatBot APi end
 
 
-router.route('/notification/create')
-  .get(botNotiCtrl.createUniversityNotification);
+router.route('/notification/createnew')
+  .post(botNotiCtrl.createUniversityNotification);
 
 router.route('/notification/for/:userId')
   .get(botNotiCtrl.getForMe);

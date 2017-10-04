@@ -13,13 +13,20 @@ export class AuthService {
     login(userObj: any) {
         return this.http.post(this.authApiUrl + 'admin/login', userObj).map(this.extractData);
     }
+
+    adminlogin(userObj: any) {
+        return this.http.post(environment.ApiBaseUrl + 'adminlogin', userObj).map(this.extractData);
+    }
+    logout(userId) {
+        return this.http.get(environment.ApiBaseUrl + 'logout/'+userId).map(this.extractData);
+    }
     forgotRequest(email: any) {
-    
-        return this.http.post(this.authApiUrl + 'sendmail',email).map(this.extractData);
+
+        return this.http.post(this.authApiUrl + 'sendmail', email).map(this.extractData);
     }
     passwordChanged(passwordobj: any) {
-    
-        return this.http.post(this.authApiUrl + 'resetpassword',passwordobj).map(this.extractData);
+
+        return this.http.post(this.authApiUrl + 'resetpassword', passwordobj).map(this.extractData);
     }
     private extractData(res: Response) {
         return (typeof res == 'object') ? res.json() : res;

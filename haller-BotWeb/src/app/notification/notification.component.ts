@@ -51,7 +51,7 @@ export class NotificationComponent implements OnInit {
     file: File;
     constructor(private location: Location, private modalService: ModalService,
         private notificationService: NotificationService, private postService: PostService) {
-        this.userInfo = localStorage.getItem('userInfo');
+        this.userInfo = localStorage.getItem('adminInfo');
         this.userInfo = JSON.parse(this.userInfo);
     }
 
@@ -83,8 +83,9 @@ export class NotificationComponent implements OnInit {
     }
 
     addNotification(model, isValid, id) {
+        document.getElementById('requestloader').setAttribute('style','display : block');
         if (isValid) {
-            if (this.isCustomNotification && !this.toAllstudent && this.selectedUserList.length == 0) {
+            if (!this.toAllstudent && this.selectedUserList.length == 0) {
                 // alert('Please select sudent from dropdown');
                 this.selectOneRecipient = true;
                 return;
@@ -185,6 +186,7 @@ export class NotificationComponent implements OnInit {
         return (obj && (Object.keys(obj).length === 0));
     }
     showNotification() {
+        this.searchText = "";
         this.notificationModal = {};
         this.selectedUserList = [];
         this.selectOneRecipient = false;
@@ -193,19 +195,20 @@ export class NotificationComponent implements OnInit {
     }
 
     createNotificationApi(cloudinaryResponse = null) {
+        debugger;
         let notificationObj = {
-            createdBy: localStorage.getItem('uid'),
+            createdBy: localStorage.getItem('adminid'),
             title: this.title,
             message: this.message,
             createdAt: new Date(),
             isCustom: this.isCustomNotification,
             residence: this.selectedResidense
         };
-        if (this.isCustomNotification && !this.toAllstudent && this.selectedUserList.length > 0) {
+        if (!this.toAllstudent && this.selectedUserList.length > 0) {
             notificationObj['recipients'] = this.selectedUserList.map(ele => { return ele._id });
         }
         if (cloudinaryResponse) {
-            cloudinaryResponse.createdBy = localStorage.getItem('uid');
+            cloudinaryResponse.createdBy = localStorage.getItem('adminid');
             cloudinaryResponse.version = cloudinaryResponse.version.toString();
             notificationObj['file'] = cloudinaryResponse;
         } else {
@@ -214,6 +217,7 @@ export class NotificationComponent implements OnInit {
         // console.log('notificationObj', notificationObj);
         this.notificationService.createNotification(notificationObj)
             .subscribe((res: any) => {
+                document.getElementById('requestloader').setAttribute('style','display : none');
                 // console.log('createNotification res', res);
                 this.file = null;
                 // this.userInfo = [];

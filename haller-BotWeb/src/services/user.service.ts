@@ -18,7 +18,7 @@ export class UserService {
 
     constructor(private http: Http) {
         this.adminApiUrl = environment.ApiBaseUrl + this.adminApiUrl;
-        let userInfo = localStorage.getItem('userInfo');
+        let userInfo = localStorage.getItem('adminInfo');
         this.activeToken = userInfo ? JSON.parse(userInfo).status.activeToken : '';
     }
 

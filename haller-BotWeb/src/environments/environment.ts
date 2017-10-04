@@ -4,7 +4,8 @@
 // The list of which env maps to which file can be found in `.angular-cli.json`.
 const env = 'local';
 const getApiBaseUrl = () => {
-    let url = 'http://10.0.0.2:4040/api/bot/';
+    // let url = 'http://10.0.0.18:4040/api/bot/';
+    let url = 'http://localhost:4040/api/bot/';
     switch (this.env) {
         case 'stage': url = 'https://haller-api-v2.herokuapp.com/api/bot/'; break;
         case 'prod-working': url = 'https://haller-api-app-stage.herokuapp.com/api/bot/'; break;

@@ -56,6 +56,10 @@ const populateMap = () =>
   [{
     path: 'body.image',
     model: 'Library'
+  },
+  {
+    path: 'recipients.user',
+    model: 'BotUser'
   }];
 
 const types = {
@@ -64,7 +68,26 @@ const types = {
 };
 
 BotNotificationSchema.statics = {
+    get(id) {
+    if (id.toString().match(/^[0-9a-fA-F]{24}$/).length > 0) {
+      return this.findById(id)
+        .populate(populateMap())
+        .exec()
+        .then((notification) => {
+          if (notification) {
+            return notification;
+          }
+          const err = new APIError('No such Notification exists!', httpStatus.NOT_FOUND);
+          return Promise.reject(err);
+        })
+        .error(err => Promise.reject(err))
+        .catch(err => Promise.reject(err));
+    }
+    const err = new APIError('Invalid Id!', httpStatus.INTERNAL_SERVER_ERROR);
+    return Promise.reject(err);
+  },
   getByCreater(userId, skip, limit) {
+    console.log(populateMap());
     return this.find({ createdBy: userId }).skip(parseInt(skip)).limit(parseInt(limit)).sort({ createdAt: -1 })
       .populate(populateMap()).exec().then((notifications) => { return notifications });
   },

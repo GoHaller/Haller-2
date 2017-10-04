@@ -8,14 +8,14 @@ export class PostService {
     private adminApiUrl: string = 'posts/admin/';
     private headers = new Headers();
     public activeToken: String;
-    private userId: string = localStorage.getItem('uid');
+    private userId: string = localStorage.getItem('adminid');
     private cloudname: string = 'dsgcstnsx';
     private clodinaryApi: string = `https://api.cloudinary.com/v1_1/${this.cloudname}/auto/upload`;
     // private clodinaryApi: string = `https://api.cloudinary.com/v1_1/${this.cloudname}/raw/upload`;
 
     constructor(private http: Http) {
         this.adminApiUrl = environment.ApiBaseUrl + this.adminApiUrl;
-        let userInfo = localStorage.getItem('userInfo');
+        let userInfo = localStorage.getItem('adminInfo');
         this.activeToken = userInfo ? JSON.parse(userInfo).status.activeToken : '';
     }
 
