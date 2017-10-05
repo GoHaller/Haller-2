@@ -132,6 +132,7 @@ var botuserCtrl = {
           const user = new BotUser({
             _id: mongoose.Types.ObjectId(), email: req.body.email,
             password: bcrypt.hashSync(req.body.password, 10), firstName: req.body.firstName,
+            role : 'student',
             notifications: req.body.notifications
           });
           user.save()

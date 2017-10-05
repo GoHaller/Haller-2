@@ -83,7 +83,8 @@ export class NotificationComponent implements OnInit {
     }
 
     addNotification(model, isValid, id) {
-        document.getElementById('requestloader').setAttribute('style','display : block');
+        document.getElementById('requestloader').removeAttribute("class");
+        document.getElementById('requestloader').setAttribute('class','overlayblock');
         if (isValid) {
             if (!this.toAllstudent && this.selectedUserList.length == 0) {
                 // alert('Please select sudent from dropdown');
@@ -217,7 +218,8 @@ export class NotificationComponent implements OnInit {
         // console.log('notificationObj', notificationObj);
         this.notificationService.createNotification(notificationObj)
             .subscribe((res: any) => {
-                document.getElementById('requestloader').setAttribute('style','display : none');
+                   document.getElementById('requestloader').removeAttribute("class");
+        document.getElementById('requestloader').setAttribute('class','overlaynone');
                 // console.log('createNotification res', res);
                 this.file = null;
                 // this.userInfo = [];
@@ -244,6 +246,7 @@ export class NotificationComponent implements OnInit {
 
     selectUserForNotification(user) {
         this.selectedUserList.push(user);
+         this.searchText = "";
     }
 
     removeSelectedUser(index) {

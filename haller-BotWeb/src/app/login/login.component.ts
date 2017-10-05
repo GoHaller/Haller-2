@@ -3,7 +3,7 @@ import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 
 declare var $: any;
-
+declare var swal: any;
 @Component({
     moduleId: module.id,
     selector: 'login-cmp',
@@ -31,8 +31,17 @@ export class LoginComponent implements OnInit {
                 localStorage.setItem('adminid', response.user._id);
                 localStorage.setItem('adminauth', response.token);
                 this.router.navigate(['/users']);
-            }
-        )
+            }, error => {
+                var errormsg = JSON.parse(error._body);
+                console.info('login error', errormsg.message);
+                
+        swal({
+            text: errormsg.message,
+            type: 'error',
+            showCancelButton: false,
+            showConfirmButton: true
+        })
+            })
     }
 
     checkFullPageBackgroundImage() {

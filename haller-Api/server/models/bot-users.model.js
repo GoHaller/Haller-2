@@ -82,7 +82,7 @@ BotUserSchema.statics = {
     return this.findOne({ email: email }).exec().then((user) => { return user; });
   },
   search(keyword, skip, limit) {
-    var q = { $or: [{ role: { $exists: false } }, { role: { $ne: 'bot' } }] };
+    var q = { $or: [{ role: { $exists: false } }, { role: { $eq: 'student' } }] };
     if (keyword) {
       q = {
         $and: [{
