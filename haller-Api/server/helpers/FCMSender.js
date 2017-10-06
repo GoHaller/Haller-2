@@ -185,6 +185,7 @@ const sendUniversityNotification = (participants, message) => {
   });
 }
 
+
 const sendCustomUniversityNotification = (participants, message) => {
   participants.forEach((participant) => {
     var token = [];
@@ -220,4 +221,74 @@ const sendCustomUniversityNotification = (participants, message) => {
   });
 }
 
-export default { send, sendNotification, sendMsgNotification, sendUniversityNotification, demoSend, sendCustomUniversityNotification };
+
+const sendUniversityNotificationMessage = (participants, message) => {
+  participants.forEach((participant) => {
+    // console.log(participant.firstName + ' ' + participant.lastName);
+    var token = [];
+    var os = 'ios';
+    if (participant.notifications.deviceToken) {
+      token.push(participant.notifications.deviceToken);
+      os = participant.notifications.os;
+    }
+    if (token.length > 0) {
+      var notiesObj = {};
+      notiesObj.title = message.body.title;
+      notiesObj.message = message.body.message;
+      notiesObj.body = message.body.message;
+      notiesObj.uni_msg = message.body;
+      notiesObj._id = message._id;
+      notiesObj.type = message.type;
+      notiesObj.notId = message._id.toString().substr(-4) + notiesObj.type;
+      console.info('msg notiesObj', notiesObj.notId);
+      send(token, notiesObj, os)
+        .then(function (response) {
+          console.log('=======================success===========================');
+          console.log("Successfully sent with response");//, JSON.stringify(response));
+          console.log('=========================================================');
+        })
+        .catch(function (err) {
+          console.log('========================error============================');
+          console.log("Something has gone wrong!");
+          console.info('err', err);
+          console.log('=========================================================');
+        })
+    }
+  });
+}
+
+const sendCustomUniversityNotificationMessage = (participants, message) => {
+  participants.forEach((participant) => {
+    var token = [];
+    var os = 'ios';
+    // console.log(participant.user.firstName + ' ' + participant.user.lastName);
+    if (participant.user.notifications.deviceToken) {
+      token.push(participant.user.notifications.deviceToken);
+      os = participant.user.notifications.os;
+    }
+    if (token.length > 0) {
+      var notiesObj = {};
+      notiesObj.title = message.body.title;
+      notiesObj.message = message.body.message;
+      notiesObj.body = message.body.message;
+      notiesObj.uni_msg = message.body;
+      notiesObj._id = message._id;
+      notiesObj.type = message.type;
+      notiesObj.notId = message._id.toString().substr(-4) + notiesObj.type;
+      // console.info('msg notiesObj', notiesObj.notId);
+      send(token, notiesObj, os)
+        .then(function (response) {
+          console.log('=======================success===========================');
+          console.log("Successfully sent with response");//, JSON.stringify(response));
+          console.log('=========================================================');
+        })
+        .catch(function (err) {
+          console.log('========================error============================');
+          console.log("Something has gone wrong!");
+          console.info('err', err);
+          console.log('=========================================================');
+        })
+    }
+  });
+}
+export default { send, sendNotification, sendMsgNotification, sendUniversityNotification, demoSend, sendCustomUniversityNotification, sendCustomUniversityNotificationMessage, sendUniversityNotificationMessage };

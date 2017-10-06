@@ -67,7 +67,7 @@ var botuserCtrl = {
   adminlogin: (req, res, next) => {
     BotUser.getByEmailNoError(req.body.email)
       .then((user) => {
-         if (user && user.role == 'admin') {
+        if (user && user.role == 'admin') {
           bcrypt.compare(req.body.password, user.password, (err, same) => { //eslint-disable-line
             if (same) {
               const token = jwt.sign({ email: user.email }, config.jwtSecret);
@@ -88,10 +88,10 @@ var botuserCtrl = {
             }
           });
         }
-         else {
+        else {
           const error = new APIError('Authentication fail!', httpStatus.UNAUTHORIZED);
           return next(error);
-         }
+        }
       },
       (error) => {
         console.log('login error', error);
@@ -132,7 +132,7 @@ var botuserCtrl = {
           const user = new BotUser({
             _id: mongoose.Types.ObjectId(), email: req.body.email,
             password: bcrypt.hashSync(req.body.password, 10), firstName: req.body.firstName,
-            role : 'student',
+            role: 'student',
             notifications: req.body.notifications
           });
           user.save()
@@ -213,7 +213,7 @@ var botuserCtrl = {
     BotUser.search(keyword, skip, limit)
       .then((users) => {
         res.json(users);
-        
+
       }, error => {
         console.log('searchUser error', error);
         const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);
@@ -228,6 +228,13 @@ var botuserCtrl = {
     BotUser.find({ 'notifications.deviceToken': { $exists: true, $ne: "" } })
       .then((users) => { res.json(users); })
       .catch((e) => { return next(e); });
+  },
+  getUserAnalytics: (req, res, next) => {
+    BotUser.getUserAnalytics(req, res, next).then((result) => {
+      console.log(result);
+      res.json(result);
+    })
+      .catch((e) => { return next(e); })
   }
 }
 

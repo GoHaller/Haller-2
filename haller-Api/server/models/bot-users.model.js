@@ -5,6 +5,7 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import BotConversation from '../models/bot-conversation.model';
 
+
 function toLower(v) {
   return v.toLowerCase();
 }
@@ -82,7 +83,7 @@ BotUserSchema.statics = {
   getByEmailNoError(email) {
     return this.findOne({ email: email }).exec().then((user) => { return user; });
   },
-search(keyword, skip, limit) {
+  search(keyword, skip, limit) {
     var q = { $or: [{ role: { $exists: false } }, { role: { $eq: 'student' } }] };
     if (keyword) {
       q = {
@@ -95,10 +96,10 @@ search(keyword, skip, limit) {
     return this.aggregate([
       { $match: q },
       { $project: { _id: 1, email: 1, firstName: 1, createdAt: 1 } },
-      { $group: { count: { $sum: 1 }, _id: null, data: { $push: { id: '$_id', email: '$email', firstName: '$firstName' } } } },
+      { $group: { count: { $sum: 1 }, _id: null, data: { $push: { _id: '$_id', email: '$email', firstName: '$firstName' } } } },
       { $unwind: "$data" },
       { $skip: parseInt(skip) }, { $limit: parseInt(limit) },
-      { $group: { _id: null, data: { $push: { id: '$data._id', email: '$data.email', firstName: '$data.firstName', total: "$count" } } } },
+      { $group: { _id: null, data: { $push: { _id: '$data._id', email: '$data.email', firstName: '$data.firstName', total: "$count" } } } },
       { $unwind: "$data" },
       { $project: { _id: '$data._id', email: '$data.email', firstName: '$data.firstName', total: "$data.total" } },
       { $lookup: { from: "botconversations", localField: "_id", foreignField: "createdBy", as: "convo" } },
@@ -112,8 +113,8 @@ search(keyword, skip, limit) {
           }
         }
       },
-      { $group: { count: { $sum: { $size: { $ifNull: ['$sentmsgs', []] } } }, _id: { id: '$_id', email: '$email', firstName: '$firstName', total: '$total' } } },
-      { $project: { email: '$_id.email', firstName: '$_id.firstName', _id: '$_id.id', total: '$_id.total', sentCount: '$count' } }
+      { $group: { count: { $sum: { $size: { $ifNull: ['$sentmsgs', []] } } }, _id: { _id: '$_id', email: '$email', firstName: '$firstName', total: '$total' } } },
+      { $project: { email: '$_id.email', firstName: '$_id.firstName', _id: '$_id._id', total: '$_id.total', sentCount: '$count' } }
     ])
   },
   getForNotification(req, res, next) {
@@ -124,9 +125,10 @@ search(keyword, skip, limit) {
     // return this.find({ 'blocked.user': { $in: [id] } }, { id: true }).exec();
     var orq = [{ 'blocked.user': { $in: [id] } }, { 'deleted': true }, { 'role': 'admin' }];
     if (!includeBot) orq.push({ 'role': 'bot' })
-    return this.find({ $or: orq }, { _id: 1 }).exec(); 
+    return this.find({ $or: orq }, { _id: 1 }).exec();
   },
-  getUserAnalytics: (req, res, next) => {
+
+  getUserAnalytics(req, res, next) {
     var email = 'dev.bot@ku.edu';// + domain;, facebook: 1
     this.findOne({ email: email, role: 'bot' })
       .then(bot => {
@@ -149,8 +151,10 @@ search(keyword, skip, limit) {
                       { _id: 1, 'messages.createdBy': 1, 'messages.createdAt': 1 }).lean().exec().then((botConvo) => {
                         user['analyticsMsg'] = { userId: userId, totalCount: totalCount[0] ? totalCount[0] : null, oneToOneCount: oneToOneCount, sentCount: sentCount[0] ? sentCount[0].count : 0, bot: botConvo ? botConvo.messages : botConvo };
                         if (count == array.length) {
-                          res.setHeader('Content-Type', 'application/json');
-                          res.send(JSON.stringify({ 'users': users }, null, 4));
+                          console.log(users);
+                          return users;
+                          // res.setHeader('Content-Type', 'application/json');
+                          // res.send(JSON.stringify({ 'users': users }, null, 4));
                         } else {
                           count += 1;
                         }

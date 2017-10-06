@@ -24,7 +24,7 @@ router.route('/report-problem/:userId')
 router.route('/login')
   .post(validate(paramValidation.login), botuserCtrl.login);
 
-  router.route('/adminlogin').post(validate(paramValidation.login), botuserCtrl.adminlogin);
+router.route('/adminlogin').post(validate(paramValidation.login), botuserCtrl.adminlogin);
 
 router.route('/logout/:userId')
   .get(botuserCtrl.logout);
@@ -39,7 +39,11 @@ router.route('/users')
 
 router.route('/users/users-for-notification')
   .get(botuserCtrl.getForNotification)
-  
+
+//for user analytics
+
+router.route('/users/useranalytics').get(botuserCtrl.getUserAnalytics)
+
 //Authentication APi end
 
 //ChatBot APi start
@@ -68,7 +72,7 @@ router.route('/notification/by/:userId')
   .get(botNotiCtrl.getByMe);
 
 
-  //Event Api start 
+//Event Api start
 router.route('/events')
   .post(botEventCtrl.create);
 
@@ -88,9 +92,9 @@ router.route('/events/:eventId')
   .put(botEventCtrl.update)
   .delete(botEventCtrl.remove);
 
-  router.route('/events/:userId/feeds/:feed')
+router.route('/events/:userId/feeds/:feed')
   /** GET /api/users/:userId/feeds/:feed - Get posts for specific feeds */
   .get(botEventCtrl.listByFeed);
-  //Event Api end
+//Event Api end
 
 export default router;

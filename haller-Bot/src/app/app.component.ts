@@ -1,15 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { Push, PushObject, PushOptions } from "@ionic-native/push";
 import { LocalNotifications } from "@ionic-native/local-notifications";
+import { NavController } from 'ionic-angular';
 
 @Component({
   templateUrl: 'app.html'
 })
 export class MyApp {
+  @ViewChild('myNav') nav: NavController
   rootPage: any = '';
   local: Storage;
 
@@ -53,6 +55,7 @@ export class MyApp {
       this.local.set('fcm-data', JSON.stringify(device)).then(() => { });
 
       this.localNotifications.on('click', (data: any, state: any) => {
+
         // console.info('localNotifications click data', data)
         // if (this.platform.is('ios')) {
         //   data.aps = null;
@@ -71,6 +74,10 @@ export class MyApp {
         this.shaoLocalNotification(data);
         // this.event.publish('notification:allrecieve', data.additionalData);
       } else {
+        if (data.additionalData.type == 1) {
+          this.nav.push('Notifications');
+        }
+
         //if user NOT using app and push notification comes
         //TODO: Your logic on click of push notification directly
         // this.gotoDetailPage(data.additionalData, false);

@@ -12,32 +12,34 @@
                 </div>
                 <div class="row">
                     <form role="search">
-                        <div class="col-sm-1">&nbsp;</div>
+                        <!-- <div class="col-sm-1">&nbsp;</div> -->
                         <div class="form-group form-search is-empty p-r-0" [ngClass]="{'col-sm-7':searchkey.length>0,'col-sm-9':searchkey.length==0}">
                             <input type="text" class="form-control" name="searchkey" [(ngModel)]="searchkey" placeholder="Search">
                             <span class="material-input "></span>
                         </div>
                         <div class="col-sm-2 p-r-0">
                             <button type="submit" (click)="getAllUserWithFilter()" class="btn btn-white btn-round btn-just-icon">
-                                    <i class="material-icons">search</i>
-                                    <div class="ripple-container"></div>
-                                </button>
+                                <i class="material-icons">search</i>
+                                <div class="ripple-container"></div>
+                            </button>
                         </div>
                         <div class="col-sm-2 p-r-0" *ngIf="searchkey.length>0">
                             <button type="submit" (click)="searchkey='';getAllUserWithFilter()" class="btn btn-white btn-round btn-just-icon">
-                                        <i class="material-icons">close</i>
-                                        <div class="ripple-container"></div>
-                                    </button>
+                                <i class="material-icons">close</i>
+                                <div class="ripple-container"></div>
+                            </button>
                         </div>
                     </form>
                 </div>
+                <br/>
                 <div class="row user-list" *ngFor="let user of userList" [ngClass]="{'alert alert-info':user._id == selectedUser._id}">
                     <div class="col-sm-3">
                         <img class="user-image" *ngIf="user.currentProfile && user.currentProfile.secure_url" [src]="user.currentProfile.secure_url">
                         <i *ngIf="!user.currentProfile || !user.currentProfile.secure_url" class="material-icons" style="font-size: 50px;padding: 3px 11px;">person</i>
                     </div>
                     <div class="col-sm-6">
-                        {{user.firstName}}<br/>{{user.email}}
+                        {{user.firstName}}
+                        <br/>{{user.email}}
                     </div>
                     <div class="col-sm-3">
                         <button class="btn btn-primary btn-simple btn-sm" (click)="selectUser(user)">View</button>
@@ -52,7 +54,8 @@
                         <i *ngIf="!selectedUser.currentProfile || !selectedUser.currentProfile.secure_url" class="material-icons" style="font-size: 50px;padding: 3px 11px;">person</i>
                     </div>
                     <div class="col-sm-7">
-                        {{selectedUser.firstName}}<br/>{{selectedUser.email}}
+                        {{selectedUser.firstName}}
+                        <br/>{{selectedUser.email}}
                     </div>
                     <div class="col-sm-3">
                         <button class="btn btn-primary btn-simple btn-sm" *ngIf="conversationId" (click)="openModal('bot-reply-form');">Reply</button>
@@ -85,12 +88,18 @@
 
                                     <div *ngFor="let bmsg of msg.botBody1">
                                         <div *ngIf="bmsg.body ">{{bmsg.body}}</div>
-                                        <div *ngIf="bmsg.image " class="img-container "><img [src]="bmsg.image " /></div>
+                                        <div *ngIf="bmsg.image " class="img-container ">
+                                            <img [src]="bmsg.image " />
+                                        </div>
                                         <!-- <div *ngIf="bmsg.replies ">
                                         <button ion-button round (click)="sendQuestion(r) " small *ngFor="let r of bmsg.replies ">{{r}}</button>
                                     </div> -->
-                                        <div *ngIf="bmsg.link " style="margin-top:5px "><a href="{{bmsg.link}} " target="_blank ">{{bmsg.linkText || 'Click here'}}</a></div>
-                                        <div *ngIf="bmsg.location || bmsg.address " style="margin-top:5px "><a>{{bmsg.linkText || 'Show on map'}}</a></div>
+                                        <div *ngIf="bmsg.link " style="margin-top:5px ">
+                                            <a href="{{bmsg.link}} " target="_blank ">{{bmsg.linkText || 'Click here'}}</a>
+                                        </div>
+                                        <div *ngIf="bmsg.location || bmsg.address " style="margin-top:5px ">
+                                            <a>{{bmsg.linkText || 'Show on map'}}</a>
+                                        </div>
                                     </div>
                                     <p class="msg-time">
                                         {{msg.createdAt | date:userService.getDateFormate(msg.createdAt)}}

@@ -75,7 +75,7 @@ function createNotification(req, res, next, notiObje = {}) {
     var notification = new BotNotification(notiObje);
     notification.save().then(savedNoti => {
       BotNotification.get(savedNoti._id)
-        .then(noti => {res.json(noti); sendUniversityNotification(noti, next); })
+        .then(noti => { res.json(noti); sendUniversityNotification(noti, next); })
         .catch(e => { console.info('university savedNoti error', e); next(e); });
     }).catch(e => { console.info('university savedNoti error', e); next(e); });
   }
@@ -83,12 +83,15 @@ function createNotification(req, res, next, notiObje = {}) {
 
 function sendUniversityNotification(notification, next) {
   if (notification.recipients && notification.recipients.length > 0) {
-    FCMSender.sendCustomUniversityNotification(notification.recipients, notification);
+    // FCMSender.sendCustomUniversityNotification(notification.recipients, notification);
+    FCMSender.sendCustomUniversityNotificationMessage(notification.recipients, notification);
+
   } else {
     console.log('notification.residence', notification.residence);
-    BotUser.getUserForNotification(notification.residence || null)
+    BotUser.getForNotification(notification.residence || null)
       .then(users => {
-        FCMSender.sendUniversityNotification(users, notification);
+        // FCMSender.sendUniversityNotification(users, notification);
+        FCMSender.sendUniversityNotificationMessage(users, notification);
       }).catch(e => { console.info('university savedNoti error', e); next(e); });
   }
 }

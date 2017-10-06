@@ -68,7 +68,7 @@ const types = {
 };
 
 BotNotificationSchema.statics = {
-    get(id) {
+  get(id) {
     if (id.toString().match(/^[0-9a-fA-F]{24}$/).length > 0) {
       return this.findById(id)
         .populate(populateMap())
