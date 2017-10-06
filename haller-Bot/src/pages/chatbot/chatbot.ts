@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController, NavParams, IonicPage, LoadingController, Content, AlertController } from 'ionic-angular';
+import { NavController, NavParams, IonicPage, LoadingController, Content, AlertController,ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { BotconvoProvider } from "../../providers/botconvo-provider";
 // $IMPORTSTATEMENT
@@ -20,7 +20,8 @@ export class Chatbot {
   @ViewChild(Content) content: Content;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private botconvoProvider: BotconvoProvider,
-    storage: Storage, private loadingCtrl: LoadingController, public alertCtrl: AlertController) {
+    storage: Storage, private loadingCtrl: LoadingController, 
+    public alertCtrl: AlertController,private modalCtrl: ModalController) {
     this.local = storage;
   }
 
@@ -29,6 +30,16 @@ export class Chatbot {
     this.local.get('userInfo').then((val) => {
       this.userInfo = JSON.parse(val);
       this.getBotData();
+    });
+     this.local.get('intro').then((val) => {
+      let intro = val ? JSON.parse(val) : null;
+      if (!intro || intro.indexOf(1) == -1) {
+        let modal = this.modalCtrl.create('Intro', { intro: 1 });
+        modal.present();
+        if (!intro) intro = [1];
+        else intro.push(1);
+        this.local.set('intro', JSON.stringify(intro));
+      }
     });
   }
 
@@ -59,9 +70,9 @@ export class Chatbot {
       error => { this.loader.dismiss(); this.botconvoProvider.http.showError(error); },
       () => { });
   }
-
-  gotoSetting() {
-    this.navCtrl.push('Settings', {}, { animate: true, direction: 'forward' });
+  goToAddress(name)
+  {
+    this.navCtrl.push(name, {}, { animate: true, direction: 'forward' });
   }
 
   newMessageChange(event) {

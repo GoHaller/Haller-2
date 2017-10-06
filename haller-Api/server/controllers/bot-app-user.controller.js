@@ -213,6 +213,7 @@ var botuserCtrl = {
     BotUser.search(keyword, skip, limit)
       .then((users) => {
         res.json(users);
+        
       }, error => {
         console.log('searchUser error', error);
         const err = new APIError('Try latter', httpStatus.INTERNAL_SERVER_ERROR);

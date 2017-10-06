@@ -92,7 +92,7 @@ BotNotificationSchema.statics = {
       .populate(populateMap()).exec().then((notifications) => { return notifications });
   },
   getForRecipients(userId, skip, limit) {
-    return this.find({ $or: [{ recipients: userId }, { recipients: { $eq: [] } }] }).skip(parseInt(skip)).limit(parseInt(limit)).sort({ createdAt: -1 })
+    return this.find({ $or: [{ "recipients.user": userId }, { recipients: { $eq: [] } }] }).skip(parseInt(skip)).limit(parseInt(limit)).sort({ createdAt: -1 })
       .populate(populateMap()).exec().then((notifications) => { return notifications });
   }
 };

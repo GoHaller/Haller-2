@@ -26,7 +26,6 @@ export class LoginComponent implements OnInit {
             }
         this.authService.adminlogin(userObj).subscribe(
             response => {
-                debugger;
                 localStorage.setItem('adminInfo', JSON.stringify(response.user));
                 localStorage.setItem('adminid', response.user._id);
                 localStorage.setItem('adminauth', response.token);

@@ -196,7 +196,6 @@ export class NotificationComponent implements OnInit {
     }
 
     createNotificationApi(cloudinaryResponse = null) {
-        debugger;
         let notificationObj = {
             createdBy: localStorage.getItem('adminid'),
             title: this.title,

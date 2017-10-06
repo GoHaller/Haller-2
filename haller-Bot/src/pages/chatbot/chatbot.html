@@ -1,9 +1,15 @@
 <ion-header>
   <ion-toolbar no-border-top color="primary">
     <ion-buttons left>
-      <button (click)="gotoSetting()" ion-button icon-only><ion-icon name="ios-settings-outline"></ion-icon></button>
+      <button (click)="goToAddress('Settings')" ion-button icon-only><ion-icon name="ios-settings-outline"></ion-icon></button>
     </ion-buttons>
     <ion-title>HallerBot</ion-title>
+    <!--<ion-buttons right>
+      <button (click)="goToAddress('EventPage')" ion-button icon-only><ion-icon name="ios-calendar-outline"></ion-icon></button>
+    </ion-buttons>-->
+     <ion-buttons right>
+      <button (click)="goToAddress('Notifications')" ion-button icon-only><ion-icon name="ios-notifications-outline"></ion-icon></button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 

@@ -11,10 +11,10 @@ export class HttpClient {
   private headers = new Headers();
   public emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   public kuEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@ku.edu$/;
-
+  public userAvatar = 'assets/img/default-user.png';
   private env = 'local';
   private getApiBaseUrl = () => {
-    let url = 'http://10.0.0.2:4040/api/bot/';
+    let url = 'http://10.0.0.7:4040/api/bot/';
     switch (this.env) {
       case 'stage': url = 'https://haller-api-v2.herokuapp.com/api/bot/'; break;
       case 'prod-working': url = 'https://haller-api-app-stage.herokuapp.com/api/bot/'; break;
@@ -60,6 +60,9 @@ export class HttpClient {
     let body = JSON.parse(res._body);
     return body || {};
   }
+  extractError(error: any) {
+    return error;
+  }
 
   showError(error: any) {
     let body = JSON.parse(error._body);
@@ -75,6 +78,10 @@ export class HttpClient {
     prompt.present();
   }
 
+  delete(url) {
+    this.createAuthorizationHeader();
+    return this.http.delete(this.ApiBaseUrl + url, { headers: this.headers });
+  }
   getDateFormate(date) {
     let d = new Date(date);
     let today = new Date();
@@ -87,5 +94,14 @@ export class HttpClient {
       return "'Yesterday'";// h:m a";
     else
       return 'MM/dd/yyyy';
+  }
+   getProfileImageToDisplay(user) {
+    // console.info('user', user);
+    if (user && user.currentProfile)
+      return user.currentProfile.secure_url || this.userAvatar;
+    else if (user && user.facebook && user.facebook.picture && user.facebook.picture.data)
+      return user.facebook.picture.data.url || this.userAvatar;
+    else
+      return this.userAvatar;
   }
 }

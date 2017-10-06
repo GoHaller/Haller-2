@@ -5,6 +5,7 @@ import paramValidation from '../../config/param-validation';
 import botuserCtrl from '../controllers/bot-app-user.controller';
 import botConvoCtrl from '../controllers/bot-app-conversation.controller';
 import botNotiCtrl from '../controllers/bot-app-notification.controller';
+import botEventCtrl from '../controllers/bot-app-event.controller';
 import config from '../../config/env';
 import authHelper from '../helpers/AuthorizationHelper';
 
@@ -38,6 +39,7 @@ router.route('/users')
 
 router.route('/users/users-for-notification')
   .get(botuserCtrl.getForNotification)
+  
 //Authentication APi end
 
 //ChatBot APi start
@@ -64,5 +66,31 @@ router.route('/notification/for/:userId')
 
 router.route('/notification/by/:userId')
   .get(botNotiCtrl.getByMe);
+
+
+  //Event Api start 
+router.route('/events')
+  .post(botEventCtrl.create);
+
+router.route('/events/:userId/mine')
+  /** GET /api/events/:userId/mine - User Events */
+  .get(botEventCtrl.userEvents);
+
+router.route('/events/:eventId/going')
+  /** POST /api/posts/:postId/flags - Flag post */
+  .post(botEventCtrl.goingEvent);
+
+router.route('/events/:eventId/going/:goingId')
+  /** DELETE /api/posts/:postId/flags/:flagId - Remove flag from post */
+  .delete(botEventCtrl.deleteGoingEvent);
+
+router.route('/events/:eventId')
+  .put(botEventCtrl.update)
+  .delete(botEventCtrl.remove);
+
+  router.route('/events/:userId/feeds/:feed')
+  /** GET /api/users/:userId/feeds/:feed - Get posts for specific feeds */
+  .get(botEventCtrl.listByFeed);
+  //Event Api end
 
 export default router;
