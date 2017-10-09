@@ -369,6 +369,7 @@ export class UsersComponent implements OnInit {
                     excelCell['Residence Hall'] = data.residence;
                     excelData.push(excelCell);
                 });
+                console.log('excelData',excelData);
                 let date = new Date();
                 let d = (date.getMonth() + 1) + '-' + date.getDate() + '-' + date.getFullYear();
                 this.JSONToCSVConvertor(excelData, 'Invite Codes', true, 'haller-invite-code-' + d + '.csv');

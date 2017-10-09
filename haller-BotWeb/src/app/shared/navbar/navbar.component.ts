@@ -1,5 +1,5 @@
 import { Component, OnInit, Renderer, ViewChild, ElementRef, Directive } from '@angular/core';
-import { ROUTES } from '../.././sidebar/sidebar-routes.config';
+import { ROUTES, APPROUTES } from '../.././sidebar/sidebar-routes.config';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
@@ -38,7 +38,7 @@ export class NavbarComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.listTitles = ROUTES.filter(listTitle => listTitle);
+        this.listTitles = APPROUTES.filter(listTitle => listTitle);
 
         var navbar: HTMLElement = this.element.nativeElement;
         this.toggleButton = navbar.getElementsByClassName('navbar-toggle')[0];
@@ -104,7 +104,7 @@ export class NavbarComponent implements OnInit {
                 return this.listTitles[item].title;
             }
         }
-        return 'Dashboard';
+        //return 'Dashboard';
     }
     getPath() {
         // console.log(this.location);

@@ -5,6 +5,7 @@ import APIError from '../helpers/APIError';
 import BotUser from '../models/bot-users.model';
 import BotConversation from '../models/bot-conversation.model';
 import devBot from '../controllers/bot.controller';
+import FCMSender from '../helpers/FCMSender';
 
 var botConvoCtrl = {
   getByCreater: (req, res, next) => {
@@ -87,7 +88,8 @@ var botConvoCtrl = {
                     if (participant.email == 'dev.bot@ku.edu')
                       messagesObj.createdBy = participant._id;
                   });
-                  // FCMSender.sendMsgNotification(messagesObj, doc);
+                  //FCMSender.sendMsgNotification(messagesObj, doc);
+                  FCMSender.sendBotMsgNotification(messagesObj, doc);
                 }
               });
           })
@@ -127,8 +129,8 @@ var botConvoCtrl = {
 }
 
 const sendBotMessagesToUsersForLoop = function (bot, users, msgObj, index) {
-  var convoPopulatePath = [{ path: 'createdBy', model: 'User' }, { path: 'messages.createdBy', model: 'User', },
-  { path: 'messages.recipient', model: 'User', }, { path: 'participants', model: 'User' }];
+  var convoPopulatePath = [{ path: 'createdBy', model: 'BotUser' }, { path: 'messages.createdBy', model: 'BotUser', },
+  { path: 'messages.recipient', model: 'BotUser', }, { path: 'participants', model: 'BotUser' }];
   msgObj['recipient'] = users[index]._id;
   BotConversation.findOne({ $and: [{ participants: users[index]._id }, { participants: bot._id }] })
     .exec((err, savedConvo) => {
@@ -146,6 +148,7 @@ const sendBotMessagesToUsersForLoop = function (bot, users, msgObj, index) {
               if (users[index])
                 sendBotMessagesToUsersForLoop(bot, users, msgObj, index);
               // FCMSender.sendMsgNotification(msgObj, doc);
+              FCMSender.sendBotMsgNotification(msgObj, doc);
             }
           });
         })
@@ -168,7 +171,8 @@ const sendBotMessagesToUsersForLoop = function (bot, users, msgObj, index) {
               index++;
               if (users[index])
                 sendBotMessagesToUsersForLoop(bot, users, msgObj, index);
-              // FCMSender.sendMsgNotification(msgObj, doc);
+              //FCMSender.sendMsgNotification(msgObj, doc);
+              FCMSender.sendBotMsgNotification(msgObj, doc);
             }
           });
         })

@@ -130,7 +130,7 @@ BotUserSchema.statics = {
 
   getUserAnalytics(req, res, next) {
     var email = 'dev.bot@ku.edu';// + domain;, facebook: 1
-    this.findOne({ email: email, role: 'bot' })
+      this.findOne({ email: email, role: 'bot' })
       .then(bot => {
         this.find({ $or: [{ role: { $exists: false } }, { role: { $eq: 'student' } }] }, { _id: 1, firstName: 1, lastName: 1, residence: 1, graduationYear: 1, facebook: 1, organizations: 1 }).populate('organizations', 'name').lean().exec().then((users) => {
           let count = 1;
@@ -147,14 +147,14 @@ BotUserSchema.statics = {
                       "sentmsgs": { $filter: { input: '$messages', as: 'msg', cond: { $eq: ["$$msg.createdBy", userId] } } }
                     }
                   }, { $group: { count: { $sum: { $size: '$sentmsgs' } }, _id: null } }], (errorsent, sentCount) => {
-                    BotConversation.findOne({ $and: [{ participants: userId }, { participants: { $size: 2 } }, { participants: bot._id }] },
+                    return BotConversation.findOne({ $and: [{ participants: userId }, { participants: { $size: 2 } }, { participants: bot._id }] },
                       { _id: 1, 'messages.createdBy': 1, 'messages.createdAt': 1 }).lean().exec().then((botConvo) => {
                         user['analyticsMsg'] = { userId: userId, totalCount: totalCount[0] ? totalCount[0] : null, oneToOneCount: oneToOneCount, sentCount: sentCount[0] ? sentCount[0].count : 0, bot: botConvo ? botConvo.messages : botConvo };
                         if (count == array.length) {
                           console.log(users);
-                          return users;
-                          // res.setHeader('Content-Type', 'application/json');
-                          // res.send(JSON.stringify({ 'users': users }, null, 4));
+                          //return users;
+                          res.setHeader('Content-Type', 'application/json');
+                           res.send(JSON.stringify({ 'users': users }, null, 4));
                         } else {
                           count += 1;
                         }

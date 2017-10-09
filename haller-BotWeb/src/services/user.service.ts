@@ -32,6 +32,7 @@ export class UserService {
     }
 
     getUsersListWithFilter(skip: number = 0, limit: number = 25, keyword: string = null) {
+ 
         this.createAuthorizationHeader();
         let q = '?skip=' + skip + '&limit=' + limit;
         if (keyword) { q += '&keyword=' + keyword; }
@@ -74,5 +75,8 @@ export class UserService {
         if (today.toDateString() == d.toDateString()) { return 'shortTime'; }
         else if (yesterday.toDateString() == d.toDateString()) { return "'Yesterday' h:m a"; }// h:m a";
         else { return 'MM/dd/yyyy h:m a'; }
+    }
+    getUserAnalytics() {
+        return this.http.get(environment.ApiBaseUrl + '/users/useranalytics').map(this.extractDataBody);
     }
 }

@@ -230,11 +230,12 @@ var botuserCtrl = {
       .catch((e) => { return next(e); });
   },
   getUserAnalytics: (req, res, next) => {
-    BotUser.getUserAnalytics(req, res, next).then((result) => {
-      console.log(result);
-      res.json(result);
-    })
-      .catch((e) => { return next(e); })
+    // BotUser.getUserAnalytics().then((result) => {
+    //   console.log("my"+result);
+    //   res.json(result);
+    // })
+    //   .catch((e) => {console.log(e); return next(e); })
+    BotUser.getUserAnalytics(req, res, next);
   }
 }
 

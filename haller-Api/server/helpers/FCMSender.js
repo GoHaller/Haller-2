@@ -40,7 +40,7 @@ const send = (token, message, os) => {
     paylods.content_available = true;
     paylods.priority = 'high';
   }
-  // console.log('paylods', paylods);
+  console.log('paylods', paylods);
   return fcm.send(paylods);
 }
 
@@ -130,6 +130,54 @@ const sendMsgNotification = (message, convo) => {
         notiesObj.notId = convo._id.toString().substr(-4) + notiesObj.type;
         notiesObj.createdAt = message.createdAt;
         notiesObj.body = createdBy.firstName + ' ' + createdBy.lastName;
+        if (convo.participants.length > 2)
+          notiesObj.body += ' has posted in ' + (convo.groupName || '') + ' group chat';
+        else
+          notiesObj.body += ' has sent you a new message';
+        // console.info('msg notiesObj', notiesObj);
+        send(token, notiesObj, os)
+          .then(function (response) {
+            console.log("Successfully sent with response");//, JSON.stringify(response));
+            console.log('=========================================================');
+          })
+          .catch(function (err) {
+            console.log("Something has gone wrong!");
+            console.error(err);
+            console.log('=========================================================');
+          })
+      }
+    });
+  }
+}
+
+
+//for bot Application
+
+const sendBotMsgNotification = (message, convo) => {
+  
+  var createdBy;
+  convo.participants.forEach((participant) => {
+    if (participant._id.toString() == message.createdBy.toString())
+      createdBy = participant;
+  });
+  if (createdBy) {
+    convo.participants.forEach((participant) => {
+      var token = [];
+      var os = 'ios';
+      if (participant.notifications.deviceToken && participant.notifications.enabled == true) {
+          token.push(participant.notifications.deviceToken);
+          os = participant.notifications.os;
+      }
+      //console.log("my" +participant);
+      if (token.length > 0) {
+        var notiesObj = {};
+        notiesObj.title = 'Haller';
+        notiesObj._id = convo._id;
+        notiesObj.convo = { _id: convo._id };
+        notiesObj.type = 19;
+        notiesObj.notId = convo._id.toString().substr(-4) + notiesObj.type;
+        notiesObj.createdAt = message.createdAt;
+        notiesObj.body = createdBy.firstName;
         if (convo.participants.length > 2)
           notiesObj.body += ' has posted in ' + (convo.groupName || '') + ' group chat';
         else
@@ -291,4 +339,4 @@ const sendCustomUniversityNotificationMessage = (participants, message) => {
     }
   });
 }
-export default { send, sendNotification, sendMsgNotification, sendUniversityNotification, demoSend, sendCustomUniversityNotification, sendCustomUniversityNotificationMessage, sendUniversityNotificationMessage };
+export default { send, sendNotification, sendMsgNotification, sendUniversityNotification, demoSend, sendCustomUniversityNotification, sendCustomUniversityNotificationMessage, sendUniversityNotificationMessage, sendBotMsgNotification };
