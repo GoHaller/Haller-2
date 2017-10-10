@@ -130,7 +130,7 @@ BotUserSchema.statics = {
 
   getUserAnalytics(req, res, next) {
     var email = 'dev.bot@ku.edu';// + domain;, facebook: 1
-      this.findOne({ email: email, role: 'bot' })
+    this.findOne({ email: email, role: 'bot' })
       .then(bot => {
         this.find({ $or: [{ role: { $exists: false } }, { role: { $eq: 'student' } }] }, { _id: 1, firstName: 1, lastName: 1, residence: 1, graduationYear: 1, facebook: 1, organizations: 1 }).populate('organizations', 'name').lean().exec().then((users) => {
           let count = 1;
@@ -154,7 +154,7 @@ BotUserSchema.statics = {
                           console.log(users);
                           //return users;
                           res.setHeader('Content-Type', 'application/json');
-                           res.send(JSON.stringify({ 'users': users }, null, 4));
+                          res.send(JSON.stringify({ 'users': users }, null, 4));
                         } else {
                           count += 1;
                         }

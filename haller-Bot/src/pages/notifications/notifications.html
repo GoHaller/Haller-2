@@ -23,7 +23,8 @@
         <ion-note class="note"> {{noti.createdAt | date: botconvoProvider.http.getDateFormate(noti.createdAt)}}</ion-note>
       </h3>
       <!-- {{noti | json}} -->
-      <p *ngIf="noti.body.message" [ngClass]="noti.type!=20?'unwrap-text':''">{{noti.body.message}}</p>
+      <!--<p *ngIf="noti.body.message" [ngClass]="noti.type!=20?'unwrap-text':''">{{noti.body.message}}</p>-->
+       <p *ngIf="noti.body.message">{{noti.body.message}}</p>
       <p *ngIf="noti.body.image" class="link-text" (click)="openUrl(noti.body.image.secure_url)">{{checkIfPdf(noti.body.image.secure_url)?'Open pdf':'Open image'}} </p>
     </ion-item>
   </ion-list>

@@ -10,10 +10,11 @@ import { LocalNotifications } from "@ionic-native/local-notifications";
 
 import { MyApp } from './app.component';
 import { HttpClient } from "../providers/http-client";
+import { ImageFullComponent } from '../pages/view-image/image.full';
 
 @NgModule({
   declarations: [
-    MyApp
+    MyApp, ImageFullComponent
   ],
 
   imports: [
@@ -37,7 +38,7 @@ import { HttpClient } from "../providers/http-client";
   ],
   bootstrap: [IonicApp],
   entryComponents: [
-    MyApp
+    MyApp,ImageFullComponent
   ],
   providers: [
     StatusBar,

@@ -14,6 +14,7 @@ var botConvoCtrl = {
       .exec((error, result) => { res.json(result); });
   },
   asktoBot: (req, res, next) => {
+    //console.log("start " + new Date);
     // req.body = { message: '', createdBy: '', conversationId: '', participant: '', accessToken: '' }//participant is bot id
     var message = { body: req.body.message, createdBy: req.body.createdBy, createdAt: new Date() }
 
@@ -22,8 +23,8 @@ var botConvoCtrl = {
         .then(convo => {
           const copyConvo = convo;
           copyConvo.messages.push(message);
+          console.log("reqsend " + new Date);
           devBot.sendText(req.body.accessToken, req.body.conversationId, req.body.message, (error, response) => {
-
             if (error) { response = 'Sorry! Bot need a doctor right now.' }
             var botMessage = { botBody: response, createdBy: req.body.participant, createdAt: new Date() }
             copyConvo.messages.push(botMessage);
@@ -45,7 +46,6 @@ var botConvoCtrl = {
       }
 
       devBot.sendText(req.body.accessToken, convoObj._id.toString(), req.body.message, (error, response) => {
-
         if (error) { response = 'Sorry! Bot need a doctor right now.' };
         var botMessage = { botBody: response, createdBy: req.body.participant, createdAt: new Date() }
         convoObj.messages.push(botMessage);

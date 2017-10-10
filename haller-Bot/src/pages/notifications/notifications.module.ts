@@ -2,11 +2,10 @@ import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { Notifications } from './notifications';
 import { BotconvoProvider } from "../../providers/botconvo-provider";
-import { ImageFullComponent } from '../view-image/image.full';
 
 @NgModule({
   declarations: [
-    Notifications,ImageFullComponent
+    Notifications
   ],
   imports: [
     IonicPageModule.forChild(Notifications),

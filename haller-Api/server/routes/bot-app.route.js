@@ -7,7 +7,7 @@ import botConvoCtrl from '../controllers/bot-app-conversation.controller';
 import botNotiCtrl from '../controllers/bot-app-notification.controller';
 import botEventCtrl from '../controllers/bot-app-event.controller';
 import config from '../../config/env';
-import authHelper from '../helpers/AuthorizationHelper';
+import { getToken } from '../helpers/AuthorizationHelper';
 
 const router = express.Router();
 
@@ -35,14 +35,36 @@ router.route('/change-password')
 router.route('/users')
   .post(validate(paramValidation.createBotUser), botuserCtrl.create)
   .put(validate(paramValidation.updateBotUser), botuserCtrl.update)
-  .get(botuserCtrl.searchUser)
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }),botuserCtrl.searchUser)
 
+router.route('/users/:userId')
+  /** GET /api/users/:userId - Get user */
+  .get([expressJwt({
+    secret: config.jwtSecret,
+    getToken: (req) => {
+      if (req.headers && req.headers.authorization) {
+        return req.headers.authorization.split(':')[1];
+      }
+      return null;
+    }
+  }), botuserCtrl.getById])
+
+  
 router.route('/users/users-for-notification')
-  .get(botuserCtrl.getForNotification)
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }),botuserCtrl.getForNotification)
 
 //for user analytics
 
-router.route('/users/useranalytics').get(botuserCtrl.getUserAnalytics)
+router.route('/users/useranalytics').get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }),botuserCtrl.getUserAnalytics)
 
 //Authentication APi end
 
@@ -51,25 +73,40 @@ router.route('/')
   .get(botuserCtrl.getBotUser);
 
 router.route('/convo/mass-reply')
-  .post(botConvoCtrl.massReply);
+  .post(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }),botConvoCtrl.massReply);
 
 router.route('/convo/:userId')
-  .get(botConvoCtrl.getByCreater)
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }),botConvoCtrl.getByCreater)
   .post(botConvoCtrl.asktoBot);
 
 router.route('/convo/reply/:conversationId')
-  .post(botConvoCtrl.replyAsBot);
+  .post(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }),botConvoCtrl.replyAsBot);
 //ChatBot APi end
 
 
 router.route('/notification/createnew')
-  .post(botNotiCtrl.createUniversityNotification);
+  .post(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }),botNotiCtrl.createUniversityNotification);
 
 router.route('/notification/for/:userId')
   .get(botNotiCtrl.getForMe);
 
 router.route('/notification/by/:userId')
-  .get(botNotiCtrl.getByMe);
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    getToken
+  }),botNotiCtrl.getByMe);
 
 
 //Event Api start

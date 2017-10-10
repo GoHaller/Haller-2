@@ -14,7 +14,8 @@ export class HttpClient {
   public userAvatar = 'assets/img/default-user.png';
   private env = 'local';
   private getApiBaseUrl = () => {
-    let url = 'http://10.0.0.7:4040/api/bot/';
+     let url = 'http://10.0.0.7:4040/api/bot/';
+    //let url = 'https://haller-api-app-stage.herokuapp.com/api/bot/';
     switch (this.env) {
       case 'stage': url = 'https://haller-api-v2.herokuapp.com/api/bot/'; break;
       case 'prod-working': url = 'https://haller-api-app-stage.herokuapp.com/api/bot/'; break;
@@ -27,6 +28,7 @@ export class HttpClient {
 
   constructor(private http: Http, storage: Storage, private alertCtrl: AlertController) {
     this.local = storage;
+    this.getActivationToken();
   }
 
   getActivationToken() {
@@ -95,7 +97,7 @@ export class HttpClient {
     else
       return 'MM/dd/yyyy';
   }
-   getProfileImageToDisplay(user) {
+  getProfileImageToDisplay(user) {
     // console.info('user', user);
     if (user && user.currentProfile)
       return user.currentProfile.secure_url || this.userAvatar;

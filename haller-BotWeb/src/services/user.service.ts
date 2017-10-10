@@ -40,7 +40,8 @@ export class UserService {
     }
 
     getConversationForRecipient(userId: string) {
-        return this.http.get(environment.ApiBaseUrl + 'convo/' + userId).map(this.extractDataBody);
+         this.createAuthorizationHeader();
+        return this.http.get(environment.ApiBaseUrl + 'convo/' + userId,{ headers: this.headers }).map(this.extractDataBody);
     }
 
     replyAsBot(conversationId, recipient, createdBy, body) {
@@ -77,6 +78,8 @@ export class UserService {
         else { return 'MM/dd/yyyy h:m a'; }
     }
     getUserAnalytics() {
-        return this.http.get(environment.ApiBaseUrl + '/users/useranalytics').map(this.extractDataBody);
+        this.createAuthorizationHeader();
+        return this.http.get(environment.ApiBaseUrl + '/users/useranalytics', { headers: this.headers }).map(this.extractDataBody);
     }
+   
 }

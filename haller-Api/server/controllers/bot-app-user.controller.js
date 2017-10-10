@@ -236,7 +236,16 @@ var botuserCtrl = {
     // })
     //   .catch((e) => {console.log(e); return next(e); })
     BotUser.getUserAnalytics(req, res, next);
+  },
+  getById(req, res, next) {
+    BotUser.get(req.params.userId)
+      .then(user => res.json(user))
+      .error(e => next(e))
+      .catch((e) => {
+        next(e);
+      });
   }
+
 }
 
 export default botuserCtrl;
